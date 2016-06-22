@@ -10,7 +10,7 @@ namespace EventSimulator
 {
     class EventCreator
     {
-        public static Event CreateClickEvent()
+        public Event CreateClickEvent()
         { // TODO: Randomize event data.
             var e = new ClickEvent();
             e.SessionId = Guid.NewGuid();
@@ -22,7 +22,7 @@ namespace EventSimulator
             return e;
         }
 
-        public static Event CreatePurchaseEvent()
+        public Event CreatePurchaseEvent()
         { // TODO: Randomize event data.
             var purchaseEvent = new PurchaseEvent();
             // TODO: Get the actual transaction number. Or, we could use Guid.

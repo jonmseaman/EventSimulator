@@ -3,11 +3,18 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ServiceBus.Messaging;
 
 namespace EventSimulator
 {
+    /// <summary>
+    /// This program is supposed to simulate usage of an ecommerce website.
+    /// This program sends events corresponding to navigating around the website
+    /// as well as making purchases. The events are sent to an event hub corresponding
+    /// to a connection string stored in the App.config file.
+    /// </summary>
     class Program
     {
         static void Main(string[] args)
@@ -21,14 +28,31 @@ namespace EventSimulator
             { // TODO: Throw exception or just print error?
                 throw new NullReferenceException("Could not find 'ConnectionString' in AppSettings");
             }
-            var eventHubClient = EventHubClient.CreateFromConnectionString(connectionString);
 
-            // Make an event creator.
-            // Make an event sender.
-            // While the user has not pressed enter:
-            //// Create events with the event creator.
-            //// Send a batch of events. (on a separate thread.)
+            Thread eventThread = new Thread(async () =>
+            {
+                while (true)
+                {
+                    // Event sender and receiver.
+                    var eventCreator = new EventCreator();
+                    var eventSender = new Sender(connectionString);
+
+                    // Create the events
+                    var eventList = new List<EventSimulator.Events.Event>();
+                    eventList.Add(eventCreator.CreateClickEvent());
+                    eventList.Add(eventCreator.CreatePurchaseEvent());
+
+                    // Send the events
+                    Console.WriteLine("Sending the results.");
+                    await eventSender.SendBatchAsync(eventList);
+                    Console.WriteLine("Finished Sending data.");
+                }
+            });
+            eventThread.Start();
+
+            Console.WriteLine("Press enter to exit...");
             Console.ReadLine();
+            eventThread.Abort();
         }
     }
 }
