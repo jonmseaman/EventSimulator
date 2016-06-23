@@ -20,7 +20,6 @@ namespace EventSimulator
         static void Main(string[] args)
         {
             // Get data from config file and command line parameters.
-            // TODO: Get command line parameters.
             var config = ConfigurationManager.AppSettings;
             // Get the conenction string from the config file.
             string connectionString = config["ConnectionString"];
@@ -38,9 +37,7 @@ namespace EventSimulator
                     var eventSender = new Sender(connectionString);
 
                     // Create the events
-                    var eventList = new List<EventSimulator.Events.Event>();
-                    eventList.Add(eventCreator.CreateClickEvent());
-                    eventList.Add(eventCreator.CreatePurchaseEvent());
+                    var eventList = eventCreator.CreateUserEventSequence();
 
                     // Send the events
                     Console.WriteLine("Sending the results.");
