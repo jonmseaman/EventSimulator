@@ -9,8 +9,6 @@ namespace EventSimulator.Events
 {
     class ClickEvent : Event
     {
-        public Guid SessionId { get; set; }
-        public string Email { get; set; }
         public string PrevUrl { get; set; }
         public string NextUrl { get; set; }
         public DateTime EntryTime { get; set; }

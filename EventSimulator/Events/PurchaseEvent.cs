@@ -9,7 +9,6 @@ namespace EventSimulator.Events
     public class PurchaseEvent : Event
     {
         public int TransactionNum { get; set; }
-        public string Email { get; set; }
         public string ProductId { get; set; }
         public int Price { get; set; }
         public int Quantity { get; set; }

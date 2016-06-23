@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using EventSimulator.Events;
@@ -16,15 +18,51 @@ namespace EventSimulator
     }
     class EventCreator
     {
+        #region Randoms
+        /// <summary>
+        /// Used to randomize the click events.
+        /// </summary>
+        private Random Random = new Random();
+
+        public string HomePageUrl { get; private set; } = "/";
+
+        private string RandomEmail()
+        {
+            return string.Format("user{0}@example.com", Random.Next(1, 99999));
+        }
+
+        private string RandomUrl()
+        {
+            var rand = Random.Next(0, 9);
+            // 30% to go back to the home page.
+            if (rand < 3)
+            {
+                return HomePageUrl;
+            }
+            else
+            {
+                return RandomProductUrl();
+            }
+        }
+
+        private string RandomProductUrl()
+        {
+            return String.Format("/products/{0}", Random.Next(1, 20));
+        }
+
+        #endregion
+
+
+
         public Event CreateClickEvent()
-        { // TODO: Randomize event data.
+        {
             var e = new ClickEvent();
             e.SessionId = Guid.NewGuid();
-            e.Email = "t-joseam@microsoft.com";
-            e.EntryTime = DateTime.Now - TimeSpan.FromMinutes(5);
+            e.Email = RandomEmail();
+            e.EntryTime = DateTime.Now - TimeSpan.FromSeconds(Random.Next(1, 60 * 10));
             e.ExitTime = DateTime.Now;
-            e.PrevUrl = "/";
-            e.NextUrl = "/products/1";
+            e.PrevUrl = RandomUrl();
+            e.NextUrl = RandomProductUrl();
             return e;
         }
 
@@ -33,7 +71,7 @@ namespace EventSimulator
             var purchaseEvent = new PurchaseEvent();
             // TODO: Get the actual transaction number. Or, we could use Guid.
             purchaseEvent.TransactionNum = 1;
-            purchaseEvent.Email = "t-joseam@microsoft.com";
+            purchaseEvent.Email = RandomEmail();
             purchaseEvent.ProductId = 1.ToString();
             purchaseEvent.Price = 250;
             purchaseEvent.Quantity = 15;
@@ -41,29 +79,96 @@ namespace EventSimulator
             return purchaseEvent;
         }
 
-        public List<Event> CreateUserEventSequence(UserBehavior behavior = UserBehavior.FastPurchase)
+        private PurchaseEvent CreateNextPurchaseEvent(Event @event)
         {
-            var list = new List<Event>();
-            list.Add(CreateClickEvent());
-            list.Add(CreateClickEvent());
-            list.Add(CreateClickEvent());
-            list.Add(CreateClickEvent());
-            list.Add(CreatePurchaseEvent());
-            // Data common across all of the events in the sequence
-
-
-            // Make an event navigating to the home page.
-            var e1 = new ClickEvent();
-            e1.SessionId = Guid.NewGuid();
-            e1.Email = "t-joseam@microsoft.com";
-            e1.EntryTime = DateTime.Now - TimeSpan.FromMinutes(5);
-            e1.ExitTime = DateTime.Now;
-            e1.PrevUrl = null;
-            e1.NextUrl = "/";
-            // Make an event navigating to a product page.
-            // Make an event that purchases the product.
-
-            return list;
+            throw new NotImplementedException();
         }
+
+        private ClickEvent CreateNextClickEvent(Event @event)
+        {
+            var next = new ClickEvent();
+            next.Email = @event.Email;
+            next.SessionId = @event.SessionId;
+
+            // Get the type of the event
+            if (@event.EventType == EventType.Click)
+            {
+                var old = @event as ClickEvent;
+                // Make the next event.
+                // ClickEvent Members
+                next.PrevUrl = old.NextUrl;
+                next.NextUrl = RandomUrl();
+                next.EntryTime = old.ExitTime;
+                next.ExitTime = DateTime.Now;
+            }
+            else if (@event.EventType == EventType.Purchase)
+            {
+                var old = @event as PurchaseEvent;
+                // ClickEvent Members
+                // TODO: Make url(product id)
+                next.PrevUrl = "/products/" + old.ProductId;
+                next.NextUrl = RandomUrl();
+                next.EntryTime = old.Time;
+                next.ExitTime = DateTime.Now;
+            }
+            else
+            {
+                var err = String.Format("EventSimulator.Events.EventType does not have member {0}", @event.EventType);
+                throw new InvalidEnumArgumentException(err);
+            }
+
+            return next;
+        }
+
+        // TODO: Clean up this method. Make a sub method for each
+        // TODO: behavior.
+        public Event CreateNextEvent(Event @event, UserBehavior behavior)
+        {
+            if (@event.EventType == EventType.Purchase)
+            {
+                return CreateClickEvent();
+            }
+            else if (behavior == UserBehavior.Browsing)
+            {
+                return CreateNextClickEvent(@event);
+            }
+            else if (behavior == UserBehavior.FastPurchase)
+            {
+                // If on product page, purchase
+                var old = @event as ClickEvent;
+                // If we are on a product page, purchase it.
+                // TODO: IsProductPage(url) is better than this
+                if (old.NextUrl != HomePageUrl)
+                {
+                    // If we are on a product page, we are
+                    // going to purchase it.
+                    return CreateNextPurchaseEvent(old);
+                }
+                else
+                {
+                    var next = CreateNextClickEvent(old);
+                    next.NextUrl = RandomProductUrl();
+                    return next;
+                }
+            }
+            else if (behavior == UserBehavior.SlowPurchase)
+            {
+                if (Random.Next(0, 9) < 5) // 50%
+                {
+                    return CreateNextClickEvent(@event);
+                }
+                else
+                {
+                    return CreateNextPurchaseEvent(@event);
+                }
+            }
+            else
+            {
+                return CreateClickEvent();
+            }
+
+        }
+
+
     }
 }

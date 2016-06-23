@@ -20,6 +20,8 @@ namespace EventSimulator.Events
             EventType = eventType;
         }
         public EventType EventType { get; set; }
+        public Guid SessionId { get; set; }
+        public string Email { get; set; }
 
         public static Event Create(EventType eventType)
         {

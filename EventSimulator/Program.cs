@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using EventSimulator.Events;
 using Microsoft.ServiceBus.Messaging;
 
 namespace EventSimulator
@@ -24,24 +26,49 @@ namespace EventSimulator
             // Get the conenction string from the config file.
             string connectionString = config["ConnectionString"];
             if (connectionString == null)
-            { // TODO: Throw exception or just print error?
-                throw new NullReferenceException("Could not find 'ConnectionString' in AppSettings");
+            { // TODO: What kind of exception should be thrown?
+                throw new Exception("Could not find 'ConnectionString' in AppSettings in App.Config");
             }
 
             Thread eventThread = new Thread(async () =>
             {
+                // Event sender and receiver.
+                var eventCreator = new EventCreator();
+                var eventSender = new Sender(connectionString);
+
+                // Create list of events to send to eventHub
+                var eventList = new List<Event>();
+                for (var i = 0; i < 256; i++)
+                {
+                    eventList.Add(eventCreator.CreateClickEvent());
+                }
+
                 while (true)
                 {
-                    // Event sender and receiver.
-                    var eventCreator = new EventCreator();
-                    var eventSender = new Sender(connectionString);
-
-                    // Create the events
-                    var eventList = eventCreator.CreateUserEventSequence();
+                    // Update list of events to show user action.
+                    for (var i = 0; i < eventList.Count; i++)
+                    {
+                        eventList[i] = eventCreator.CreateNextEvent(eventList[i], UserBehavior.FastPurchase);
+                    }                    
 
                     // Send the events
                     Console.WriteLine("Sending the results.");
-                    await eventSender.SendBatchAsync(eventList);
+                    try
+                    {
+                        await eventSender.SendBatchAsync(eventList);
+                    }
+                    catch (MessageSizeExceededException e)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.Write("Batch size exceeded. ");
+                        Console.WriteLine(e.Message);
+                        Console.ResetColor();
+                        while (eventList.Count > 0)
+                        {
+                            eventSender.Send(eventList[0]);
+                            eventList.RemoveAt(0);
+                        }
+                    }
                     Console.WriteLine("Finished Sending data.");
                 }
             });
