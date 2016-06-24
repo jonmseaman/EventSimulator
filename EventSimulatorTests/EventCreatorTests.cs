@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using EventSimulator;
+using EventSimulator.Events;
 
 namespace EventSimulatorTests
 {
@@ -32,6 +34,7 @@ namespace EventSimulatorTests
             var p1 = ec.CreatePurchaseEvent();
             var p2 = ec.CreatePurchaseEvent();
 
+            Assert.IsFalse(p1.SessionId.Equals(p2.SessionId));
 
             // Make sure nothing is null, and something is different.
             Assert.IsFalse(p1.TransactionNum.Equals(p2.TransactionNum)
@@ -39,8 +42,39 @@ namespace EventSimulatorTests
                 && p1.ProductId.Equals(p2.ProductId)
                 && p1.Price.Equals(p2.Price)
                 && p1.Quantity.Equals(p2.Quantity));
+        }
 
-            Assert.IsFalse(p1.SessionId == null);
+        [TestMethod]
+        public void CreateNextPurchaseEventWithPurchaseEventTest()
+        {
+            var ec = new EventCreator();
+
+            var first = ec.CreatePurchaseEvent();
+            var next = ec.CreateNextPurchaseEvent(first);
+
+            // Event Members
+            Assert.AreEqual(first.SessionId, next.SessionId);
+            Assert.AreEqual(first.Email, next.Email);
+            // PurchaseEvent Members
+            Assert.AreEqual(first.ProductId, next.ProductId);
+            Assert.AreNotEqual(first.Time, next.Time);
+        }
+
+        [TestMethod]
+        public void CreateNextPurchaseEventWithClickEventTest()
+        {
+            var ec = new EventCreator();
+
+            var first = ec.CreateClickEvent();
+            // TODO: Fix this for if the product url changes.
+            first.NextUrl = "/products/2";
+            var next = ec.CreateNextPurchaseEvent(first);
+
+            Assert.AreEqual(2, next.ProductId);
+            Assert.IsTrue(next.Price > 0);
+            Assert.IsTrue(next.Quantity > 0);
+            Assert.IsTrue(next.TransactionNum > 0);
+
         }
     }
 }

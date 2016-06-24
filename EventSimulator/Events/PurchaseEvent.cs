@@ -20,7 +20,7 @@ namespace EventSimulator.Events
         #endregion
 
         #region Constructors
-        public PurchaseEvent() : base(EventType.Purchase)
+        public PurchaseEvent()
         {
             // Nothing to do here.
         }

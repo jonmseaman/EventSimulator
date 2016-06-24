@@ -64,21 +64,32 @@ namespace EventSimulator
 
         #region CreateNextEvents
 
-        private PurchaseEvent CreateNextPurchaseEvent(Event @event)
+        /// <summary>
+        /// Creates a purchase that could follow from the previous event.
+        /// </summary>
+        /// <param name="event"></param>
+        /// <exception cref="ArgumentException">Event must be a PurchaseEvent 
+        /// or ClickEvent that corresponds to navigating to a product page.
+        /// </exception>
+        /// <returns></returns>
+        public PurchaseEvent CreateNextPurchaseEvent(Event @event)
         {
             // If PurchaseEvent, purchase again.
-            if (@event.EventType == EventType.Purchase)
+            if (@event is PurchaseEvent)
             {
-                var nextEvent = new PurchaseEvent(@event as PurchaseEvent);
-                nextEvent.Quantity = RandomProductQuantity();
-                nextEvent.Time = DateTime.Now;
+                var nextEvent = new PurchaseEvent(@event as PurchaseEvent)
+                {
+                    Quantity = RandomProductQuantity(),
+                    Time = DateTime.Now,
+                };
                 return nextEvent;
             }
-            if (@event.EventType == EventType.Click
-                     && IsUrlAProductPage((@event as ClickEvent).NextUrl))
+            if (@event is ClickEvent
+                     && IsUrlAProductPage(((ClickEvent)@event).NextUrl))
             {
+                var clickEvent = (ClickEvent) @event;
                 // Get the product id from the url.
-                var productId = ProductIdFromUrl((@event as ClickEvent).NextUrl);
+                var productId = ProductIdFromUrl(clickEvent.NextUrl);
                 var nextEvent = new PurchaseEvent(@event)
                 {
                     Price = RandomPrice(),
@@ -86,25 +97,26 @@ namespace EventSimulator
                     Quantity = RandomProductQuantity(),
                     Time = DateTime.Now,
                     TransactionNum = RandomTransactionNumber()
-
                 };
 
                 return nextEvent;
             }
             else
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentException("Event must be a PurchaseEvent "
+                    + "or ClickEvent that corresponds to navigating to a "
+                    + "product page.");
             }
         }
 
 
 
-        private ClickEvent CreateNextClickEvent(Event @event)
+        public ClickEvent CreateNextClickEvent(Event @event)
         {
             var next = new ClickEvent(@event);
 
             // Get the type of the event
-            if (@event.EventType == EventType.Click)
+            if (@event is ClickEvent)
             {
                 var old = @event as ClickEvent;
                 // Make the next event.
@@ -113,19 +125,14 @@ namespace EventSimulator
                 next.EntryTime = old.ExitTime;
                 next.ExitTime = DateTime.Now;
             }
-            else if (@event.EventType == EventType.Purchase)
+            else if (@event is PurchaseEvent)
             {
-                var old = @event as PurchaseEvent;
+                var old = (PurchaseEvent) @event;
                 // TODO: Make url(product id)
                 next.PrevUrl = "/products/" + old.ProductId;
                 next.NextUrl = RandomUrl();
                 next.EntryTime = old.Time;
                 next.ExitTime = DateTime.Now;
-            }
-            else
-            {
-                var err = $"EventSimulator.Events.EventType does not have member {@event.EventType}";
-                throw new InvalidEnumArgumentException(err);
             }
 
             return next;
@@ -140,7 +147,7 @@ namespace EventSimulator
         /// <returns>An event that could occur after 'prevEvent'.</returns>
         public Event CreateNextEvent(Event prevEvent, UserBehavior behavior)
         {
-            if (prevEvent.EventType == EventType.Purchase)
+            if (prevEvent is PurchaseEvent)
             {
                 return CreateClickEvent();
             }
@@ -169,7 +176,7 @@ namespace EventSimulator
         private Event CreateNextEventSlowPurchase(Event prevEvent)
         {
             // If ClickEvent && on Product page, 50% chance to purchase.
-            if (prevEvent.EventType == EventType.Click
+            if (prevEvent is ClickEvent
                 && IsUrlAProductPage((prevEvent as ClickEvent).NextUrl)
                 && Random.Next(0, 9) < 5)
             {
@@ -191,15 +198,15 @@ namespace EventSimulator
         /// <returns>Event generated according to 'FastPurchase' behavior.</returns>
         private Event CreateNextEventFastPurchase(Event e)
         {
-            if (e.EventType == EventType.Purchase)
+            if (e is PurchaseEvent)
             {
                 return CreateNextClickEvent(e);
             }
 
             ClickEvent clickEvent = new ClickEvent();
-            if (e.EventType == EventType.Click)
+            if (e is ClickEvent)
             {
-                clickEvent = e as ClickEvent;
+                clickEvent = (ClickEvent)e;
             }
 
             // If on a product page, purchase it.
@@ -281,17 +288,17 @@ namespace EventSimulator
         private string ProductPageUrl { get; } = "/products/";
 
 
-        bool IsUrlAProductPage(string url)
+        public bool IsUrlAProductPage(string url)
         {
             return url.StartsWith(ProductPageUrl);
         }
 
-        bool IsUrlTheHomePage(string url)
+        public bool IsUrlTheHomePage(string url)
         {
             return url == HomePageUrl;
         }
 
-        int ProductIdFromUrl(string nextUrl)
+        public int ProductIdFromUrl(string nextUrl)
         {
             var prodIdStr = nextUrl.Substring(ProductPageUrl.Length);
             return int.Parse(prodIdStr);

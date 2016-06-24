@@ -7,16 +7,9 @@ using System.Threading.Tasks;
 
 namespace EventSimulator.Events
 {
-    public enum EventType
-    {
-        Click,
-        Purchase
-    }
-
     public abstract class Event
     {
         #region Data Members
-        public EventType EventType { get; set; }
         public Guid SessionId { get; set; }
         public string Email { get; set; }
 
@@ -25,20 +18,18 @@ namespace EventSimulator.Events
 
         #region Constructors
 
-        public Event(EventType eventType)
+        public Event()
         {
-            EventType = eventType;
         }
 
         /// <summary>
         /// Makes a shallow copy of e.
         /// </summary>
         /// <param name="e">The event to be copied. </param>
-        public Event(Event e): this(e.EventType)
+        public Event(Event e)
         {
             SessionId = e.SessionId;
             Email = e.Email;
-            EventType = e.EventType;
         }
 
         #endregion

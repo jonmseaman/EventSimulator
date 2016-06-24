@@ -17,7 +17,7 @@ namespace EventSimulator.Events
         #region Constructors
 
 
-        public ClickEvent() : base(EventType.Click)
+        public ClickEvent()
         { }
 
         /// <summary>

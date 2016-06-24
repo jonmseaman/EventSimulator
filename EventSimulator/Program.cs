@@ -30,7 +30,9 @@ namespace EventSimulator
                 throw new Exception("Could not find 'ConnectionString' in AppSettings in App.Config");
             }
 
-            Thread eventThread = new Thread(async () =>
+            int eventsSent = 0;
+
+            var threadStart = new ThreadStart(async () =>
             {
                 // Event sender and receiver.
                 var eventCreator = new EventCreator();
@@ -38,10 +40,12 @@ namespace EventSimulator
 
                 // Create list of events to send to eventHub
                 var eventList = new List<Event>();
-                for (var i = 0; i < 256; i++)
+                for (var i = 0; i < 512; i++)
                 {
                     eventList.Add(eventCreator.CreateClickEvent());
                 }
+
+                var timeStarted = DateTime.Now;
 
                 while (true)
                 {
@@ -49,13 +53,14 @@ namespace EventSimulator
                     for (var i = 0; i < eventList.Count; i++)
                     {
                         eventList[i] = eventCreator.CreateNextEvent(eventList[i], UserBehavior.FastPurchase);
-                    }                    
+                    }
 
                     // Send the events
                     Console.WriteLine("Sending the results.");
                     try
                     {
                         await eventSender.SendBatchAsync(eventList);
+                        eventsSent += eventList.Count;
                     }
                     catch (MessageSizeExceededException e)
                     {
@@ -63,15 +68,24 @@ namespace EventSimulator
                         Console.Write("Batch size exceeded. ");
                         Console.WriteLine(e.Message);
                         Console.ResetColor();
-                        while (eventList.Count > 0)
-                        {
-                            eventSender.Send(eventList[0]);
-                            eventList.RemoveAt(0);
-                        }
+                        break;
                     }
                     Console.WriteLine("Finished Sending data.");
+                    Console.WriteLine("Total events sent: " + eventsSent);
+                    var seconds = (DateTime.Now - timeStarted).TotalSeconds;
+                    Console.WriteLine("Average events per second: " + eventsSent / seconds);
                 }
             });
+
+            Thread eventThread = new Thread(threadStart);
+            Thread[] threads = new Thread[12];
+            for (var i = 0; i < 12; i++)
+            {
+                threads[i] = new Thread(threadStart);
+                threads[i].Start();
+            }
+
+
             eventThread.Start();
 
             Console.WriteLine("Press enter to exit...");
