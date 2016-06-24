@@ -18,42 +18,12 @@ namespace EventSimulator
     }
     class EventCreator
     {
-        #region Randoms
+        #region CreateEvents
+
         /// <summary>
-        /// Used to randomize the click events.
+        /// Creates a randomized click event. 
         /// </summary>
-        private Random Random = new Random();
-
-        public string HomePageUrl { get; private set; } = "/";
-
-        private string RandomEmail()
-        {
-            return string.Format("user{0}@example.com", Random.Next(1, 99999));
-        }
-
-        private string RandomUrl()
-        {
-            var rand = Random.Next(0, 9);
-            // 30% to go back to the home page.
-            if (rand < 3)
-            {
-                return HomePageUrl;
-            }
-            else
-            {
-                return RandomProductUrl();
-            }
-        }
-
-        private string RandomProductUrl()
-        {
-            return String.Format("/products/{0}", Random.Next(1, 20));
-        }
-
-        #endregion
-
-
-
+        /// <returns> The randomized event. </returns>
         public Event CreateClickEvent()
         {
             var e = new ClickEvent();
@@ -62,26 +32,51 @@ namespace EventSimulator
             e.EntryTime = DateTime.Now - TimeSpan.FromSeconds(Random.Next(1, 60 * 10));
             e.ExitTime = DateTime.Now;
             e.PrevUrl = RandomUrl();
-            e.NextUrl = RandomProductUrl();
+            e.NextUrl = IsUrlTheHomePage(e.PrevUrl) ? RandomProductUrl() : RandomUrl();
             return e;
         }
 
+        /// <summary>
+        /// Creates a randomized purchase event.
+        /// TransactionNum, Email, ProductId, Price, and Quantity are all randomized.
+        /// 
+        /// </summary>
+        /// <returns> The randomly generate event. </returns>
         public Event CreatePurchaseEvent()
         { // TODO: Randomize event data.
             var purchaseEvent = new PurchaseEvent();
             // TODO: Get the actual transaction number. Or, we could use Guid.
-            purchaseEvent.TransactionNum = 1;
+            purchaseEvent.TransactionNum = RandomTransactionNumber();
             purchaseEvent.Email = RandomEmail();
-            purchaseEvent.ProductId = 1.ToString();
-            purchaseEvent.Price = 250;
-            purchaseEvent.Quantity = 15;
+            purchaseEvent.ProductId = RandomProductId();
+            purchaseEvent.Price = RandomPrice();
+            purchaseEvent.Quantity = RandomProductQuantity();
             purchaseEvent.Time = DateTime.Now;
             return purchaseEvent;
         }
 
+        #endregion
+
+        #region CreateNextEvents
+
         private PurchaseEvent CreateNextPurchaseEvent(Event @event)
         {
-            throw new NotImplementedException();
+            // If PurchaseEvent, purchase again.
+            if (@event.EventType == EventType.Purchase)
+            {
+                var nextEvent = new PurchaseEvent(@event as PurchaseEvent);
+                nextEvent.Quantity = RandomProductQuantity();
+            }
+            else if (@event.EventType == EventType.Click
+                && IsUrlAProductPage((@event as ClickEvent).NextUrl))
+            { // If click event
+                var nextEvent = new PurchaseEvent(@event);
+
+            }
+            // If clickEvent && onProductPage
+                // PurchaseProduct
+            // If on Home page
+                // Throw exception
         }
 
         private ClickEvent CreateNextClickEvent(Event @event)
@@ -157,7 +152,7 @@ namespace EventSimulator
                 {
                     return CreateNextClickEvent(@event);
                 }
-                else
+                else if (/* On product page */IsUrlAProductPage((@event as ClickEvent).NextUrl))
                 {
                     return CreateNextPurchaseEvent(@event);
                 }
@@ -169,6 +164,76 @@ namespace EventSimulator
 
         }
 
+        #endregion
+
+        #region Randoms
+        /// <summary>
+        /// Used to randomize click event members. Email, ProductUrl are randomized.
+        /// </summary>
+        private Random Random = new Random();
+
+        private int RandomTransactionNumber()
+        {
+            return Random.Next(1, 1000000);
+        }
+
+        private string RandomEmail()
+        {
+            return $"user{Random.Next(0, 99999)}@example.com";
+        }
+
+        private int RandomProductId()
+        {
+            return Random.Next(1, 20);
+        }
+
+        private int RandomPrice()
+        {
+            return Random.Next(25, 2500);
+        }
+
+        private int RandomProductQuantity()
+        {
+            return Random.Next(1, 10);
+        }
+
+        private string RandomUrl()
+        {
+            var rand = Random.Next(0, 9);
+            // 30% to go back to the home page.
+            if (rand < 3)
+            {
+                return HomePageUrl;
+            }
+            else
+            {
+                return RandomProductUrl();
+            }
+        }
+
+        private string RandomProductUrl()
+        {
+            return $"{ProductPageUrl}{Random.Next(1, 20)}";
+        }
+
+        #endregion
+
+        #region Utilities
+        private string HomePageUrl { get; } = "/";
+        private string ProductPageUrl { get; } = "/products/";
+
+
+        bool IsUrlAProductPage(string url)
+        {
+            return url.StartsWith(ProductPageUrl);
+        }
+
+        bool IsUrlTheHomePage(string url)
+        {
+            return url == HomePageUrl;
+        }
+
+        #endregion
 
     }
 }

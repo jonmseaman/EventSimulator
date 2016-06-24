@@ -13,27 +13,33 @@ namespace EventSimulator.Events
         Purchase
     }
 
-    public class Event
+    public abstract class Event
     {
-        public Event(EventType eventType)
-        {
-            EventType = eventType;
-        }
+        #region Data Members
         public EventType EventType { get; set; }
         public Guid SessionId { get; set; }
         public string Email { get; set; }
 
-        public static Event Create(EventType eventType)
+        #endregion
+
+
+        #region Constructors
+
+        public Event(EventType eventType)
         {
-            switch (eventType)
-            {
-                case EventType.Click:
-                    return new ClickEvent();
-                case EventType.Purchase:
-                    return new PurchaseEvent();
-                default:
-                    return new Event(eventType);
-            }
+            EventType = eventType;
         }
+
+        /// <summary>
+        /// Makes a shallow copy of e.
+        /// </summary>
+        /// <param name="e">The event to be copied. </param>
+        public Event(Event e): this(e.EventType)
+        {
+            SessionId = e.SessionId;
+            Email = e.Email;
+        }
+
+        #endregion
     }
 }
