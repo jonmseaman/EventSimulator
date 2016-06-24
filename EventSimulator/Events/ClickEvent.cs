@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EventSimulator.Events
 {
-    class ClickEvent : Event
+    public class ClickEvent : Event
     {
         public string PrevUrl { get; set; }
         public string NextUrl { get; set; }

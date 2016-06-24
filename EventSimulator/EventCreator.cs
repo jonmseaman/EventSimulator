@@ -17,36 +17,40 @@ namespace EventSimulator
         FastPurchase,
         SlowPurchase,
     }
-    class EventCreator
+    public class EventCreator
     {
         #region CreateEvents
 
         /// <summary>
-        /// Creates a randomized click event. 
+        /// Creates a randomized click event.
+        /// Randomized Variables: SessionId, Email, EntryTime, PrevUrl, NextUrl
+        /// ExitTime is always DateTime.Now
         /// </summary>
         /// <returns> The randomized event. </returns>
-        public Event CreateClickEvent()
+        public ClickEvent CreateClickEvent()
         {
-            var e = new ClickEvent();
-            e.SessionId = Guid.NewGuid();
-            e.Email = RandomEmail();
-            e.EntryTime = DateTime.Now - TimeSpan.FromSeconds(Random.Next(1, 60 * 10));
-            e.ExitTime = DateTime.Now;
-            e.PrevUrl = RandomUrl();
-            e.NextUrl = IsUrlTheHomePage(e.PrevUrl) ? RandomProductUrl() : RandomUrl();
+            var e = new ClickEvent()
+            {
+                SessionId = Guid.NewGuid(),
+                Email = RandomEmail(),
+                EntryTime = DateTime.Now - TimeSpan.FromSeconds(Random.Next(1, 60 * 10)),
+                ExitTime = DateTime.Now,
+                PrevUrl = RandomUrl(),
+                NextUrl = RandomUrl(),
+            };
             return e;
         }
 
         /// <summary>
         /// Creates a randomized purchase event.
         /// TransactionNum, Email, ProductId, Price, and Quantity are all randomized.
-        /// 
         /// </summary>
         /// <returns> The randomly generate event. </returns>
-        public Event CreatePurchaseEvent()
-        { // TODO: Randomize event data.
+        public PurchaseEvent CreatePurchaseEvent()
+        {
             var purchaseEvent = new PurchaseEvent();
             // TODO: Get the actual transaction number. Or, we could use Guid.
+            purchaseEvent.SessionId = Guid.NewGuid();
             purchaseEvent.TransactionNum = RandomTransactionNumber();
             purchaseEvent.Email = RandomEmail();
             purchaseEvent.ProductId = RandomProductId();

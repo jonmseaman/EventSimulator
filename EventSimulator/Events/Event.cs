@@ -38,6 +38,7 @@ namespace EventSimulator.Events
         {
             SessionId = e.SessionId;
             Email = e.Email;
+            EventType = e.EventType;
         }
 
         #endregion
