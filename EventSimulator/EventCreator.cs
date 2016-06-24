@@ -68,23 +68,29 @@ namespace EventSimulator
                 var nextEvent = new PurchaseEvent(@event as PurchaseEvent);
                 nextEvent.Quantity = RandomProductQuantity();
                 nextEvent.Time = DateTime.Now;
+                return nextEvent;
             }
-            else if (@event.EventType == EventType.Click
+            if (@event.EventType == EventType.Click
                      && IsUrlAProductPage((@event as ClickEvent).NextUrl))
             {
                 // Get the product id from the url.
-                // Make a purchase according to the 
-                int productId = ProductIdFromUrl((@event as ClickEvent).NextUrl);
+                var productId = ProductIdFromUrl((@event as ClickEvent).NextUrl);
+                var nextEvent = new PurchaseEvent(@event)
+                {
+                    Price = RandomPrice(),
+                    ProductId = productId,
+                    Quantity = RandomProductQuantity(),
+                    Time = DateTime.Now,
+                    TransactionNum = RandomTransactionNumber()
 
+                };
+
+                return nextEvent;
             }
             else
             {
                 throw new ArgumentOutOfRangeException();
             }
-            // If clickEvent && onProductPage
-                // PurchaseProduct
-            // If on Home page
-                // Throw exception
         }
 
 
@@ -92,15 +98,12 @@ namespace EventSimulator
         private ClickEvent CreateNextClickEvent(Event @event)
         {
             var next = new ClickEvent(@event);
-            next.Email = @event.Email;
-            next.SessionId = @event.SessionId;
 
             // Get the type of the event
             if (@event.EventType == EventType.Click)
             {
                 var old = @event as ClickEvent;
                 // Make the next event.
-                // ClickEvent Members
                 next.PrevUrl = old.NextUrl;
                 next.NextUrl = RandomUrl();
                 next.EntryTime = old.ExitTime;
@@ -109,7 +112,6 @@ namespace EventSimulator
             else if (@event.EventType == EventType.Purchase)
             {
                 var old = @event as PurchaseEvent;
-                // ClickEvent Members
                 // TODO: Make url(product id)
                 next.PrevUrl = "/products/" + old.ProductId;
                 next.NextUrl = RandomUrl();
@@ -118,7 +120,7 @@ namespace EventSimulator
             }
             else
             {
-                var err = String.Format("EventSimulator.Events.EventType does not have member {0}", @event.EventType);
+                var err = $"EventSimulator.Events.EventType does not have member {@event.EventType}";
                 throw new InvalidEnumArgumentException(err);
             }
 
@@ -208,7 +210,7 @@ namespace EventSimulator
                 NextUrl = RandomProductUrl(),
                 EntryTime = clickEvent.ExitTime,
                 ExitTime = DateTime.Now,
-                PrevUrl = clickEvent.NextUrl    
+                PrevUrl = clickEvent.NextUrl
             };
             return next;
         }
