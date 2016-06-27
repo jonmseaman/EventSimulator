@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using EventSimulator.Events;
+using System.Text.RegularExpressions;
 
 namespace EventSimulator
 {
@@ -110,7 +111,14 @@ namespace EventSimulator
         }
 
 
-
+        /// <summary>
+        /// Creates a click event that could come after @event.
+        /// </summary>
+        /// <param name="event">The event which precedes the event
+        /// being created. Can be a purchase event or click event.</param>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the event is
+        /// not of type ClickEvent or PurchaseEvent.</exception>
+        /// <returns>The created event. </returns>
         public static ClickEvent CreateNextClickEvent(Event @event)
         {
             var next = new ClickEvent(@event);
@@ -118,7 +126,7 @@ namespace EventSimulator
             // Get the type of the event
             if (@event is ClickEvent)
             {
-                var old = @event as ClickEvent;
+                var old = (ClickEvent) @event;
                 // Make the next event.
                 next.PrevUrl = old.NextUrl;
                 next.NextUrl = RandomUrl();
@@ -128,11 +136,14 @@ namespace EventSimulator
             else if (@event is PurchaseEvent)
             {
                 var old = (PurchaseEvent) @event;
-                // TODO: Make url(product id)
-                next.PrevUrl = "/products/" + old.ProductId;
+                next.PrevUrl = ProductUrlFromId(old.ProductId);
                 next.NextUrl = RandomUrl();
                 next.EntryTime = old.Time;
                 next.ExitTime = DateTime.Now;
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException();
             }
 
             return next;
@@ -151,17 +162,14 @@ namespace EventSimulator
             {
                 return CreateClickEvent();
             }
-            if (behavior == UserBehavior.Browsing)
+            switch (behavior)
             {
-                return CreateNextClickEvent(prevEvent);
-            }
-            if (behavior == UserBehavior.FastPurchase)
-            {
-                return CreateNextEventFastPurchase(prevEvent);
-            }
-            if (behavior == UserBehavior.SlowPurchase)
-            {
-                return CreateNextEventSlowPurchase(prevEvent);
+                case UserBehavior.Browsing:
+                    return CreateNextClickEvent(prevEvent);
+                case UserBehavior.FastPurchase:
+                    return CreateNextEventFastPurchase(prevEvent);
+                case UserBehavior.SlowPurchase:
+                    return CreateNextEventSlowPurchase(prevEvent);
             }
             return CreateClickEvent();
         }
@@ -287,10 +295,14 @@ namespace EventSimulator
         private static string HomePageUrl { get; } = "/";
         private static string ProductPageUrl { get; } = "/products/";
 
+        public static string ProductUrlFromId(int productId)
+        {
+            return $"{ProductPageUrl}{productId}";
+        }
 
         public static bool IsUrlAProductPage(string url)
         {
-            return url.StartsWith(ProductPageUrl);
+            return Regex.Match(url, $"({ProductPageUrl})[0-9]+").Length == url.Length;
         }
 
         public static bool IsUrlTheHomePage(string url)

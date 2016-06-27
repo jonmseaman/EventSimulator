@@ -60,8 +60,7 @@ namespace EventSimulatorTests
         public void CreateNextPurchaseEventWithClickEventTest()
         {
             var first = EventCreator.CreateClickEvent();
-            // TODO: Fix this for if the product url changes.
-            first.NextUrl = "/products/2";
+            first.NextUrl = EventCreator.ProductUrlFromId(2);
             var next = EventCreator.CreateNextPurchaseEvent(first);
 
             Assert.AreEqual(2, next.ProductId);
@@ -70,5 +69,60 @@ namespace EventSimulatorTests
             Assert.IsTrue(next.TransactionNum > 0);
 
         }
+
+        [TestMethod]
+        public void CreateNextClickEventFromClickEventTest()
+        {
+            var first = EventCreator.CreateClickEvent();
+            var next = EventCreator.CreateNextClickEvent(first);
+
+            // Check to make sure the urls are done correctly.
+            Assert.AreEqual(first.NextUrl, next.PrevUrl);
+            // first.PrevUrl does not have a relationship to next
+
+            // Check to make sure that the dates have been updated.
+            Assert.IsTrue(first.ExitTime <= next.EntryTime);
+            Assert.IsTrue(next.ExitTime <= DateTime.Now);
+        }
+
+        [TestMethod]
+        public void CreateNextClickEventFromPurchaseEventTest()
+        {
+            var p = EventCreator.CreatePurchaseEvent();
+            var next = EventCreator.CreateNextClickEvent(p);
+
+            // Check to make sure the urls are done correctly.
+            Assert.AreEqual(EventCreator.ProductUrlFromId(p.ProductId), next.PrevUrl);
+            // first.PrevUrl does not have a relationship to next
+
+            // Check to make sure that the dates have been updated.
+            Assert.IsTrue(p.Time <= next.EntryTime);
+            Assert.IsTrue(next.ExitTime <= DateTime.Now);
+        }
+
+        [TestMethod]
+        public void IsUrlAProductPageTrueTest()
+        {
+            Assert.IsTrue(EventCreator.IsUrlAProductPage("/products/2"));
+        }
+
+        [TestMethod]
+        public void IsUrlAProductPageFalseTest()
+        {
+            Assert.IsFalse(EventCreator.IsUrlAProductPage("/products/2/hello"));
+        }
+
+        [TestMethod]
+        public void IsUrlAProductPageFalse2Test()
+        {
+            Assert.IsFalse(EventCreator.IsUrlAProductPage("/notproducts/2/hello"));
+        }
+
+        [TestMethod]
+        public void IsUrlAProductPageFalse3Test()
+        {
+            Assert.IsFalse(EventCreator.IsUrlAProductPage($"/"));
+        }
+
     }
 }

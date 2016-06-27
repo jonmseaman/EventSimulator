@@ -70,14 +70,12 @@ namespace EventSimulator
             var batchSizeStr = config["BatchSize"];
             if (batchSizeStr == null)
             {
-                BatchSize = 512;
-                Console.WriteLine("Couldn't find batch size in App.Config. Using default 512.");
+                Console.WriteLine($"Couldn't find batch size in App.Config. Using default {BatchSize}.");
             }
             int batchSize;
             if (!int.TryParse(batchSizeStr, out batchSize))
             {
-                BatchSize = 512;
-                Console.WriteLine("Couldn't parse BatchSize from App.Config. Using default 512.");
+                Console.WriteLine($"Couldn't parse BatchSize from App.Config. Using default {BatchSize}.");
             }
 
             // Set up threads.
