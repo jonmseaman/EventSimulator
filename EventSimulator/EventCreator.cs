@@ -298,8 +298,18 @@ namespace EventSimulator
             return url == HomePageUrl;
         }
 
+        /// <summary>
+        /// Extracts the product id from a product page url.
+        /// </summary>
+        /// <param name="nextUrl"></param>
+        /// <exception cref="ArgumentException">Thrown if the url is not a product url.</exception>
+        /// <returns></returns>
         public static int ProductIdFromUrl(string nextUrl)
         {
+            if (!nextUrl.StartsWith(ProductPageUrl))
+            {
+                throw new ArgumentException("The url does not correspond to a product page.");
+            }
             var prodIdStr = nextUrl.Substring(ProductPageUrl.Length);
             return int.Parse(prodIdStr);
         }
