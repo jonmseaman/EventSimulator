@@ -79,13 +79,39 @@ namespace EventSimulator
             }
 
             // Set up threads.
-            const int numThreads = 2;
+            var numThreads = Environment.ProcessorCount;
+            var eventsSentByThread = new int[numThreads];
             var threads = new Thread[numThreads];
+            var timeStarted = DateTime.Now;
             for (var i = 0; i < numThreads; i++)
             {
-                threads[i] = new Thread(() => SendEvents(connectionString));
+                var i1 = i;
+                threads[i] = new Thread(() => SendEvents(connectionString, ref eventsSentByThread[i1]));
                 threads[i].Start();
             }
+
+
+            // TODO: Make a thread that counts the number of events being sent each second.
+            var countThread = new Thread(() =>
+            {
+                while (true)
+                {
+                    Thread.Sleep(1000);
+                    // Count events sent.
+                    var sum = eventsSentByThread.Sum();
+                    var eps = sum/(DateTime.Now - timeStarted).TotalSeconds;
+                    Console.Write("Events sent: ");
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write(sum.ToString());
+                    Console.ResetColor();
+                    Console.Write(". Events per second: ");
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine(eps);
+                    Console.ResetColor();
+                }
+            });
+            countThread.Start();
+
 
             // Done.
             Console.WriteLine("Press enter to exit...");
@@ -96,7 +122,7 @@ namespace EventSimulator
             }
         }
 
-        public static async void SendEvents(string connectionString)
+        public static void SendEvents(string connectionString, ref int eventsSent)
         {
             // Event sender and receiver.
             var eventSender = new Sender(connectionString);
@@ -124,10 +150,10 @@ namespace EventSimulator
 
 
                 // Send the events
-                Console.WriteLine("Sending the results.");
                 try
                 {
-                    await eventSender.SendBatchAsync(eventList);
+                    eventSender.SendBatch(eventList);
+                    eventsSent += eventList.Count;
                 }
                 catch (MessageSizeExceededException e)
                 {
@@ -137,7 +163,6 @@ namespace EventSimulator
                     Console.ResetColor();
                     break;
                 }
-                Console.WriteLine("Finished Sending data.");
             }
         }
 
