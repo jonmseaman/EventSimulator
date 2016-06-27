@@ -12,9 +12,8 @@ namespace EventSimulatorTests
         [TestMethod]
         public void CreateClickEventTest()
         {
-            var ec = new EventCreator();
-            var c1 = ec.CreateClickEvent();
-            var c2 = ec.CreateClickEvent();
+            var c1 = EventCreator.CreateClickEvent();
+            var c2 = EventCreator.CreateClickEvent();
 
             Assert.IsFalse(c1.SessionId.Equals(c2.SessionId));
 
@@ -30,9 +29,8 @@ namespace EventSimulatorTests
         [TestMethod]
         public void CreatePurchaseEventTest()
         {
-            var ec = new EventCreator();
-            var p1 = ec.CreatePurchaseEvent();
-            var p2 = ec.CreatePurchaseEvent();
+            var p1 = EventCreator.CreatePurchaseEvent();
+            var p2 = EventCreator.CreatePurchaseEvent();
 
             Assert.IsFalse(p1.SessionId.Equals(p2.SessionId));
 
@@ -47,10 +45,8 @@ namespace EventSimulatorTests
         [TestMethod]
         public void CreateNextPurchaseEventWithPurchaseEventTest()
         {
-            var ec = new EventCreator();
-
-            var first = ec.CreatePurchaseEvent();
-            var next = ec.CreateNextPurchaseEvent(first);
+            var first = EventCreator.CreatePurchaseEvent();
+            var next = EventCreator.CreateNextPurchaseEvent(first);
 
             // Event Members
             Assert.AreEqual(first.SessionId, next.SessionId);
@@ -63,12 +59,10 @@ namespace EventSimulatorTests
         [TestMethod]
         public void CreateNextPurchaseEventWithClickEventTest()
         {
-            var ec = new EventCreator();
-
-            var first = ec.CreateClickEvent();
+            var first = EventCreator.CreateClickEvent();
             // TODO: Fix this for if the product url changes.
             first.NextUrl = "/products/2";
-            var next = ec.CreateNextPurchaseEvent(first);
+            var next = EventCreator.CreateNextPurchaseEvent(first);
 
             Assert.AreEqual(2, next.ProductId);
             Assert.IsTrue(next.Price > 0);
