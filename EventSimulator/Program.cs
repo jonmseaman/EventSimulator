@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics.Tracing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EventSimulator.Events;
+using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
 
 namespace EventSimulator
@@ -19,8 +21,43 @@ namespace EventSimulator
     /// </summary>
     class Program
     {
+        private static int[] behaviorPercents;
+        private static int BatchSize { get; } = 5;
+
         static void Main(string[] args)
         {
+            // Get distribution of events from the command line parameters.
+            behaviorPercents = new int[3];
+            try
+            {
+                var sum = 0;
+                for (var i = 0; i < 3; i++)
+                {
+                    behaviorPercents[i] = int.Parse(args[i]);
+                    sum += behaviorPercents[i];
+                }
+
+                if (sum != 100)
+                {
+                    throw new ArgumentException("Command line arguments do not add up to 100%.");
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(e.Message);
+                Console.WriteLine("Usage:\n" +
+                                  System.AppDomain.CurrentDomain.FriendlyName +
+                                  " %UsersPurchasingFirstProductViewed %UsersPurchasingAfterBrowsing %UsersBrowsing");
+                Console.WriteLine("These must add up to 100%.");
+                Console.ResetColor();
+                Console.WriteLine("Press enter to exit...");
+                Console.ReadLine();
+                Environment.Exit(exitCode: 1);
+            }
+
+
             // Get data from config file and command line parameters.
             var config = ConfigurationManager.AppSettings;
             // Get the conenction string from the config file.
@@ -49,23 +86,29 @@ namespace EventSimulator
         public static async void SendEvents(string connectionString)
         {
             // Event sender and receiver.
-            var eventCreator = new EventCreator();
             var eventSender = new Sender(connectionString);
 
             // Create list of events to send to eventHub
             var eventList = new List<Event>();
-            for (var i = 0; i < 512; i++)
+            for (var i = 0; i < BatchSize; i++)
             {
-                eventList.Add(eventCreator.CreateClickEvent());
+                eventList.Add(EventCreator.CreateClickEvent());
             }
 
             while (true)
             {
                 // Update list of events to show user action.
-                for (var i = 0; i < eventList.Count; i++)
-                {
-                    eventList[i] = eventCreator.CreateNextEvent(eventList[i], UserBehavior.FastPurchase);
-                }
+                var offset = 0;
+                var fastPurchaseCount = behaviorPercents[0] * BatchSize / 100;
+                var slowPurchaseCount = behaviorPercents[1] * BatchSize / 100;
+                var browsingCount = eventList.Count - fastPurchaseCount - slowPurchaseCount;
+                
+                UpdateEvents(offset, fastPurchaseCount, eventList, UserBehavior.FastPurchase);
+                offset += fastPurchaseCount;
+                UpdateEvents(offset, slowPurchaseCount, eventList, UserBehavior.SlowPurchase);
+                offset += slowPurchaseCount;
+                UpdateEvents(offset, browsingCount, eventList, UserBehavior.Browsing);
+
 
                 // Send the events
                 Console.WriteLine("Sending the results.");
@@ -76,7 +119,7 @@ namespace EventSimulator
                 catch (MessageSizeExceededException e)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write("Batch size exceeded. ");
+                    Console.Write("Batch size exceeded.");
                     Console.WriteLine(e.Message);
                     Console.ResetColor();
                     break;
@@ -85,5 +128,12 @@ namespace EventSimulator
             }
         }
 
+        private static void UpdateEvents(int startIndex, int count, List<Event> eventList , UserBehavior behavior)
+        {
+            for (var i = startIndex; count > 0; count--, i++)
+            {
+                eventList[i] = EventCreator.CreateNextEvent(eventList[i], behavior);
+            }
+        }
     }
 }

@@ -27,7 +27,7 @@ namespace EventSimulator
         /// ExitTime is always DateTime.Now
         /// </summary>
         /// <returns> The randomized event. </returns>
-        public ClickEvent CreateClickEvent()
+        public static ClickEvent CreateClickEvent()
         {
             var e = new ClickEvent()
             {
@@ -46,7 +46,7 @@ namespace EventSimulator
         /// TransactionNum, Email, ProductId, Price, and Quantity are all randomized.
         /// </summary>
         /// <returns> The randomly generate event. </returns>
-        public PurchaseEvent CreatePurchaseEvent()
+        public static PurchaseEvent CreatePurchaseEvent()
         {
             var purchaseEvent = new PurchaseEvent();
             // TODO: Get the actual transaction number. Or, we could use Guid.
@@ -72,7 +72,7 @@ namespace EventSimulator
         /// or ClickEvent that corresponds to navigating to a product page.
         /// </exception>
         /// <returns></returns>
-        public PurchaseEvent CreateNextPurchaseEvent(Event @event)
+        public static PurchaseEvent CreateNextPurchaseEvent(Event @event)
         {
             // If PurchaseEvent, purchase again.
             if (@event is PurchaseEvent)
@@ -111,7 +111,7 @@ namespace EventSimulator
 
 
 
-        public ClickEvent CreateNextClickEvent(Event @event)
+        public static ClickEvent CreateNextClickEvent(Event @event)
         {
             var next = new ClickEvent(@event);
 
@@ -145,7 +145,7 @@ namespace EventSimulator
         /// <param name="prevEvent">The 'previous' event.</param>
         /// <param name="behavior">The behavior of the simulated user.</param>
         /// <returns>An event that could occur after 'prevEvent'.</returns>
-        public Event CreateNextEvent(Event prevEvent, UserBehavior behavior)
+        public static Event CreateNextEvent(Event prevEvent, UserBehavior behavior)
         {
             if (prevEvent is PurchaseEvent)
             {
@@ -173,7 +173,7 @@ namespace EventSimulator
         /// </summary>
         /// <param name="prevEvent">The previous event that was simulated.</param>
         /// <returns>The next event.</returns>
-        private Event CreateNextEventSlowPurchase(Event prevEvent)
+        private static Event CreateNextEventSlowPurchase(Event prevEvent)
         {
             // If ClickEvent && on Product page, 50% chance to purchase.
             if (prevEvent is ClickEvent
@@ -196,7 +196,7 @@ namespace EventSimulator
         /// </summary>
         /// <param name="e">The previous event.</param>
         /// <returns>Event generated according to 'FastPurchase' behavior.</returns>
-        private Event CreateNextEventFastPurchase(Event e)
+        private static Event CreateNextEventFastPurchase(Event e)
         {
             if (e is PurchaseEvent)
             {
@@ -235,34 +235,34 @@ namespace EventSimulator
         /// <summary>
         /// Used to randomize click event members. Email, ProductUrl are randomized.
         /// </summary>
-        private Random Random = new Random();
+        private static Random Random = new Random();
 
-        private int RandomTransactionNumber()
+        private static int RandomTransactionNumber()
         {
             return Random.Next(1, 1000000);
         }
 
-        private string RandomEmail()
+        private static string RandomEmail()
         {
             return $"user{Random.Next(0, 99999)}@example.com";
         }
 
-        private int RandomProductId()
+        private static int RandomProductId()
         {
             return Random.Next(1, 20);
         }
 
-        private int RandomPrice()
+        private static int RandomPrice()
         {
             return Random.Next(25, 2500);
         }
 
-        private int RandomProductQuantity()
+        private static int RandomProductQuantity()
         {
             return Random.Next(1, 10);
         }
 
-        private string RandomUrl()
+        private static string RandomUrl()
         {
             var rand = Random.Next(0, 9);
             // 30% to go back to the home page.
@@ -276,7 +276,7 @@ namespace EventSimulator
             }
         }
 
-        private string RandomProductUrl()
+        private static string RandomProductUrl()
         {
             return $"{ProductPageUrl}{Random.Next(1, 20)}";
         }
@@ -284,21 +284,21 @@ namespace EventSimulator
         #endregion
 
         #region Utilities
-        private string HomePageUrl { get; } = "/";
-        private string ProductPageUrl { get; } = "/products/";
+        private static string HomePageUrl { get; } = "/";
+        private static string ProductPageUrl { get; } = "/products/";
 
 
-        public bool IsUrlAProductPage(string url)
+        public static bool IsUrlAProductPage(string url)
         {
             return url.StartsWith(ProductPageUrl);
         }
 
-        public bool IsUrlTheHomePage(string url)
+        public static bool IsUrlTheHomePage(string url)
         {
             return url == HomePageUrl;
         }
 
-        public int ProductIdFromUrl(string nextUrl)
+        public static int ProductIdFromUrl(string nextUrl)
         {
             var prodIdStr = nextUrl.Substring(ProductPageUrl.Length);
             return int.Parse(prodIdStr);
