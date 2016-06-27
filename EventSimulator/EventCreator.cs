@@ -301,7 +301,7 @@ namespace EventSimulator
         /// <summary>
         /// Extracts the product id from a product page url.
         /// </summary>
-        /// <param name="nextUrl"></param>
+        /// <param name="nextUrl">A url corresponding to a product page.</param>
         /// <exception cref="ArgumentException">Thrown if the url is not a product url.</exception>
         /// <returns></returns>
         public static int ProductIdFromUrl(string nextUrl)

@@ -22,7 +22,7 @@ namespace EventSimulator
     class Program
     {
         private static int[] behaviorPercents;
-        private static int BatchSize { get; } = 5;
+        private static int BatchSize { get; set; } = 512;
 
         static void Main(string[] args)
         {
@@ -58,7 +58,7 @@ namespace EventSimulator
             }
 
 
-            // Get data from config file and command line parameters.
+            // Get data from config file.
             var config = ConfigurationManager.AppSettings;
             // Get the conenction string from the config file.
             string connectionString = config["ConnectionString"];
@@ -66,7 +66,21 @@ namespace EventSimulator
             { // TODO: What kind of exception should be thrown?
                 throw new Exception("Could not find 'ConnectionString' in AppSettings in App.Config");
             }
+            // Get batch size from config file.
+            var batchSizeStr = config["BatchSize"];
+            if (batchSizeStr == null)
+            {
+                BatchSize = 512;
+                Console.WriteLine("Couldn't find batch size in App.Config. Using default 512.");
+            }
+            int batchSize;
+            if (!int.TryParse(batchSizeStr, out batchSize))
+            {
+                BatchSize = 512;
+                Console.WriteLine("Couldn't parse BatchSize from App.Config. Using default 512.");
+            }
 
+            // Set up threads.
             const int numThreads = 2;
             var threads = new Thread[numThreads];
             for (var i = 0; i < numThreads; i++)
@@ -75,6 +89,7 @@ namespace EventSimulator
                 threads[i].Start();
             }
 
+            // Done.
             Console.WriteLine("Press enter to exit...");
             Console.ReadLine();
             for (var i = 0; i < numThreads; i++)
