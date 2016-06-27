@@ -91,7 +91,7 @@ namespace EventSimulator
             }
 
 
-            // TODO: Make a thread that counts the number of events being sent each second.
+            // Thread to show the user how many events are being sent.
             var countThread = new Thread(() =>
             {
                 while (true)
