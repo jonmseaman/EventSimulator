@@ -174,28 +174,6 @@ namespace EventSimulator
             return CreateClickEvent();
         }
 
-
-        /// <summary>
-        /// Slow purchase browses, but if the simulated user is on a product
-        /// page, the user has a 50% chance to make the purchase.
-        /// </summary>
-        /// <param name="prevEvent">The previous event that was simulated.</param>
-        /// <returns>The next event.</returns>
-        private static Event CreateNextEventSlowPurchase(Event prevEvent)
-        {
-            // If ClickEvent && on Product page, 50% chance to purchase.
-            if (prevEvent is ClickEvent
-                && IsUrlAProductPage((prevEvent as ClickEvent).NextUrl)
-                && Random.Next(0, 9) < 5)
-            {
-                return CreateNextPurchaseEvent(prevEvent);
-            }
-            else
-            {
-                return CreateNextClickEvent(prevEvent);
-            }
-        }
-
         #region CreateNextEvent specific behaviors
 
         /// <summary>
@@ -232,6 +210,27 @@ namespace EventSimulator
                 PrevUrl = clickEvent.NextUrl
             };
             return next;
+        }
+
+        /// <summary>
+        /// Slow purchase browses, but if the simulated user is on a product
+        /// page, the user has a 50% chance to make the purchase.
+        /// </summary>
+        /// <param name="prevEvent">The previous event that was simulated.</param>
+        /// <returns>The next event.</returns>
+        private static Event CreateNextEventSlowPurchase(Event prevEvent)
+        {
+            // If ClickEvent && on Product page, 50% chance to purchase.
+            if (prevEvent is ClickEvent
+                && IsUrlAProductPage(((ClickEvent)prevEvent).NextUrl)
+                && Random.Next(0, 9) < 5)
+            {
+                return CreateNextPurchaseEvent(prevEvent);
+            }
+            else
+            {
+                return CreateNextClickEvent(prevEvent);
+            }
         }
 
         #endregion

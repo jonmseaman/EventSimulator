@@ -77,6 +77,10 @@ namespace EventSimulator
             {
                 Console.WriteLine($"Couldn't parse BatchSize from App.Config. Using default {BatchSize}.");
             }
+            else
+            {
+                BatchSize = batchSize;
+            }
 
             // Set up threads.
             var numThreads = Environment.ProcessorCount;
@@ -85,7 +89,7 @@ namespace EventSimulator
             var timeStarted = DateTime.Now;
             for (var i = 0; i < numThreads; i++)
             {
-                var i1 = i;
+                var i1 = i; // Make sure the lambda gets the right value of i.
                 threads[i] = new Thread(() => SendEvents(connectionString, ref eventsSentByThread[i1]));
                 threads[i].Start();
             }
