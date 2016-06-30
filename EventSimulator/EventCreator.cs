@@ -24,7 +24,7 @@ namespace EventSimulator
 
         /// <summary>
         /// Creates a randomized click event.
-        /// Randomized Variables: SessionId, Email, EntryTime, PrevUrl, NextUrl
+        /// Randomized Variables: SessionId, Email, EntryTime, CurrentUrl, NextUrl
         /// ExitTime is always DateTime.Now
         /// </summary>
         /// <returns> The randomized event. </returns>
@@ -36,7 +36,7 @@ namespace EventSimulator
                 Email = RandomEmail(),
                 EntryTime = DateTime.Now - TimeSpan.FromSeconds(Random.Next(1, 60 * 10)),
                 ExitTime = DateTime.Now,
-                PrevUrl = RandomUrl(),
+                CurrentUrl = RandomUrl(),
                 NextUrl = RandomUrl(),
             };
             return e;
@@ -128,7 +128,7 @@ namespace EventSimulator
             {
                 var old = (ClickEvent) @event;
                 // Make the next event.
-                next.PrevUrl = old.NextUrl;
+                next.CurrentUrl = old.NextUrl;
                 next.NextUrl = RandomUrl();
                 next.EntryTime = old.ExitTime;
                 next.ExitTime = DateTime.Now;
@@ -136,7 +136,7 @@ namespace EventSimulator
             else if (@event is PurchaseEvent)
             {
                 var old = (PurchaseEvent) @event;
-                next.PrevUrl = ProductUrlFromId(old.ProductId);
+                next.CurrentUrl = ProductUrlFromId(old.ProductId);
                 next.NextUrl = RandomUrl();
                 next.EntryTime = old.Time;
                 next.ExitTime = DateTime.Now;
@@ -207,7 +207,7 @@ namespace EventSimulator
                 NextUrl = RandomProductUrl(),
                 EntryTime = clickEvent.ExitTime,
                 ExitTime = DateTime.Now,
-                PrevUrl = clickEvent.NextUrl
+                CurrentUrl = clickEvent.NextUrl
             };
             return next;
         }

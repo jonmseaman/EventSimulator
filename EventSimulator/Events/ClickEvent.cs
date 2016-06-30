@@ -9,7 +9,7 @@ namespace EventSimulator.Events
 {
     public class ClickEvent : Event
     {
-        public string PrevUrl { get; set; }
+        public string CurrentUrl { get; set; }
         public string NextUrl { get; set; }
         public DateTime EntryTime { get; set; }
         public DateTime ExitTime { get; set; }
@@ -26,7 +26,7 @@ namespace EventSimulator.Events
         /// <param name="e">The event to be copied.</param>
         public ClickEvent(ClickEvent e): base(e)
         {
-            PrevUrl = e.PrevUrl;
+            CurrentUrl = e.CurrentUrl;
             NextUrl = e.NextUrl;
             EntryTime = e.EntryTime;
             ExitTime = e.ExitTime;

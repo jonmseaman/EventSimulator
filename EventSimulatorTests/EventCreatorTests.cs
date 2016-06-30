@@ -20,7 +20,7 @@ namespace EventSimulatorTests
             // Just make sure something is different about these events.
             // Chance that all these variables should be ~~ 0.
             Assert.IsFalse(c1.Email.Equals(c2.Email)
-                && c1.PrevUrl.Equals(c2.PrevUrl)
+                && c1.CurrentUrl.Equals(c2.CurrentUrl)
                 && c1.NextUrl.Equals(c2.NextUrl)
                 && c1.EntryTime.Equals(c2.EntryTime)
                 && c1.Email.Equals(c2.Email));
@@ -77,8 +77,8 @@ namespace EventSimulatorTests
             var next = EventCreator.CreateNextClickEvent(first);
 
             // Check to make sure the urls are done correctly.
-            Assert.AreEqual(first.NextUrl, next.PrevUrl);
-            // first.PrevUrl does not have a relationship to next
+            Assert.AreEqual(first.NextUrl, next.CurrentUrl);
+            // first.CurrentUrl does not have a relationship to next
 
             // Check to make sure that the dates have been updated.
             Assert.IsTrue(first.ExitTime <= next.EntryTime);
@@ -92,8 +92,8 @@ namespace EventSimulatorTests
             var next = EventCreator.CreateNextClickEvent(p);
 
             // Check to make sure the urls are done correctly.
-            Assert.AreEqual(EventCreator.ProductUrlFromId(p.ProductId), next.PrevUrl);
-            // first.PrevUrl does not have a relationship to next
+            Assert.AreEqual(EventCreator.ProductUrlFromId(p.ProductId), next.CurrentUrl);
+            // first.CurrentUrl does not have a relationship to next
 
             // Check to make sure that the dates have been updated.
             Assert.IsTrue(p.Time <= next.EntryTime);

@@ -116,7 +116,6 @@ namespace EventSimulator
             });
             countThread.Start();
 
-
             // Done.
             Console.WriteLine("Press enter to exit...");
             Console.ReadLine();

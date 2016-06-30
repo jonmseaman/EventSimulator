@@ -13,6 +13,15 @@ namespace EventSimulator.Events
         public Guid SessionId { get; set; }
         public string Email { get; set; }
 
+        public int EventType
+        {
+            get
+            {
+                var eventType = this is ClickEvent ? 1 : 2;
+                return eventType;
+            }
+        }
+
         #endregion
 
 
