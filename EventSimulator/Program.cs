@@ -58,15 +58,24 @@ namespace EventSimulator
             // Set up delegates
             if (args.Length > 0 && args[0].Equals("ClickEvents"))
             {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Sending click events.");
+                Console.ResetColor();
                 CreateList = CreateClickEvents;
                 UpdateList = UpdateClickEvents;
             } else if (args.Length > 0 && args[0].Equals("PurchaseEvents"))
             {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Sending purchase events.");
+                Console.ResetColor();
                 CreateList = CreatePurchaseEvents;
                 UpdateList = UpdatePurchaseEvents;
             }
             else
             {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Sending simulated events.");
+                Console.ResetColor();
                 CreateList = CreateClickEvents;
                 UpdateList = UpdateSimulatedEvents;
             }
