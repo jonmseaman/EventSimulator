@@ -195,7 +195,7 @@ namespace EventSimulator
         {
             for (var i = 0; i < eventList.Count; i++)
             {
-                eventList[i] = EventCreator.CreateNextClickEvent(eventList[i]);
+                eventList[i] = EventCreator.CreateClickEvent();
             }
 
         }
@@ -204,7 +204,7 @@ namespace EventSimulator
         {
             for (var i = 0; i < eventList.Count; i++)
             {
-                eventList[i] = EventCreator.CreateNextPurchaseEvent(eventList[i]);
+                eventList[i] = EventCreator.CreatePurchaseEvent();
             }
         }
 
