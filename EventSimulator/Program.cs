@@ -22,9 +22,6 @@ namespace EventSimulator
     {
         #region Member Variables
 
-        private static int[] behaviorPercents;
-        private static int BatchSize { get; set; } = 512;
-
         delegate List<Event> CreateListDelegate();
 
         private static CreateListDelegate CreateList;
@@ -33,16 +30,48 @@ namespace EventSimulator
 
         static UpdateListDelegate UpdateList;
 
+        static int BatchSize { get; set; }
+        static int[] behaviorPercents { get; set; } = { 15, 30, 55 };
+
         #endregion
 
         static void Main(string[] args)
         {
-            // Load settings
+            /// The first part of this program decides whether to run setup or not.
+            /// The program recommends running the setup if the user has not run
+            /// the program before.
+
+            //Get isFirstRun from config if there is a variable.
+            var firstRunSetting = ConfigurationManager.AppSettings["FirstRun"];
+            bool isFirstRun = true;
+            // If we can't find the variable, or it is true, default to running setup.
+            var runSetup = firstRunSetting == null || bool.TryParse(firstRunSetting, out isFirstRun) && isFirstRun;
+
+            Console.Write($"Run setup? <{true}/{false}> ({runSetup}): ");
+            var choiceStr = Console.ReadLine();
+
+            if (!choiceStr.Equals(string.Empty))
+            {
+                bool.TryParse(choiceStr, out runSetup);
+            }
+
+
+            /// Get or load settings.
+            /// If the previous section specifies running setup, settings are obtained from setup.
+            /// Otherwise, they are loaded from a file.
+
+            var s = new Settings();
+            // Get or load settings.
             try
             {
-                Settings.Load();
-                behaviorPercents = Settings.BehaviorPercents;
-                BatchSize = Settings.BatchSize;
+                if (runSetup)
+                {
+                    s = GetSettingsFromUser();
+                } else
+                {
+                    s.Load();
+                }
+
             }
             catch (Exception e)
             {
@@ -54,7 +83,6 @@ namespace EventSimulator
                 Environment.Exit(exitCode: 1);
             }
 
-            // TODO:
             // Set up delegates
             if (args.Length > 0 && args[0].Equals("ClickEvents"))
             {
@@ -63,7 +91,8 @@ namespace EventSimulator
                 Console.ResetColor();
                 CreateList = CreateClickEvents;
                 UpdateList = UpdateClickEvents;
-            } else if (args.Length > 0 && args[0].Equals("PurchaseEvents"))
+            }
+            else if (args.Length > 0 && args[0].Equals("PurchaseEvents"))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Sending purchase events.");
@@ -81,7 +110,7 @@ namespace EventSimulator
             }
 
             // Set up threads.
-            var numThreads = Settings.MaxThreads;
+            var numThreads = s.MaxThreads;
             if (numThreads == 0)
             {
                 numThreads = Environment.ProcessorCount;
@@ -92,7 +121,7 @@ namespace EventSimulator
             for (var i = 0; i < numThreads; i++)
             {
                 var i1 = i; // Make sure the lambda gets the right value of i.
-                threads[i] = new Thread(() => SendEvents(Settings.ConnectionString, ref eventsSentByThread[i1]));
+                threads[i] = new Thread(() => SendEvents(s.ConnectionString, ref eventsSentByThread[i1]));
                 threads[i].Start();
             }
 
@@ -105,7 +134,7 @@ namespace EventSimulator
                     Thread.Sleep(1000);
                     // Count events sent.
                     var sum = eventsSentByThread.Sum();
-                    var eps = sum/(DateTime.Now - timeStarted).TotalSeconds;
+                    var eps = sum / (DateTime.Now - timeStarted).TotalSeconds;
                     Console.WriteLine($"Events sent: {sum}\tEvents per second: {eps}");
                 }
             });
@@ -119,6 +148,12 @@ namespace EventSimulator
             {
                 threads[i].Abort();
             }
+        }
+
+        static Settings GetSettingsFromUser()
+        {
+
+            return new Settings();
         }
 
         public static void SendEvents(string connectionString, ref int eventsSent)

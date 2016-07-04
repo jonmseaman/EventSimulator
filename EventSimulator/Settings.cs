@@ -8,7 +8,7 @@ namespace EventSimulator
         /// <summary>
         ///     Loads settings from App.Config.
         /// </summary>
-        public static void Load()
+        public void Load()
         {
             // Make config mngr
             // Get data from config file.
@@ -72,19 +72,19 @@ namespace EventSimulator
 
         #region Settings
 
-        public static int BatchSize { get; set; } = 512;
-        public static string ConnectionString { get; set; }
+        public int BatchSize { get; set; } = 512;
+        public string ConnectionString { get; set; }
 
         /// <summary>
         ///     [0] - FastPurchase
         ///     [1] - SlowPurchase
         ///     [2] - Browsing
         /// </summary>
-        public static int[] BehaviorPercents { get; set; }
+        public int[] BehaviorPercents { get; set; }
 
-        public static int EventsPerSecond { get; set; }
+        public int EventsPerSecond { get; set; }
 
-        public static int MaxThreads { get; set; }
+        public int MaxThreads { get; set; }
 
         #endregion
     }
