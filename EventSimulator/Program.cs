@@ -18,11 +18,9 @@ namespace EventSimulator
         #region Member Variables
 
         delegate List<Event> CreateListDelegate();
-
-        private static CreateListDelegate CreateList;
+        static CreateListDelegate CreateList;
 
         delegate void UpdateListDelegate(List<Event> events);
-
         static UpdateListDelegate UpdateList;
 
         static Settings settings;
@@ -73,30 +71,31 @@ namespace EventSimulator
             }
 
             // Set up delegates
-            if (args.Length > 0 && args[0].Equals("ClickEvents"))
+            SendMode sendMode;
+            if (args.Length > 0 && Enum.TryParse(args[0], out sendMode))
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Sending click events.");
-                Console.ResetColor();
+                settings.SendMode = sendMode;
+            }
+
+            if (settings.SendMode == SendMode.ClickEvents)
+            {
                 CreateList = CreateClickEvents;
                 UpdateList = UpdateClickEvents;
             }
-            else if (args.Length > 0 && args[0].Equals("PurchaseEvents"))
+            else if (settings.SendMode == SendMode.PurchaseEvents)
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Sending purchase events.");
-                Console.ResetColor();
                 CreateList = CreatePurchaseEvents;
                 UpdateList = UpdatePurchaseEvents;
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Sending simulated events.");
-                Console.ResetColor();
                 CreateList = CreateClickEvents;
                 UpdateList = UpdateSimulatedEvents;
             }
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Sending {settings.SendMode:G}");
+            Console.ResetColor();
 
             // Set up threads.
             var numThreads = settings.MaxThreads;
@@ -149,6 +148,17 @@ namespace EventSimulator
             // Connection string
             Console.Write("Enter the connection string for the event hub: ");
             userSettings.ConnectionString = Console.ReadLine();
+
+            // Send mode
+            SendMode sendMode;
+            string sendModeStr;
+            Console.Write($"SendModes: {SendMode.ClickEvents:G}, {SendMode.PurchaseEvents:G}, {SendMode.SimulatedEvents:G}\n");
+            do
+            {
+                Console.Write("Enter a SendMode: ");
+                sendModeStr = Console.ReadLine();
+            } while (!Enum.TryParse(sendModeStr, out sendMode));
+            userSettings.SendMode = sendMode;
 
             // BehaviorPercents
             var strs = new string[3];

@@ -20,7 +20,6 @@ namespace EventSimulator
 
         #region Send
 
-
         public void Send(object toSend)
         {
             // Serialize

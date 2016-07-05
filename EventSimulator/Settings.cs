@@ -70,7 +70,7 @@ namespace EventSimulator
                 throw new ConfigurationErrorsException("MaxThreads not found in App.config.");
             }
 
-            var isFirstRunStr = ConfigurationManager.AppSettings["IsFirstRun"];
+            var isFirstRunStr = config["IsFirstRun"];
             bool isFirstRun;
             // Default to true if parse failure.
             if (!bool.TryParse(isFirstRunStr, out isFirstRun))
@@ -79,6 +79,12 @@ namespace EventSimulator
             }
             IsFirstRun = isFirstRun;
 
+            // Send mode
+            var sendModeStr = config["SendMode"];
+            SendMode sendMode;
+            Enum.TryParse(sendModeStr, out sendMode);
+            SendMode = sendMode;
+            
         }
 
         public void Save()
@@ -96,6 +102,7 @@ namespace EventSimulator
             app.Add("BrowsingPercent", BehaviorPercents[2].ToString());
             app.Add("MaxThreads", MaxThreads.ToString());
             app.Add("IsFirstRun", IsFirstRun.ToString());
+            app.Add("SendMode", SendMode.ToString());
             config.Save(ConfigurationSaveMode.Modified);
         }
 
@@ -109,14 +116,38 @@ namespace EventSimulator
         ///     [1] - SlowPurchase
         ///     [2] - Browsing
         /// </summary>
-        public int[] BehaviorPercents { get; set; }
+        public int[] BehaviorPercents { get; set; } = {15, 30, 55};
 
-        public int EventsPerSecond { get; set; }
+        public int EventsPerSecond { get; set; } = 1;
 
-        public int MaxThreads { get; set; }
+        public int MaxThreads { get; set; } = Environment.ProcessorCount;
 
         public bool IsFirstRun { get; set; } = true;
 
+        public SendMode SendMode { get; set; } = SendMode.SimulatedEvents;
+
         #endregion
+
+
+
+    }
+
+    /// <summary>
+    /// Used to specify what type of events the program will be sending.
+    /// </summary>
+    public enum SendMode
+    {
+        /// <summary>
+        /// Just send click events.
+        /// </summary>
+        ClickEvents,
+        /// <summary>
+        /// Just send Purchase events
+        /// </summary>
+        PurchaseEvents,
+        /// <summary>
+        /// Send simulated purchase events and click events.
+        /// </summary>
+        SimulatedEvents
     }
 }
