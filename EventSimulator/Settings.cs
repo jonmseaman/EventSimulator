@@ -57,6 +57,7 @@ namespace EventSimulator
                 throw new ConfigurationErrorsException("EventsPerSecond not found in App.config.");
             }
             EventsPerSecond = int.Parse(eventsPerSecond);
+
             // MaxThreads
             var maxThreadsStr = config["MaxThreads"];
             int maxThreads;
@@ -68,6 +69,15 @@ namespace EventSimulator
             {
                 throw new ConfigurationErrorsException("MaxThreads not found in App.config.");
             }
+
+            var isFirstRunStr = ConfigurationManager.AppSettings["FirstRun"];
+            bool isFirstRun;
+            // Default to true if parse failure.
+            if (!bool.TryParse(isFirstRunStr, out isFirstRun))
+            {
+                isFirstRun = true;
+            }
+            IsFirstRun = isFirstRun;
 
         }
 
@@ -93,6 +103,8 @@ namespace EventSimulator
         public int EventsPerSecond { get; set; }
 
         public int MaxThreads { get; set; }
+
+        public bool IsFirstRun { get; set; }
 
         #endregion
     }

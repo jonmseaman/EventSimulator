@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -10,6 +9,7 @@ using System.Threading.Tasks;
 using EventSimulator.Events;
 using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
+using System.Configuration;
 
 namespace EventSimulator
 {
@@ -45,45 +45,40 @@ namespace EventSimulator
             // the program before.
 
             //Get isFirstRun from config if there is a variable.
-            var firstRunSetting = ConfigurationManager.AppSettings["FirstRun"];
-            bool isFirstRun = true;
-            // If we can't find the variable, or it is true, default to running setup.
-            var runSetup = firstRunSetting == null || bool.TryParse(firstRunSetting, out isFirstRun) && isFirstRun;
+            settings = new Settings();
+            settings.Load();
 
-            Console.Write($"Run setup? <{true}/{false}> ({runSetup}): ");
+            // Default to running setup for the first run of the program.
+            Console.Write($"Run setup? <{true}/{false}> ({settings.IsFirstRun}): ");
             var choiceStr = Console.ReadLine();
-
-            if (!choiceStr.Equals(string.Empty))
+            bool runSetup;
+            // Run setup if parse failure.
+            if (!bool.TryParse(choiceStr, out runSetup))
             {
-                bool.TryParse(choiceStr, out runSetup);
+                runSetup = true;
             }
 
 
             // Get or load settings.
-            // If the previous section specifies running setup, settings are obtained from setup.
+            // If the previous section specifies running setup, settings are obtained from user.
             // Otherwise, they are loaded from a file.
 
             // Get or load settings.
-            try
+            if (runSetup)
             {
-                if (runSetup)
+                try
                 {
-                    GetSettingsFromUser();
-                } else
-                {
-                    settings = new Settings();
-                    settings.Load();
+                    GetSettingsFromUser(settings);
                 }
-
-            }
-            catch (Exception e)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(e.Message);
-                Console.ResetColor();
-                Console.WriteLine("Press enter to exit...");
-                Console.ReadLine();
-                Environment.Exit(exitCode: 1);
+                catch (Exception e)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(e.Message);
+                    Console.ResetColor();
+                    Console.WriteLine("Press enter to exit...");
+                    Console.ReadLine();
+                    Environment.Exit(exitCode: 1);
+                }
             }
 
             // Set up delegates
@@ -157,13 +152,12 @@ namespace EventSimulator
         /// Allows the user to specify settings that would otherwise be loaded
         /// from a configuration file.
         /// </summary>
-        static void GetSettingsFromUser()
+        /// <param name="userSettings">Puts settings entered into this settings object.</param>
+        static void GetSettingsFromUser(Settings userSettings)
         {
-            settings = new Settings();
-
             // Connection string
             Console.Write("Enter the connection string for the event hub: ");
-            settings.ConnectionString = Console.ReadLine();
+            userSettings.ConnectionString = Console.ReadLine();
 
             // BehaviorPercents
             var strs = new string[3];
@@ -179,7 +173,7 @@ namespace EventSimulator
             percs[2] = 100 - percs[0] - percs[1];
             Console.WriteLine(percs[2]);
 
-            settings.BehaviorPercents = percs;
+            userSettings.BehaviorPercents = percs;
 
             if (percs.Sum() != 100)
             {
@@ -189,13 +183,16 @@ namespace EventSimulator
 
             // Events per second
             Console.Write("Enter the number of events to send per second: ");
-            Console.ReadLine(); //TODO: Set the setting
+            int eventsPerSecond;
+            int.TryParse(Console.ReadLine(), out eventsPerSecond);
+            userSettings.EventsPerSecond = eventsPerSecond;
+
 
             // Max Threads
             Console.Write("Enter the number of threads to use: ");
             int maxThreads;
             int.TryParse(Console.ReadLine(), out maxThreads);
-            settings.MaxThreads = maxThreads;
+            userSettings.MaxThreads = maxThreads;
 
             // Would you like to save these settings?
             Console.Write($"Save settings for next run <{true}/{false}>: ");
@@ -206,7 +203,7 @@ namespace EventSimulator
             if (shouldSave)
             {
                 Console.WriteLine("Saving...");
-                settings.Save();
+                userSettings.Save();
                 Console.WriteLine("Done.");
             }
             else
