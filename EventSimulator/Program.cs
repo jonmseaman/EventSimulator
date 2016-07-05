@@ -161,24 +161,30 @@ namespace EventSimulator
             userSettings.SendMode = sendMode;
 
             // BehaviorPercents
-            var strs = new string[3];
-            var percs = new int[3];
-            Console.WriteLine("Enter user behaviors by percentage:");
-            Console.Write("FastPurchase: ");
-            strs[0] = Console.ReadLine();
-            int.TryParse(strs[0], out percs[0]);
-            Console.Write("SlowPurchase: ");
-            strs[1] = Console.ReadLine();
-            int.TryParse(strs[1], out percs[1]);
-            Console.Write("Browsing: ");
-            percs[2] = 100 - percs[0] - percs[1];
-            Console.WriteLine(percs[2]);
-
-            userSettings.BehaviorPercents = percs;
-
-            if (percs.Sum() != 100)
+            if (userSettings.SendMode == SendMode.SimulatedEvents)
             {
-                throw new ConfigurationErrorsException("Behavior percents must add up to 100%.");
+                var strs = new string[3];
+                var percs = new int[3];
+                Console.WriteLine("Enter user behaviors by percentage:");
+
+                Console.Write("FastPurchase: ");
+                strs[0] = Console.ReadLine();
+                int.TryParse(strs[0], out percs[0]);
+
+                Console.Write("SlowPurchase: ");
+                strs[1] = Console.ReadLine();
+                int.TryParse(strs[1], out percs[1]);
+
+                Console.Write("Browsing: ");
+                percs[2] = 100 - percs[0] - percs[1];
+                Console.WriteLine(percs[2]);
+
+                userSettings.BehaviorPercents = percs;
+
+                if (percs.Sum() != 100)
+                {
+                    throw new ConfigurationErrorsException("Behavior percents must add up to 100%.");
+                }
             }
 
 
