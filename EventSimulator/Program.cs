@@ -5,6 +5,7 @@ using System.Threading;
 using EventSimulator.Events;
 using Microsoft.ServiceBus.Messaging;
 using System.Configuration;
+using System.Deployment.Application;
 
 namespace EventSimulator
 {
@@ -29,6 +30,11 @@ namespace EventSimulator
 
         static void Main(string[] args)
         {
+            if (ApplicationDeployment.IsNetworkDeployed)
+            {
+                Console.WriteLine($"Version: {ApplicationDeployment.CurrentDeployment.CurrentVersion}");
+            }
+
             // The first part of this program decides whether to run setup or not.
             // The program recommends running the setup if the user has not run
             // the program before.
