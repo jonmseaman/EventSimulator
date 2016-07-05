@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using System.Linq;
 
 namespace EventSimulator
@@ -70,7 +71,14 @@ namespace EventSimulator
 
         }
 
+        public void Save()
+        { // TODO : Implement this.
+            throw new NotImplementedException();
+        }
+
         #region Settings
+
+        public bool FirstRun { get; set; } = true;
 
         public int BatchSize { get; set; } = 512;
         public string ConnectionString { get; set; }

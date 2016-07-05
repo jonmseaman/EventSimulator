@@ -40,9 +40,9 @@ namespace EventSimulator
 
         static void Main(string[] args)
         {
-            /// The first part of this program decides whether to run setup or not.
-            /// The program recommends running the setup if the user has not run
-            /// the program before.
+            // The first part of this program decides whether to run setup or not.
+            // The program recommends running the setup if the user has not run
+            // the program before.
 
             //Get isFirstRun from config if there is a variable.
             var firstRunSetting = ConfigurationManager.AppSettings["FirstRun"];
@@ -59,9 +59,9 @@ namespace EventSimulator
             }
 
 
-            /// Get or load settings.
-            /// If the previous section specifies running setup, settings are obtained from setup.
-            /// Otherwise, they are loaded from a file.
+            // Get or load settings.
+            // If the previous section specifies running setup, settings are obtained from setup.
+            // Otherwise, they are loaded from a file.
 
             // Get or load settings.
             try
@@ -113,7 +113,7 @@ namespace EventSimulator
             }
 
             // Set up threads.
-            var numThreads = s.MaxThreads;
+            var numThreads = settings.MaxThreads;
             if (numThreads == 0)
             {
                 numThreads = Environment.ProcessorCount;
@@ -124,7 +124,7 @@ namespace EventSimulator
             for (var i = 0; i < numThreads; i++)
             {
                 var i1 = i; // Make sure the lambda gets the right value of i.
-                threads[i] = new Thread(() => SendEvents(s.ConnectionString, ref eventsSentByThread[i1]));
+                threads[i] = new Thread(() => SendEvents(settings.ConnectionString, ref eventsSentByThread[i1]));
                 threads[i].Start();
             }
 
@@ -153,27 +153,68 @@ namespace EventSimulator
             }
         }
 
+        /// <summary>
+        /// Allows the user to specify settings that would otherwise be loaded
+        /// from a configuration file.
+        /// </summary>
         static void GetSettingsFromUser()
         {
             settings = new Settings();
-            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            var appSettings = config.AppSettings.Settings;
 
             // Connection string
-            Console.WriteLine("Enter the connection string for the event hub: ");
-            appSettings.Add("ConnectionString", Console.ReadLine());
+            Console.Write("Enter the connection string for the event hub: ");
+            settings.ConnectionString = Console.ReadLine();
 
             // BehaviorPercents
-            Console.WriteLine("Enter user behaviors by percentage")
+            var strs = new string[3];
+            var percs = new int[3];
+            Console.WriteLine("Enter user behaviors by percentage:");
+            Console.Write("FastPurchase: ");
+            strs[0] = Console.ReadLine();
+            int.TryParse(strs[0], out percs[0]);
+            Console.Write("SlowPurchase: ");
+            strs[1] = Console.ReadLine();
+            int.TryParse(strs[1], out percs[1]);
+            Console.Write("Browsing: ");
+            percs[2] = 100 - percs[0] - percs[1];
+            Console.WriteLine(percs[2]);
+
+            settings.BehaviorPercents = percs;
+
+            if (percs.Sum() != 100)
+            {
+                throw new ConfigurationErrorsException("Behavior percents must add up to 100%.");
+            }
+
 
             // Events per second
+            Console.Write("Enter the number of events to send per second: ");
+            Console.ReadLine(); //TODO: Set the setting
 
             // Max Threads
-
-
+            Console.Write("Enter the number of threads to use: ");
+            int maxThreads;
+            int.TryParse(Console.ReadLine(), out maxThreads);
+            settings.MaxThreads = maxThreads;
 
             // Would you like to save these settings?
-            
+            Console.Write($"Save settings for next run <{true}/{false}>: ");
+            var saveSettingsStr = Console.ReadLine();
+            bool shouldSave;
+            bool.TryParse(saveSettingsStr, out shouldSave);
+
+            if (shouldSave)
+            {
+                Console.WriteLine("Saving...");
+                settings.Save();
+                Console.WriteLine("Done.");
+            }
+            else
+            {
+                Console.WriteLine("Not saving.");
+            }
+
+
         }
 
         public static void SendEvents(string connectionString, ref int eventsSent)
