@@ -50,7 +50,7 @@ namespace EventSimulator
             // Run setup if parse failure.
             if (!bool.TryParse(choiceStr, out runSetup))
             {
-                runSetup = true;
+                runSetup = settings.IsFirstRun;
             }
 
 

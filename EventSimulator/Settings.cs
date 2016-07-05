@@ -87,16 +87,16 @@ namespace EventSimulator
             var app = config.AppSettings.Settings;
 
             // Add settings
+            app.Clear();
             app.Add("BatchSize", BatchSize.ToString());
             app.Add("ConnectionString", ConnectionString);
             app.Add("EventsPerSecond", EventsPerSecond.ToString());
-            app.Add("FastPurchase", BehaviorPercents[0].ToString());
-            app.Add("SlowPurchase", BehaviorPercents[1].ToString());
-            app.Add("Browsing", BehaviorPercents[2].ToString());
+            app.Add("FastPurchasePercent", BehaviorPercents[0].ToString());
+            app.Add("SlowPurchasePercent", BehaviorPercents[1].ToString());
+            app.Add("BrowsingPercent", BehaviorPercents[2].ToString());
             app.Add("MaxThreads", MaxThreads.ToString());
             app.Add("FirstRun", FirstRun.ToString());
-
-            config.Save();
+            config.Save(ConfigurationSaveMode.Modified);
         }
 
         #region Settings
