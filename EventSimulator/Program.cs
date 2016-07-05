@@ -33,6 +33,9 @@ namespace EventSimulator
         static int BatchSize { get; set; }
         static int[] behaviorPercents { get; set; } = { 15, 30, 55 };
 
+
+        static Settings settings;
+
         #endregion
 
         static void Main(string[] args)
@@ -60,16 +63,16 @@ namespace EventSimulator
             /// If the previous section specifies running setup, settings are obtained from setup.
             /// Otherwise, they are loaded from a file.
 
-            var s = new Settings();
             // Get or load settings.
             try
             {
                 if (runSetup)
                 {
-                    s = GetSettingsFromUser();
+                    GetSettingsFromUser();
                 } else
                 {
-                    s.Load();
+                    settings = new Settings();
+                    settings.Load();
                 }
 
             }
@@ -150,10 +153,27 @@ namespace EventSimulator
             }
         }
 
-        static Settings GetSettingsFromUser()
+        static void GetSettingsFromUser()
         {
+            settings = new Settings();
+            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            var appSettings = config.AppSettings.Settings;
 
-            return new Settings();
+            // Connection string
+            Console.WriteLine("Enter the connection string for the event hub: ");
+            appSettings.Add("ConnectionString", Console.ReadLine());
+
+            // BehaviorPercents
+            Console.WriteLine("Enter user behaviors by percentage")
+
+            // Events per second
+
+            // Max Threads
+
+
+
+            // Would you like to save these settings?
+            
         }
 
         public static void SendEvents(string connectionString, ref int eventsSent)
