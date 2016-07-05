@@ -70,7 +70,7 @@ namespace EventSimulator
                 throw new ConfigurationErrorsException("MaxThreads not found in App.config.");
             }
 
-            var isFirstRunStr = ConfigurationManager.AppSettings["FirstRun"];
+            var isFirstRunStr = ConfigurationManager.AppSettings["IsFirstRun"];
             bool isFirstRun;
             // Default to true if parse failure.
             if (!bool.TryParse(isFirstRunStr, out isFirstRun))
@@ -87,7 +87,7 @@ namespace EventSimulator
             var app = config.AppSettings.Settings;
 
             // Add settings
-            app.Clear();
+            app.Clear(); // Necessary to keep from writing the setting twice.
             app.Add("BatchSize", BatchSize.ToString());
             app.Add("ConnectionString", ConnectionString);
             app.Add("EventsPerSecond", EventsPerSecond.ToString());
@@ -95,13 +95,11 @@ namespace EventSimulator
             app.Add("SlowPurchasePercent", BehaviorPercents[1].ToString());
             app.Add("BrowsingPercent", BehaviorPercents[2].ToString());
             app.Add("MaxThreads", MaxThreads.ToString());
-            app.Add("FirstRun", FirstRun.ToString());
+            app.Add("IsFirstRun", IsFirstRun.ToString());
             config.Save(ConfigurationSaveMode.Modified);
         }
 
         #region Settings
-
-        public bool FirstRun { get; set; } = true;
 
         public int BatchSize { get; set; } = 512;
         public string ConnectionString { get; set; }
@@ -117,7 +115,7 @@ namespace EventSimulator
 
         public int MaxThreads { get; set; }
 
-        public bool IsFirstRun { get; set; }
+        public bool IsFirstRun { get; set; } = true;
 
         #endregion
     }

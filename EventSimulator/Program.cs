@@ -25,10 +25,6 @@ namespace EventSimulator
 
         static UpdateListDelegate UpdateList;
 
-        static int BatchSize { get; set; }
-        static int[] behaviorPercents { get; set; } = { 15, 30, 55 };
-
-
         static Settings settings;
 
         #endregion
@@ -243,7 +239,7 @@ namespace EventSimulator
         private static List<Event> CreateClickEvents()
         {
             var eventList = new List<Event>();
-            for (var i = 0; i < BatchSize; i++)
+            for (var i = 0; i < settings.BatchSize; i++)
             {
                 eventList.Add(EventCreator.CreateClickEvent());
             }
@@ -253,7 +249,7 @@ namespace EventSimulator
         private static List<Event> CreatePurchaseEvents()
         {
             var eventList = new List<Event>();
-            for (var i = 0; i < BatchSize; i++)
+            for (var i = 0; i < settings.BatchSize; i++)
             {
                 eventList.Add(EventCreator.CreatePurchaseEvent());
             }
@@ -268,8 +264,8 @@ namespace EventSimulator
         {
             // Update list of events to show user action.
             var offset = 0;
-            var fastPurchaseCount = behaviorPercents[0] * BatchSize / 100;
-            var slowPurchaseCount = behaviorPercents[1] * BatchSize / 100;
+            var fastPurchaseCount = settings.BehaviorPercents[0] * settings.BatchSize / 100;
+            var slowPurchaseCount = settings.BehaviorPercents[1] * settings.BatchSize / 100;
             var browsingCount = eventList.Count - fastPurchaseCount - slowPurchaseCount;
 
             UpdateSimulatedEventsWithBehavior(offset, fastPurchaseCount, eventList, UserBehavior.FastPurchase);
