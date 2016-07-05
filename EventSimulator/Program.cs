@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Diagnostics.Tracing;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using EventSimulator.Events;
-using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
+using System.Configuration;
 
 namespace EventSimulator
 {
@@ -22,66 +17,88 @@ namespace EventSimulator
     {
         #region Member Variables
 
-        private static int[] behaviorPercents;
-        private static int BatchSize { get; set; } = 512;
-
         delegate List<Event> CreateListDelegate();
-
-        private static CreateListDelegate CreateList;
+        static CreateListDelegate CreateList;
 
         delegate void UpdateListDelegate(List<Event> events);
-
         static UpdateListDelegate UpdateList;
+
+        static Settings settings;
 
         #endregion
 
         static void Main(string[] args)
         {
-            // Load settings
-            try
+            // The first part of this program decides whether to run setup or not.
+            // The program recommends running the setup if the user has not run
+            // the program before.
+
+            //Get isFirstRun from config if there is a variable.
+            settings = new Settings();
+            settings.Load();
+
+            // Default to running setup for the first run of the program.
+            Console.Write($"Run setup? <{true}/{false}> ({settings.IsFirstRun}): ");
+            var choiceStr = Console.ReadLine();
+            bool runSetup;
+            // Run setup if parse failure.
+            if (!bool.TryParse(choiceStr, out runSetup))
             {
-                Settings.Load();
-                behaviorPercents = Settings.BehaviorPercents;
-                BatchSize = Settings.BatchSize;
-            }
-            catch (Exception e)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(e.Message);
-                Console.ResetColor();
-                Console.WriteLine("Press enter to exit...");
-                Console.ReadLine();
-                Environment.Exit(exitCode: 1);
+                runSetup = settings.IsFirstRun;
             }
 
-            // TODO:
-            // Set up delegates
-            if (args.Length > 0 && args[0].Equals("ClickEvents"))
+
+            // Get or load settings.
+            // If the previous section specifies running setup, settings are obtained from user.
+            // Otherwise, they are loaded from a file.
+
+            // Get or load settings.
+            if (runSetup)
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Sending click events.");
-                Console.ResetColor();
+                try
+                {
+                    GetSettingsFromUser(settings);
+                }
+                catch (Exception e)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(e.Message);
+                    Console.ResetColor();
+                    Console.WriteLine("Press enter to exit...");
+                    Console.ReadLine();
+                    Environment.Exit(exitCode: 1);
+                }
+            }
+
+            // Set up delegates
+            SendMode sendMode;
+            if (args.Length > 0 && Enum.TryParse(args[0], out sendMode))
+            {
+                settings.SendMode = sendMode;
+            }
+
+            if (settings.SendMode == SendMode.ClickEvents)
+            {
                 CreateList = CreateClickEvents;
                 UpdateList = UpdateClickEvents;
-            } else if (args.Length > 0 && args[0].Equals("PurchaseEvents"))
+            }
+            else if (settings.SendMode == SendMode.PurchaseEvents)
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Sending purchase events.");
-                Console.ResetColor();
                 CreateList = CreatePurchaseEvents;
                 UpdateList = UpdatePurchaseEvents;
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Sending simulated events.");
-                Console.ResetColor();
                 CreateList = CreateClickEvents;
                 UpdateList = UpdateSimulatedEvents;
             }
 
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Sending {settings.SendMode:G}");
+            Console.ResetColor();
+
             // Set up threads.
-            var numThreads = Settings.MaxThreads;
+            var numThreads = settings.MaxThreads;
             if (numThreads == 0)
             {
                 numThreads = Environment.ProcessorCount;
@@ -92,7 +109,7 @@ namespace EventSimulator
             for (var i = 0; i < numThreads; i++)
             {
                 var i1 = i; // Make sure the lambda gets the right value of i.
-                threads[i] = new Thread(() => SendEvents(Settings.ConnectionString, ref eventsSentByThread[i1]));
+                threads[i] = new Thread(() => SendEvents(settings.ConnectionString, ref eventsSentByThread[i1]));
                 threads[i].Start();
             }
 
@@ -105,7 +122,7 @@ namespace EventSimulator
                     Thread.Sleep(1000);
                     // Count events sent.
                     var sum = eventsSentByThread.Sum();
-                    var eps = sum/(DateTime.Now - timeStarted).TotalSeconds;
+                    var eps = sum / (DateTime.Now - timeStarted).TotalSeconds;
                     Console.WriteLine($"Events sent: {sum}\tEvents per second: {eps}");
                 }
             });
@@ -119,6 +136,89 @@ namespace EventSimulator
             {
                 threads[i].Abort();
             }
+        }
+
+        /// <summary>
+        /// Allows the user to specify settings that would otherwise be loaded
+        /// from a configuration file.
+        /// </summary>
+        /// <param name="userSettings">Puts settings entered into this settings object.</param>
+        static void GetSettingsFromUser(Settings userSettings)
+        {
+            // Connection string
+            Console.Write("Enter the connection string for the event hub: ");
+            userSettings.ConnectionString = Console.ReadLine();
+
+            // Send mode
+            SendMode sendMode;
+            string sendModeStr;
+            Console.Write($"SendModes: {SendMode.ClickEvents:G}, {SendMode.PurchaseEvents:G}, {SendMode.SimulatedEvents:G}\n");
+            do
+            {
+                Console.Write("Enter a SendMode: ");
+                sendModeStr = Console.ReadLine();
+            } while (!Enum.TryParse(sendModeStr, out sendMode));
+            userSettings.SendMode = sendMode;
+
+            // BehaviorPercents
+            if (userSettings.SendMode == SendMode.SimulatedEvents)
+            {
+                var strs = new string[3];
+                var percs = new int[3];
+                Console.WriteLine("Enter user behaviors by percentage:");
+
+                Console.Write("FastPurchase: ");
+                strs[0] = Console.ReadLine();
+                int.TryParse(strs[0], out percs[0]);
+
+                Console.Write("SlowPurchase: ");
+                strs[1] = Console.ReadLine();
+                int.TryParse(strs[1], out percs[1]);
+
+                Console.Write("Browsing: ");
+                percs[2] = 100 - percs[0] - percs[1];
+                Console.WriteLine(percs[2]);
+
+                userSettings.BehaviorPercents = percs;
+
+                if (percs.Sum() != 100)
+                {
+                    throw new ConfigurationErrorsException("Behavior percents must add up to 100%.");
+                }
+            }
+
+
+            // Events per second
+            Console.Write("Enter the number of events to send per second: ");
+            int eventsPerSecond;
+            int.TryParse(Console.ReadLine(), out eventsPerSecond);
+            userSettings.EventsPerSecond = eventsPerSecond;
+
+
+            // Max Threads
+            Console.Write("Enter the number of threads to use: ");
+            int maxThreads;
+            int.TryParse(Console.ReadLine(), out maxThreads);
+            userSettings.MaxThreads = maxThreads;
+
+            // Would you like to save these settings?
+            Console.Write($"Save settings for next run <{true}/{false}>: ");
+            var saveSettingsStr = Console.ReadLine();
+            bool shouldSave;
+            bool.TryParse(saveSettingsStr, out shouldSave);
+
+            if (shouldSave)
+            {
+                Console.WriteLine("Saving...");
+                userSettings.Save();
+                Console.WriteLine("Done.");
+            }
+            else
+            {
+                Console.WriteLine("Not saving.");
+            }
+
+
         }
 
         public static void SendEvents(string connectionString, ref int eventsSent)
@@ -155,7 +255,7 @@ namespace EventSimulator
         private static List<Event> CreateClickEvents()
         {
             var eventList = new List<Event>();
-            for (var i = 0; i < BatchSize; i++)
+            for (var i = 0; i < settings.BatchSize; i++)
             {
                 eventList.Add(EventCreator.CreateClickEvent());
             }
@@ -165,7 +265,7 @@ namespace EventSimulator
         private static List<Event> CreatePurchaseEvents()
         {
             var eventList = new List<Event>();
-            for (var i = 0; i < BatchSize; i++)
+            for (var i = 0; i < settings.BatchSize; i++)
             {
                 eventList.Add(EventCreator.CreatePurchaseEvent());
             }
@@ -180,8 +280,8 @@ namespace EventSimulator
         {
             // Update list of events to show user action.
             var offset = 0;
-            var fastPurchaseCount = behaviorPercents[0] * BatchSize / 100;
-            var slowPurchaseCount = behaviorPercents[1] * BatchSize / 100;
+            var fastPurchaseCount = settings.BehaviorPercents[0] * settings.BatchSize / 100;
+            var slowPurchaseCount = settings.BehaviorPercents[1] * settings.BatchSize / 100;
             var browsingCount = eventList.Count - fastPurchaseCount - slowPurchaseCount;
 
             UpdateSimulatedEventsWithBehavior(offset, fastPurchaseCount, eventList, UserBehavior.FastPurchase);

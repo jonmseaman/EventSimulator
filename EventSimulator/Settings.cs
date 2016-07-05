@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using System.Linq;
 
 namespace EventSimulator
@@ -8,7 +9,7 @@ namespace EventSimulator
         /// <summary>
         ///     Loads settings from App.Config.
         /// </summary>
-        public static void Load()
+        public void Load()
         {
             // Make config mngr
             // Get data from config file.
@@ -56,6 +57,7 @@ namespace EventSimulator
                 throw new ConfigurationErrorsException("EventsPerSecond not found in App.config.");
             }
             EventsPerSecond = int.Parse(eventsPerSecond);
+
             // MaxThreads
             var maxThreadsStr = config["MaxThreads"];
             int maxThreads;
@@ -68,24 +70,84 @@ namespace EventSimulator
                 throw new ConfigurationErrorsException("MaxThreads not found in App.config.");
             }
 
+            var isFirstRunStr = config["IsFirstRun"];
+            bool isFirstRun;
+            // Default to true if parse failure.
+            if (!bool.TryParse(isFirstRunStr, out isFirstRun))
+            {
+                isFirstRun = true;
+            }
+            IsFirstRun = isFirstRun;
+
+            // Send mode
+            var sendModeStr = config["SendMode"];
+            SendMode sendMode;
+            Enum.TryParse(sendModeStr, out sendMode);
+            SendMode = sendMode;
+            
+        }
+
+        public void Save()
+        {
+            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            var app = config.AppSettings.Settings;
+
+            // Add settings
+            app.Clear(); // Necessary to keep from writing the setting twice.
+            app.Add("BatchSize", BatchSize.ToString());
+            app.Add("ConnectionString", ConnectionString);
+            app.Add("EventsPerSecond", EventsPerSecond.ToString());
+            app.Add("FastPurchasePercent", BehaviorPercents[0].ToString());
+            app.Add("SlowPurchasePercent", BehaviorPercents[1].ToString());
+            app.Add("BrowsingPercent", BehaviorPercents[2].ToString());
+            app.Add("MaxThreads", MaxThreads.ToString());
+            app.Add("IsFirstRun", IsFirstRun.ToString());
+            app.Add("SendMode", SendMode.ToString());
+            config.Save(ConfigurationSaveMode.Modified);
         }
 
         #region Settings
 
-        public static int BatchSize { get; set; } = 512;
-        public static string ConnectionString { get; set; }
+        public int BatchSize { get; set; } = 512;
+        public string ConnectionString { get; set; }
 
         /// <summary>
         ///     [0] - FastPurchase
         ///     [1] - SlowPurchase
         ///     [2] - Browsing
         /// </summary>
-        public static int[] BehaviorPercents { get; set; }
+        public int[] BehaviorPercents { get; set; } = {15, 30, 55};
 
-        public static int EventsPerSecond { get; set; }
+        public int EventsPerSecond { get; set; } = 1;
 
-        public static int MaxThreads { get; set; }
+        public int MaxThreads { get; set; } = Environment.ProcessorCount;
+
+        public bool IsFirstRun { get; set; } = true;
+
+        public SendMode SendMode { get; set; } = SendMode.SimulatedEvents;
 
         #endregion
+
+
+
+    }
+
+    /// <summary>
+    /// Used to specify what type of events the program will be sending.
+    /// </summary>
+    public enum SendMode
+    {
+        /// <summary>
+        /// Just send click events.
+        /// </summary>
+        ClickEvents,
+        /// <summary>
+        /// Just send Purchase events
+        /// </summary>
+        PurchaseEvents,
+        /// <summary>
+        /// Send simulated purchase events and click events.
+        /// </summary>
+        SimulatedEvents
     }
 }
