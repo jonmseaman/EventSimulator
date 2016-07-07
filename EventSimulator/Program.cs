@@ -111,7 +111,6 @@ namespace EventSimulator
             }
             var eventsSentByThread = new int[numThreads];
             var threads = new Thread[numThreads];
-            var timeStarted = DateTime.Now;
             for (var i = 0; i < numThreads; i++)
             {
                 var i1 = i; // Make sure the lambda gets the right value of i.
@@ -123,13 +122,18 @@ namespace EventSimulator
             // Thread to show the user how many events are being sent.
             var countThread = new Thread(() =>
             {
+                int previousSum = 0;
+                var previousTime = DateTime.Now;
                 while (true)
                 {
                     Thread.Sleep(1000);
                     // Count events sent.
                     var sum = eventsSentByThread.Sum();
-                    var eps = sum / (DateTime.Now - timeStarted).TotalSeconds;
-                    Console.WriteLine($"Events sent: {sum}\tEvents per second: {eps}");
+                    var time = DateTime.Now;
+                    var eps = (sum - previousSum) / (DateTime.Now - previousTime).TotalSeconds;
+                    previousSum = sum;
+                    previousTime = time;
+                    Console.WriteLine($"Events sent: {sum}, {eps} per second.");
                 }
             });
             countThread.Start();
