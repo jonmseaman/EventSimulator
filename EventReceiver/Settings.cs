@@ -15,7 +15,7 @@ namespace Receiver
 
         public string EventHubName { get; set; }
 
-        public string ConsumerGroup { get; set; }
+        public string ConsumerGroup { get; set; } = "$Default";
 
         public bool IsFirstRun { get; set; } = true;
 
