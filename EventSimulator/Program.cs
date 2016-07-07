@@ -39,7 +39,7 @@ namespace EventSimulator
             // The program recommends running the setup if the user has not run
             // the program before.
 
-            //Get isFirstRun from config if there is a variable.
+            // Get isFirstRun from config if there is a variable.
             settings = new Settings();
             settings.Load();
 

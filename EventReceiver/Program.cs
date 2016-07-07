@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Configuration;
+using System.Deployment.Application;
+
 
 namespace Receiver
 {
@@ -11,16 +14,28 @@ namespace Receiver
     {
         static void Main(string[] args)
         {
-            string eventHubConnectionString = "Endpoint=sb://servicebusintern2016.servicebus.windows.net/;SharedAccessKeyName=Managed;SharedAccessKey=oRt/agurnQYUDRsvm0tOKOEi2e5nXr0MnTrUxP8PdTw=";
-            string eventHubName = "sellersite";
-            string storageAccountName = "sbi2016ehreceiver";
-            string storageAccountKey = "ijLlpwJryEx+o3dJIn2NDoUcvzZwVkhVSuPpQJezZjcnSGgVrwzOzpwaYF55b45AC8olef6MiltcB202mBMo4g==";
-            string storageConnectionString = string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1}", storageAccountName, storageAccountKey);
-            Console.WriteLine("Enter the consumer group name: ");
-            string consumerGroupName = Console.ReadLine();
+            if (ApplicationDeployment.IsNetworkDeployed)
+            {
+                Console.WriteLine($"Version: {ApplicationDeployment.CurrentDeployment.CurrentVersion}");
+            }
 
-            string eventProcessorHostName = Guid.NewGuid().ToString();
-            EventProcessorHost eventProcessorHost = new EventProcessorHost(eventProcessorHostName, eventHubName, consumerGroupName, eventHubConnectionString, storageConnectionString);
+            // Get settings.
+            var settings = new Settings();
+            settings.Load();
+
+            // Default to running setup for the first run of the program.
+            Console.Write($"Run setup? <{true}/{false}> ({settings.IsFirstRun}): ");
+            var runSetupStr = Console.ReadLine();
+            bool runSetup;
+            bool.TryParse(runSetupStr, out runSetup);
+
+            if (runSetup)
+            {
+                GetSettingsFromUser(settings);
+            }
+
+            var eventProcessorHostName = Guid.NewGuid().ToString();
+            var eventProcessorHost = new EventProcessorHost(eventProcessorHostName, settings.EventHubName, settings.ConsumerGroup, settings.ConnectionString, settings.StorageConnectionString);
             Console.WriteLine("Registering EventProcessor...");
             var options = new EventProcessorOptions();
             options.ExceptionReceived += (sender, e) => { Console.WriteLine(e.Exception); };
@@ -31,5 +46,47 @@ namespace Receiver
             Console.ReadLine();
             eventProcessorHost.UnregisterEventProcessorAsync().Wait();
         }
+
+        static void GetSettingsFromUser(Settings settings)
+        {
+            Console.WriteLine("Enter settings: ");
+
+            // Get the connection string
+            Console.Write($"ConnectionString ({settings.ConnectionString}): ");
+            var connectionString = Console.ReadLine();
+            if (!connectionString.Equals(string.Empty)) {
+                settings.ConnectionString = connectionString;
+            }
+
+            // EventHubName
+            Console.Write($"EventHubName ({settings.EventHubName}): ");
+            var eventHubName = Console.ReadLine();
+            if (!eventHubName.Equals(string.Empty)) {
+                settings.EventHubName = eventHubName;
+            }
+
+            // Get the consumer group.
+            Console.Write($"ConsumerGroup ({settings.ConsumerGroup}): ");
+            var consumerGroup = Console.ReadLine();
+            if (!consumerGroup.Equals(string.Empty)) {
+                settings.ConsumerGroup = consumerGroup;
+            }
+
+            // StorageAccountName
+            Console.Write($"StorageAccountName ({settings.StorageAccountName}): ");
+            var storageAccountName = Console.ReadLine();
+            if (!storageAccountName.Equals(string.Empty)) {
+                settings.StorageAccountName = storageAccountName;
+            }
+
+            // StorageAccountKey
+            Console.Write($"StorageAccountKey ({settings.StorageAccountKey}): ");
+            var storageAccountKey = Console.ReadLine();
+            if (!storageAccountKey.Equals(string.Empty)) {
+                settings.StorageAccountKey = storageAccountKey;
+            }
+
+        }
+
     }
 }

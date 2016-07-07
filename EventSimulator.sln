@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventSimulator", "EventSimu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventSimulatorTests", "EventSimulatorTests\EventSimulatorTests.csproj", "{0302470B-7090-4455-80D1-8C6D1E9CAA27}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Receiver", "EventReceiver\Receiver.csproj", "{F9818A52-E855-4818-9CF8-4822396542CD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{0302470B-7090-4455-80D1-8C6D1E9CAA27}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0302470B-7090-4455-80D1-8C6D1E9CAA27}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0302470B-7090-4455-80D1-8C6D1E9CAA27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9818A52-E855-4818-9CF8-4822396542CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9818A52-E855-4818-9CF8-4822396542CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9818A52-E855-4818-9CF8-4822396542CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9818A52-E855-4818-9CF8-4822396542CD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
