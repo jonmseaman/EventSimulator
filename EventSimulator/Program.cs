@@ -220,6 +220,7 @@ namespace EventSimulator
             if (shouldSave)
             {
                 Console.WriteLine("Saving...");
+                userSettings.IsFirstRun = false;
                 userSettings.Save();
                 Console.WriteLine("Done.");
             }
