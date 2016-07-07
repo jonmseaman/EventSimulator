@@ -27,7 +27,10 @@ namespace Receiver
             Console.Write($"Run setup? <{true}/{false}> ({settings.IsFirstRun}): ");
             var runSetupStr = Console.ReadLine();
             bool runSetup;
-            bool.TryParse(runSetupStr, out runSetup);
+            if (!bool.TryParse(runSetupStr, out runSetup))
+            {
+                runSetup = settings.IsFirstRun;
+            }
 
             if (runSetup)
             {
@@ -85,6 +88,26 @@ namespace Receiver
             if (!storageAccountKey.Equals(string.Empty)) {
                 settings.StorageAccountKey = storageAccountKey;
             }
+
+            // Would you like to save these settings?
+            Console.Write($"Save settings for next run <{true}/{false}>: ");
+            var saveSettingsStr = Console.ReadLine();
+            bool shouldSave;
+            bool.TryParse(saveSettingsStr, out shouldSave);
+
+            if (shouldSave)
+            {
+                Console.Write("Saving...");
+                settings.IsFirstRun = false;
+                settings.Save();
+                Console.WriteLine("Done.");
+            }
+            else
+            {
+                Console.WriteLine("Not saving.");
+            }
+
+
 
         }
 
