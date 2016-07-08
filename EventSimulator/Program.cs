@@ -335,5 +335,15 @@ namespace EventSimulator
 
         #endregion
 
+
+        private static void SleepUntil(DateTime sleepUntil)
+        {
+            if (DateTime.Compare(sleepUntil, DateTime.Now) > 0)
+            {
+                var dt = sleepUntil - DateTime.Now;
+                Thread.Sleep((int)dt.TotalMilliseconds);
+            }
+        }
+
     }
 }
