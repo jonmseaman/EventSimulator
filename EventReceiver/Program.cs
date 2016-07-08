@@ -106,9 +106,6 @@ namespace Receiver
             {
                 Console.WriteLine("Not saving.");
             }
-
-
-
         }
 
     }

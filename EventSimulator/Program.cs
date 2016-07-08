@@ -239,6 +239,8 @@ namespace EventSimulator
 
             // Create list of events to send to eventHub
             var eventList = CreateList();
+            var prev = new {Time = DateTime.Now, Events = 0};
+
 
             while (true)
             {
@@ -249,6 +251,9 @@ namespace EventSimulator
                 {
                     eventSender.SendBatch(eventList);
                     eventsSent += eventList.Count;
+                    var now = new {Time = DateTime.Now, Events = eventsSent};
+                    var eps = (now.Events - prev.Events)/(now.Time - prev.Time).TotalSeconds;
+                    prev = now;
                 }
                 catch (MessageSizeExceededException e)
                 {
