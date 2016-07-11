@@ -1,14 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Configuration;
-using System.Diagnostics;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using EventSimulator.Events;
 using System.Text.RegularExpressions;
+using MathNet.Numerics.Distributions;
 
 namespace EventSimulator
 {
@@ -242,7 +235,7 @@ namespace EventSimulator
         /// <summary>
         /// Used to randomize click event members. Email, ProductUrl are randomized.
         /// </summary>
-        private static Random Random = new Random();
+        private static readonly Random Random = new Random();
 
         private static int RandomTransactionNumber()
         {
@@ -251,22 +244,30 @@ namespace EventSimulator
 
         private static string RandomEmail()
         {
-            return $"user{Random.Next(0, 99999)}@example.com";
+            var rand = (int)Normal.Sample(Random, 25000, 7500);
+            return $"user{rand}@example.com";
         }
 
         private static int RandomProductId()
         {
-            return Random.Next(1, 20);
+            var rand = (int) Normal.Sample(Random, 10.0, 2.0);
+            rand = rand < 1 ? 1 : rand;
+            rand = rand > 20 ? 20 : rand;
+            return rand;
         }
 
         private static int RandomPrice()
         {
-            return Random.Next(25, 2500);
+            var rand = (int) Normal.Sample(Random, 1250, 250);
+            rand = rand < 250 ? 250 : rand;
+            return rand;
         }
 
         private static int RandomProductQuantity()
         {
-            return Random.Next(1, 10);
+            var rand = (int)Normal.Sample(Random, 5, 2);
+            rand = rand < 1 ? 1 : rand;
+            return rand;
         }
 
         private static string RandomUrl()
@@ -285,7 +286,9 @@ namespace EventSimulator
 
         private static string RandomProductUrl()
         {
-            return $"{ProductPageUrl}{Random.Next(1, 20)}";
+            var rand = (int)Normal.Sample(Random, 20, 4);
+            rand = rand < 1 ? 1 : rand;
+            return $"{ProductPageUrl}{rand}";
         }
 
         #endregion

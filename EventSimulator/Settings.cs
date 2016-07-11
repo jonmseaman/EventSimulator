@@ -58,16 +58,16 @@ namespace EventSimulator
             }
             EventsPerSecond = int.Parse(eventsPerSecond);
 
-            // MaxThreads
-            var maxThreadsStr = config["MaxThreads"];
+            // ThreadsCount
+            var maxThreadsStr = config["ThreadsCount"];
             int maxThreads;
             if (maxThreadsStr != null && int.TryParse(maxThreadsStr, out maxThreads))
             {
-                MaxThreads = maxThreads;
+                ThreadsCount = maxThreads;
             }
             else
             {
-                throw new ConfigurationErrorsException("MaxThreads not found in App.config.");
+                throw new ConfigurationErrorsException("ThreadsCount not found in App.config.");
             }
 
             var isFirstRunStr = config["IsFirstRun"];
@@ -100,7 +100,7 @@ namespace EventSimulator
             app.Add("FastPurchasePercent", BehaviorPercents[0].ToString());
             app.Add("SlowPurchasePercent", BehaviorPercents[1].ToString());
             app.Add("BrowsingPercent", BehaviorPercents[2].ToString());
-            app.Add("MaxThreads", MaxThreads.ToString());
+            app.Add("ThreadsCount", ThreadsCount.ToString());
             app.Add("IsFirstRun", IsFirstRun.ToString());
             app.Add("SendMode", SendMode.ToString());
             config.Save(ConfigurationSaveMode.Modified);
@@ -120,7 +120,7 @@ namespace EventSimulator
 
         public int EventsPerSecond { get; set; } = 1;
 
-        public int MaxThreads { get; set; } = Environment.ProcessorCount;
+        public int ThreadsCount { get; set; } = Environment.ProcessorCount;
 
         public bool IsFirstRun { get; set; } = true;
 

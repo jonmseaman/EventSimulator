@@ -39,7 +39,7 @@ namespace EventSimulator
             // The program recommends running the setup if the user has not run
             // the program before.
 
-            //Get isFirstRun from config if there is a variable.
+            // Get isFirstRun from config if there is a variable.
             settings = new Settings();
             settings.Load();
 
@@ -103,12 +103,15 @@ namespace EventSimulator
             Console.WriteLine($"Sending {settings.SendMode:G}");
             Console.ResetColor();
 
+
+            // TODO: Update this.
             // Set up threads.
-            var numThreads = settings.MaxThreads;
+            var numThreads = settings.ThreadsCount;
             if (numThreads == 0)
             {
                 numThreads = Environment.ProcessorCount;
             }
+            Console.WriteLine($"Making {numThreads} threads.");
             var eventsSentByThread = new int[numThreads];
             var threads = new Thread[numThreads];
             for (var i = 0; i < numThreads; i++)
@@ -133,7 +136,7 @@ namespace EventSimulator
                     var eps = (sum - previousSum) / (DateTime.Now - previousTime).TotalSeconds;
                     previousSum = sum;
                     previousTime = time;
-                    Console.WriteLine($"Events sent: {sum}, {eps} per second.");
+                    Console.WriteLine($"Events sent: {sum}, {eps:F0} per second.");
                 }
             });
             countThread.Start();
@@ -209,7 +212,7 @@ namespace EventSimulator
             Console.Write("Enter the number of threads to use: ");
             int maxThreads;
             int.TryParse(Console.ReadLine(), out maxThreads);
-            userSettings.MaxThreads = maxThreads;
+            userSettings.ThreadsCount = maxThreads;
 
             // Would you like to save these settings?
             Console.Write($"Save settings for next run <{true}/{false}>: ");
@@ -239,6 +242,8 @@ namespace EventSimulator
 
             // Create list of events to send to eventHub
             var eventList = CreateList();
+            var prev = new {Time = DateTime.Now, Events = 0};
+
 
             while (true)
             {
@@ -249,6 +254,9 @@ namespace EventSimulator
                 {
                     eventSender.SendBatch(eventList);
                     eventsSent += eventList.Count;
+                    var now = new {Time = DateTime.Now, Events = eventsSent};
+                    var eps = (now.Events - prev.Events)/(now.Time - prev.Time).TotalSeconds;
+                    prev = now;
                 }
                 catch (MessageSizeExceededException e)
                 {
@@ -329,6 +337,16 @@ namespace EventSimulator
         }
 
         #endregion
+
+
+        private static void SleepUntil(DateTime sleepUntil)
+        {
+            if (DateTime.Compare(sleepUntil, DateTime.Now) > 0)
+            {
+                var dt = sleepUntil - DateTime.Now;
+                Thread.Sleep((int)dt.TotalMilliseconds);
+            }
+        }
 
     }
 }
