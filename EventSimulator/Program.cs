@@ -103,12 +103,15 @@ namespace EventSimulator
             Console.WriteLine($"Sending {settings.SendMode:G}");
             Console.ResetColor();
 
+
+            // TODO: Update this.
             // Set up threads.
             var numThreads = settings.MaxThreads;
             if (numThreads == 0)
             {
                 numThreads = Environment.ProcessorCount;
             }
+            Console.WriteLine($"Making {numThreads} threads.");
             var eventsSentByThread = new int[numThreads];
             var threads = new Thread[numThreads];
             for (var i = 0; i < numThreads; i++)
@@ -133,7 +136,7 @@ namespace EventSimulator
                     var eps = (sum - previousSum) / (DateTime.Now - previousTime).TotalSeconds;
                     previousSum = sum;
                     previousTime = time;
-                    Console.WriteLine($"Events sent: {sum}, {eps} per second.");
+                    Console.WriteLine($"Events sent: {sum}, {eps:F0} per second.");
                 }
             });
             countThread.Start();
