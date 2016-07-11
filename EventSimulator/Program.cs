@@ -106,7 +106,7 @@ namespace EventSimulator
 
             // TODO: Update this.
             // Set up threads.
-            var numThreads = settings.MaxThreads;
+            var numThreads = settings.ThreadsCount;
             if (numThreads == 0)
             {
                 numThreads = Environment.ProcessorCount;
@@ -212,7 +212,7 @@ namespace EventSimulator
             Console.Write("Enter the number of threads to use: ");
             int maxThreads;
             int.TryParse(Console.ReadLine(), out maxThreads);
-            userSettings.MaxThreads = maxThreads;
+            userSettings.ThreadsCount = maxThreads;
 
             // Would you like to save these settings?
             Console.Write($"Save settings for next run <{true}/{false}>: ");
