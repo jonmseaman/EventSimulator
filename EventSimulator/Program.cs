@@ -30,6 +30,8 @@ namespace EventSimulator
 
         static Settings settings;
 
+        private static EventHubClient EventHubClient;
+
         #endregion
 
         static void Main(string[] args)
@@ -109,6 +111,7 @@ namespace EventSimulator
 
             // Set up sending threads
             var queue = new ConcurrentQueue<List<EventData>>();
+            EventHubClient = EventHubClient.CreateFromConnectionString(settings.ConnectionString);
             var numThreads = settings.ThreadsCount;
             if (numThreads == 0)
             {
@@ -247,9 +250,6 @@ namespace EventSimulator
 
         public static void SendEvents(string connectionString, ref int eventsSent, ConcurrentQueue<List<EventData>> dataQueue)
         {
-            // Event sender and receiver.
-            var eventSender = new Sender(connectionString);
-            var client = EventHubClient.CreateFromConnectionString(connectionString);
             List<EventData> eventList;
 
 
@@ -263,7 +263,7 @@ namespace EventSimulator
                 // Send the events
                 try
                 {
-                    client.SendBatch(eventList);
+                    EventHubClient.SendBatch(eventList);
                     eventsSent += eventList.Count;
                 }
                 catch (MessageSizeExceededException e)
@@ -298,6 +298,15 @@ namespace EventSimulator
             var next = DateTime.Now;
             while (true)
             {
+                // If we already have a large backlog, don't make more events.
+                if (dataQueue.Count >= 2*settings.ThreadsCount)
+                {
+                    Thread.Sleep(50);
+                    continue;
+                }
+
+
+
                 // Make an EventData list to add to the queue
                 var dataList = new List<EventData>(eventList.Count);
                 foreach (var ev in eventList)
