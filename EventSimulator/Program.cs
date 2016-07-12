@@ -6,6 +6,7 @@ using EventSimulator.Events;
 using Microsoft.ServiceBus.Messaging;
 using System.Configuration;
 using System.Deployment.Application;
+using System.Collections.Concurrent;
 
 namespace EventSimulator
 {
@@ -106,6 +107,7 @@ namespace EventSimulator
 
             // TODO: Update this.
             // Set up threads.
+            var queue = new ConcurrentQueue<List<EventData>>();
             var numThreads = settings.ThreadsCount;
             if (numThreads == 0)
             {
@@ -117,7 +119,7 @@ namespace EventSimulator
             for (var i = 0; i < numThreads; i++)
             {
                 var i1 = i; // Make sure the lambda gets the right value of i.
-                threads[i] = new Thread(() => SendEvents(settings.ConnectionString, ref eventsSentByThread[i1]));
+                threads[i] = new Thread(() => SendEvents(settings.ConnectionString, ref eventsSentByThread[i1], queue));
                 threads[i].Start();
             }
 
@@ -235,22 +237,20 @@ namespace EventSimulator
 
         }
 
-        public static void SendEvents(string connectionString, ref int eventsSent)
+        public static void SendEvents(string connectionString, ref int eventsSent, ConcurrentQueue<List<EventData>> dataQueue)
         {
             // Event sender and receiver.
             var eventSender = new Sender(connectionString);
+            var client = EventHubClient.CreateFromConnectionString(connectionString);
+            List<EventData> eventList;
 
-            // Create list of events to send to eventHub
-            var eventList = CreateList();
 
-            while (true)
+            while (dataQueue.TryDequeue(out eventList))
             {
-                UpdateList(eventList);
-
                 // Send the events
                 try
                 {
-                    eventSender.SendBatch(eventList);
+                    client.SendBatch(eventList);
                     eventsSent += eventList.Count;
                 }
                 catch (MessageSizeExceededException e)

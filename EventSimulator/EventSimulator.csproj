@@ -57,10 +57,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>450F86A85AC0777BDB5EA4489C7F5D73C30FB503</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>E64B359ECA4F89F437770B430B5C8BF7767BACBD</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>EventSimulator_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>EventSimulator_1_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -133,6 +133,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="EventSimulator_1_TemporaryKey.pfx" />
     <None Include="EventSimulator_TemporaryKey.pfx" />
     <None Include="packages.config" />
   </ItemGroup>
