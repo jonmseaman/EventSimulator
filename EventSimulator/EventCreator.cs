@@ -71,10 +71,11 @@ namespace EventSimulator
             // If PurchaseEvent, purchase again.
             if (@event is PurchaseEvent)
             {
-                var nextEvent = new PurchaseEvent(@event as PurchaseEvent)
+                var pEvent = @event as PurchaseEvent;
+                var nextEvent = new PurchaseEvent(pEvent)
                 {
                     Quantity = RandomProductQuantity(),
-                    Time = DateTime.Now,
+                    Time = pEvent.Time,
                 };
                 return nextEvent;
             }
