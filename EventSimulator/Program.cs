@@ -7,6 +7,9 @@ using Microsoft.ServiceBus.Messaging;
 using System.Configuration;
 using System.Deployment.Application;
 using System.Collections.Concurrent;
+using System.Diagnostics.Tracing;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace EventSimulator
 {
@@ -19,13 +22,15 @@ namespace EventSimulator
     {
         #region Member Variables
 
-        delegate List<Event> CreateListDelegate();
+        delegate List<Event> CreateListDelegate(int size);
         static CreateListDelegate CreateList;
 
         delegate void UpdateListDelegate(List<Event> events);
         static UpdateListDelegate UpdateList;
 
         static Settings settings;
+
+        private static EventHubClient EventHubClient;
 
         #endregion
 
@@ -104,10 +109,9 @@ namespace EventSimulator
             Console.WriteLine($"Sending {settings.SendMode:G}");
             Console.ResetColor();
 
-
-            // TODO: Update this.
-            // Set up threads.
+            // Set up sending threads
             var queue = new ConcurrentQueue<List<EventData>>();
+            EventHubClient = EventHubClient.CreateFromConnectionString(settings.ConnectionString);
             var numThreads = settings.ThreadsCount;
             if (numThreads == 0)
             {
@@ -122,6 +126,13 @@ namespace EventSimulator
                 threads[i] = new Thread(() => SendEvents(settings.ConnectionString, ref eventsSentByThread[i1], queue));
                 threads[i].Start();
             }
+
+            // Set up creation threads
+            var createThread = new Thread(() =>
+            {
+                CreateEvents(queue);
+            });
+            createThread.Start();
 
 
             // Thread to show the user how many events are being sent.
@@ -239,18 +250,20 @@ namespace EventSimulator
 
         public static void SendEvents(string connectionString, ref int eventsSent, ConcurrentQueue<List<EventData>> dataQueue)
         {
-            // Event sender and receiver.
-            var eventSender = new Sender(connectionString);
-            var client = EventHubClient.CreateFromConnectionString(connectionString);
             List<EventData> eventList;
 
 
-            while (dataQueue.TryDequeue(out eventList))
+            while (true)
             {
+                if (!dataQueue.TryDequeue(out eventList))
+                {
+                    Thread.Sleep(50);
+                    continue;
+                }
                 // Send the events
                 try
                 {
-                    client.SendBatch(eventList);
+                    EventHubClient.SendBatch(eventList);
                     eventsSent += eventList.Count;
                 }
                 catch (MessageSizeExceededException e)
@@ -264,22 +277,73 @@ namespace EventSimulator
             }
         }
 
+        public static void CreateEvents(ConcurrentQueue<List<EventData>> dataQueue)
+        {
+            TimeSpan dt;
+            List<Event> eventList;
+
+            if (settings.EventsPerSecond < settings.BatchSize)
+            {
+                eventList = CreateList(settings.EventsPerSecond);
+                dt = TimeSpan.FromSeconds(1.0);
+            }
+            else
+            {
+                // Make batch at max size
+                eventList = CreateList(settings.BatchSize);
+                // Calculate dt
+                dt = TimeSpan.FromSeconds(((double)settings.BatchSize) / settings.EventsPerSecond);
+            }
+
+            var next = DateTime.Now;
+            while (true)
+            {
+                // If we already have a large backlog, don't make more events.
+                if (dataQueue.Count >= 2*settings.ThreadsCount)
+                {
+                    Thread.Sleep(50);
+                    continue;
+                }
+
+
+
+                // Make an EventData list to add to the queue
+                var dataList = new List<EventData>(eventList.Count);
+                foreach (var ev in eventList)
+                {
+                    var serializedString = JsonConvert.SerializeObject(ev);
+                    dataList.Add(new EventData(Encoding.UTF8.GetBytes(serializedString)));
+                }
+                dataQueue.Enqueue(dataList);
+
+                // Update
+                UpdateList(eventList);
+
+                var now = DateTime.Now;
+                if (next > now)
+                {
+                    Thread.Sleep((int)(next - now).TotalMilliseconds);
+                }
+                next += dt;
+            }
+        }
+
         #region CreateEvents
 
-        private static List<Event> CreateClickEvents()
+        private static List<Event> CreateClickEvents(int batchSize)
         {
             var eventList = new List<Event>();
-            for (var i = 0; i < settings.BatchSize; i++)
+            for (var i = 0; i < batchSize; i++)
             {
                 eventList.Add(EventCreator.CreateClickEvent());
             }
             return eventList;
         }
 
-        private static List<Event> CreatePurchaseEvents()
+        private static List<Event> CreatePurchaseEvents(int batchSize)
         {
             var eventList = new List<Event>();
-            for (var i = 0; i < settings.BatchSize; i++)
+            for (var i = 0; i < batchSize; i++)
             {
                 eventList.Add(EventCreator.CreatePurchaseEvent());
             }
@@ -294,9 +358,10 @@ namespace EventSimulator
         {
             // Update list of events to show user action.
             var offset = 0;
-            var fastPurchaseCount = settings.BehaviorPercents[0] * settings.BatchSize / 100;
-            var slowPurchaseCount = settings.BehaviorPercents[1] * settings.BatchSize / 100;
-            var browsingCount = eventList.Count - fastPurchaseCount - slowPurchaseCount;
+            var len = eventList.Count;
+            var fastPurchaseCount = settings.BehaviorPercents[0] * len / 100;
+            var slowPurchaseCount = settings.BehaviorPercents[1] * len / 100;
+            var browsingCount = len - fastPurchaseCount - slowPurchaseCount;
 
             UpdateSimulatedEventsWithBehavior(offset, fastPurchaseCount, eventList, UserBehavior.FastPurchase);
             offset += fastPurchaseCount;

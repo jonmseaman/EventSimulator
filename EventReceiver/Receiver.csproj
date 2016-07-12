@@ -55,10 +55,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>C59044E34815530B51C5441A9D0180635B6C917B</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>992C33EA6907A83339279F9BC1C70A8DACC9187F</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>Receiver_1_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>Receiver_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -129,7 +129,6 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-    <None Include="Receiver_1_TemporaryKey.pfx" />
     <None Include="Receiver_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
