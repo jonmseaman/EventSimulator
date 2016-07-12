@@ -128,7 +128,6 @@
     <Compile Include="Events\PurchaseEvent.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Sender.cs" />
     <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
