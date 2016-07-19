@@ -19,8 +19,10 @@ namespace EventSimulator
         #region Private Members
 
         private List<string[]> productData = new List<string[]>();
+        private Dictionary<int, string[]> productDictionary = new Dictionary<int, string[]>();
 
-        private const int _priceIndex = 4;
+        private const int ProductPriceIndex = 4;
+        private const int ProductIdIndex = 0;
 
         #endregion
 
@@ -28,25 +30,30 @@ namespace EventSimulator
 
         public EventCreator()
         {
-            // TODO: Load product data from a file.
-            try
+            // Load product data from file
+            var parser = new TextFieldParser(new StreamReader("data/products.csv"))
             {
-                // Load product data from file
-                var parser = new TextFieldParser(new StreamReader("data/products.csv"));
-                parser.TextFieldType = FieldType.Delimited;
-                parser.SetDelimiters(",");
-                // Load data while can
-                while (!parser.EndOfData)
+                TextFieldType = FieldType.Delimited
+            };
+            parser.SetDelimiters(",");
+            // Load data while can
+            while (!parser.EndOfData)
+            {
+                var data = parser.ReadFields();
+                // Add that data to our list
+                productData.Add(data);
+                try
                 {
-                    // Add that data to our list
-                    productData.Add(parser.ReadFields());
+                    // Get the product id from data
+                    int productId = int.Parse(data[ProductIdIndex]);
+                    // Add the data to the map
+                    productDictionary.Add(productId, data);
                 }
-            }
-            catch (Exception)
-            {
-                // TODO: Better catch statement.
-                // If we failed to load the data from the file.
-                productData = null;
+                catch (Exception e) when (e is ArgumentOutOfRangeException || e is IndexOutOfRangeException)
+                {
+                    throw new FormatException("Malformed products.csv");
+                }
+
             }
 
         }
@@ -276,28 +283,39 @@ namespace EventSimulator
         /// <summary>
         /// Used to randomize click event members. Email, ProductUrl are randomized.
         /// </summary>
-        private static readonly Random Random = new Random();
+        private readonly Random Random = new Random();
 
-        private static int RandomTransactionNumber()
+        private int RandomTransactionNumber()
         {
             return Random.Next(1, 1000000);
         }
 
-        private static string RandomEmail()
+        private string RandomEmail()
         {
             var rand = (int)Normal.Sample(Random, 25000, 7500);
             return $"user{rand}@example.com";
         }
 
-        private static int RandomProductId()
+        private int RandomProductId()
         {
-            var rand = (int)Normal.Sample(Random, 7.0, 1.5);
-            rand = rand < 1 ? 1 : rand;
-            rand = rand > 16 ? 16 : rand;
-            return rand;
+            // Get num items
+            var cnt = productData.Count;
+            // Standard dev. and mean.
+            var sd = cnt / 0.25;
+            var mu = cnt / 0.5;
+            var randIndex = (int)Normal.Sample(Random, mu, sd);
+            // Make sure index in range of productData
+            randIndex = randIndex < 0 ? 0 : randIndex;
+            randIndex = randIndex >= cnt ? cnt - 1 : randIndex;
+            // Try to get the product id from the selected data.
+            int productId;
+            var idStr = productData[randIndex][ProductIdIndex];
+            int.TryParse(idStr, out productId);
+
+            return productId;
         }
 
-        private static int RandomPrice()
+        private int RandomPrice()
         {
             var rand = (int)Normal.Sample(Random, 1250, 250);
             rand = rand < 250 ? 250 : rand;
@@ -306,37 +324,29 @@ namespace EventSimulator
 
         private int GetPrice(int productId)
         {
-            int price = 0;
+            var price = 0;
             try
             {
-                // If productData isn't null
-                if (productData != null)
-                {
-                    // Must convert to price in cents.
-                    double dPrice;
-                    double.TryParse(productData[productId][_priceIndex], out dPrice);
-                    price = (int) Math.Round(100.0 * dPrice);
-                }
+                // Must convert to price in cents.
+                double dPrice;
+                double.TryParse(productDictionary[productId][ProductPriceIndex], out dPrice);
+                price = (int)Math.Round(100.0 * dPrice);
             }
-            catch (IndexOutOfRangeException)
-            {
-
-            }
-            if (price == 0)
+            catch (ArgumentOutOfRangeException)
             {
                 price = RandomPrice();
             }
             return price;
         }
 
-        private static int RandomProductQuantity()
+        private int RandomProductQuantity()
         {
             var rand = (int)Normal.Sample(Random, 5, 2);
             rand = rand < 1 ? 1 : rand;
             return rand;
         }
 
-        private static string RandomUrl()
+        private string RandomUrl()
         {
             var rand = Random.Next(0, 9);
             // 30% to go back to the home page.
@@ -350,7 +360,7 @@ namespace EventSimulator
             }
         }
 
-        private static string RandomProductUrl()
+        private string RandomProductUrl()
         {
             return $"{ProductPageUrl}{RandomProductId()}";
         }
