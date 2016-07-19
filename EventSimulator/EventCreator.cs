@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using EventSimulator.Events;
 using System.Text.RegularExpressions;
 using MathNet.Numerics.Distributions;
+using Microsoft.VisualBasic.FileIO;
 
 namespace EventSimulator
 {
@@ -13,6 +16,43 @@ namespace EventSimulator
     }
     public class EventCreator
     {
+        #region Private Members
+
+        private List<string[]> productData = new List<string[]>();
+
+        private const int _priceIndex = 4;
+
+        #endregion
+
+        #region Constructor
+
+        public EventCreator()
+        {
+            // TODO: Load product data from a file.
+            try
+            {
+                // Load product data from file
+                var parser = new TextFieldParser(new StreamReader("data/products.csv"));
+                parser.TextFieldType = FieldType.Delimited;
+                parser.SetDelimiters(",");
+                // Load data while can
+                while (!parser.EndOfData)
+                {
+                    // Add that data to our list
+                    productData.Add(parser.ReadFields());
+                }
+            }
+            catch (Exception)
+            {
+                // TODO: Better catch statement.
+                // If we failed to load the data from the file.
+                productData = null;
+            }
+
+        }
+
+        #endregion
+
         #region CreateEvents
 
         /// <summary>
@@ -21,7 +61,7 @@ namespace EventSimulator
         /// ExitTime is always DateTime.Now
         /// </summary>
         /// <returns> The randomized event. </returns>
-        public static ClickEvent CreateClickEvent()
+        public ClickEvent CreateClickEvent()
         {
             var e = new ClickEvent()
             {
@@ -40,7 +80,7 @@ namespace EventSimulator
         /// TransactionNum, Email, ProductId, Price, and Quantity are all randomized.
         /// </summary>
         /// <returns> The randomly generate event. </returns>
-        public static PurchaseEvent CreatePurchaseEvent()
+        public PurchaseEvent CreatePurchaseEvent()
         {
             var purchaseEvent = new PurchaseEvent();
             // TODO: Get the actual transaction number. Or, we could use Guid.
@@ -66,7 +106,7 @@ namespace EventSimulator
         /// or ClickEvent that corresponds to navigating to a product page.
         /// </exception>
         /// <returns></returns>
-        public static PurchaseEvent CreateNextPurchaseEvent(Event @event)
+        public PurchaseEvent CreateNextPurchaseEvent(Event @event)
         {
             // If PurchaseEvent, purchase again.
             if (@event is PurchaseEvent)
@@ -82,13 +122,14 @@ namespace EventSimulator
             if (@event is ClickEvent
                      && IsUrlAProductPage(((ClickEvent)@event).NextUrl))
             {
-                var clickEvent = (ClickEvent) @event;
+                var clickEvent = (ClickEvent)@event;
                 // Get the product id from the url.
                 var productId = ProductIdFromUrl(clickEvent.NextUrl);
                 var nextEvent = new PurchaseEvent(@event)
                 {
-                    Price = RandomPrice(),
+                    // TODO: Get the price according to the product id and data from csv
                     ProductId = productId,
+                    Price = GetPrice(productId),
                     Quantity = RandomProductQuantity(),
                     Time = DateTime.Now,
                     TransactionNum = RandomTransactionNumber()
@@ -104,7 +145,6 @@ namespace EventSimulator
             }
         }
 
-
         /// <summary>
         /// Creates a click event that could come after @event.
         /// </summary>
@@ -113,14 +153,14 @@ namespace EventSimulator
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the event is
         /// not of type ClickEvent or PurchaseEvent.</exception>
         /// <returns>The created event. </returns>
-        public static ClickEvent CreateNextClickEvent(Event @event)
+        public ClickEvent CreateNextClickEvent(Event @event)
         {
             var next = new ClickEvent(@event);
 
             // Get the type of the event
             if (@event is ClickEvent)
             {
-                var old = (ClickEvent) @event;
+                var old = (ClickEvent)@event;
                 // Make the next event.
                 next.CurrentUrl = old.NextUrl;
                 next.NextUrl = RandomUrl();
@@ -129,7 +169,7 @@ namespace EventSimulator
             }
             else if (@event is PurchaseEvent)
             {
-                var old = (PurchaseEvent) @event;
+                var old = (PurchaseEvent)@event;
                 next.CurrentUrl = ProductUrlFromId(old.ProductId);
                 next.NextUrl = RandomUrl();
                 next.EntryTime = old.Time;
@@ -150,7 +190,7 @@ namespace EventSimulator
         /// <param name="prevEvent">The 'previous' event.</param>
         /// <param name="behavior">The behavior of the simulated user.</param>
         /// <returns>An event that could occur after 'prevEvent'.</returns>
-        public static Event CreateNextEvent(Event prevEvent, UserBehavior behavior)
+        public Event CreateNextEvent(Event prevEvent, UserBehavior behavior)
         {
             if (prevEvent is PurchaseEvent)
             {
@@ -176,7 +216,7 @@ namespace EventSimulator
         /// </summary>
         /// <param name="e">The previous event.</param>
         /// <returns>Event generated according to 'FastPurchase' behavior.</returns>
-        private static Event CreateNextEventFastPurchase(Event e)
+        private Event CreateNextEventFastPurchase(Event e)
         {
             if (e is PurchaseEvent)
             {
@@ -212,7 +252,7 @@ namespace EventSimulator
         /// </summary>
         /// <param name="prevEvent">The previous event that was simulated.</param>
         /// <returns>The next event.</returns>
-        private static Event CreateNextEventSlowPurchase(Event prevEvent)
+        private Event CreateNextEventSlowPurchase(Event prevEvent)
         {
             // If ClickEvent && on Product page, 50% chance to purchase.
             if (prevEvent is ClickEvent
@@ -251,17 +291,42 @@ namespace EventSimulator
 
         private static int RandomProductId()
         {
-            var rand = (int) Normal.Sample(Random, 10.0, 2.0);
+            var rand = (int)Normal.Sample(Random, 7.0, 1.5);
             rand = rand < 1 ? 1 : rand;
-            rand = rand > 20 ? 20 : rand;
+            rand = rand > 16 ? 16 : rand;
             return rand;
         }
 
         private static int RandomPrice()
         {
-            var rand = (int) Normal.Sample(Random, 1250, 250);
+            var rand = (int)Normal.Sample(Random, 1250, 250);
             rand = rand < 250 ? 250 : rand;
             return rand;
+        }
+
+        private int GetPrice(int productId)
+        {
+            int price = 0;
+            try
+            {
+                // If productData isn't null
+                if (productData != null)
+                {
+                    // Must convert to price in cents.
+                    double dPrice;
+                    double.TryParse(productData[productId][_priceIndex], out dPrice);
+                    price = (int) Math.Round(100.0 * dPrice);
+                }
+            }
+            catch (IndexOutOfRangeException)
+            {
+
+            }
+            if (price == 0)
+            {
+                price = RandomPrice();
+            }
+            return price;
         }
 
         private static int RandomProductQuantity()
@@ -287,9 +352,7 @@ namespace EventSimulator
 
         private static string RandomProductUrl()
         {
-            var rand = (int)Normal.Sample(Random, 20, 4);
-            rand = rand < 1 ? 1 : rand;
-            return $"{ProductPageUrl}{rand}";
+            return $"{ProductPageUrl}{RandomProductId()}";
         }
 
         #endregion
@@ -319,7 +382,7 @@ namespace EventSimulator
         /// <param name="nextUrl">A url corresponding to a product page.</param>
         /// <exception cref="ArgumentException">Thrown if the url is not a product url.</exception>
         /// <returns></returns>
-        public static int ProductIdFromUrl(string nextUrl)
+        private static int ProductIdFromUrl(string nextUrl)
         {
             if (!nextUrl.StartsWith(ProductPageUrl))
             {

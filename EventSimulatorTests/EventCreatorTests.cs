@@ -9,11 +9,13 @@ namespace EventSimulatorTests
     [TestClass]
     public class EventCreatorTests
     {
+        EventCreator eventCreator = new EventCreator();
+
         [TestMethod]
         public void CreateClickEventTest()
         {
-            var c1 = EventCreator.CreateClickEvent();
-            var c2 = EventCreator.CreateClickEvent();
+            var c1 = eventCreator.CreateClickEvent();
+            var c2 = eventCreator.CreateClickEvent();
 
             Assert.IsFalse(c1.SessionId.Equals(c2.SessionId));
 
@@ -29,8 +31,8 @@ namespace EventSimulatorTests
         [TestMethod]
         public void CreatePurchaseEventTest()
         {
-            var p1 = EventCreator.CreatePurchaseEvent();
-            var p2 = EventCreator.CreatePurchaseEvent();
+            var p1 = eventCreator.CreatePurchaseEvent();
+            var p2 = eventCreator.CreatePurchaseEvent();
 
             Assert.IsFalse(p1.SessionId.Equals(p2.SessionId));
 
@@ -45,23 +47,23 @@ namespace EventSimulatorTests
         [TestMethod]
         public void CreateNextPurchaseEventWithPurchaseEventTest()
         {
-            var first = EventCreator.CreatePurchaseEvent();
-            var next = EventCreator.CreateNextPurchaseEvent(first);
+            var first = eventCreator.CreatePurchaseEvent();
+            var next = eventCreator.CreateNextPurchaseEvent(first);
 
             // Event Members
             Assert.AreEqual(first.SessionId, next.SessionId);
             Assert.AreEqual(first.Email, next.Email);
             // PurchaseEvent Members
             Assert.AreEqual(first.ProductId, next.ProductId);
-            Assert.AreNotEqual(first.Time, next.Time);
+            Assert.AreEqual(first.Time, next.Time);
         }
 
         [TestMethod]
         public void CreateNextPurchaseEventWithClickEventTest()
         {
-            var first = EventCreator.CreateClickEvent();
+            var first = eventCreator.CreateClickEvent();
             first.NextUrl = EventCreator.ProductUrlFromId(2);
-            var next = EventCreator.CreateNextPurchaseEvent(first);
+            var next = eventCreator.CreateNextPurchaseEvent(first);
 
             Assert.AreEqual(2, next.ProductId);
             Assert.IsTrue(next.Price > 0);
@@ -73,8 +75,8 @@ namespace EventSimulatorTests
         [TestMethod]
         public void CreateNextClickEventFromClickEventTest()
         {
-            var first = EventCreator.CreateClickEvent();
-            var next = EventCreator.CreateNextClickEvent(first);
+            var first = eventCreator.CreateClickEvent();
+            var next = eventCreator.CreateNextClickEvent(first);
 
             // Check to make sure the urls are done correctly.
             Assert.AreEqual(first.NextUrl, next.CurrentUrl);
@@ -88,8 +90,8 @@ namespace EventSimulatorTests
         [TestMethod]
         public void CreateNextClickEventFromPurchaseEventTest()
         {
-            var p = EventCreator.CreatePurchaseEvent();
-            var next = EventCreator.CreateNextClickEvent(p);
+            var p = eventCreator.CreatePurchaseEvent();
+            var next = eventCreator.CreateNextClickEvent(p);
 
             // Check to make sure the urls are done correctly.
             Assert.AreEqual(EventCreator.ProductUrlFromId(p.ProductId), next.CurrentUrl);

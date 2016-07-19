@@ -32,6 +32,8 @@ namespace EventSimulator
 
         private static EventHubClient EventHubClient;
 
+        private static EventCreator eventCreator = new EventCreator();
+
         #endregion
 
         static void Main(string[] args)
@@ -335,7 +337,7 @@ namespace EventSimulator
             var eventList = new List<Event>();
             for (var i = 0; i < batchSize; i++)
             {
-                eventList.Add(EventCreator.CreateClickEvent());
+                eventList.Add(eventCreator.CreateClickEvent());
             }
             return eventList;
         }
@@ -345,7 +347,7 @@ namespace EventSimulator
             var eventList = new List<Event>();
             for (var i = 0; i < batchSize; i++)
             {
-                eventList.Add(EventCreator.CreatePurchaseEvent());
+                eventList.Add(eventCreator.CreatePurchaseEvent());
             }
             return eventList;
         }
@@ -375,7 +377,7 @@ namespace EventSimulator
         {
             for (var i = startIndex; count > 0; count--, i++)
             {
-                eventList[i] = EventCreator.CreateNextEvent(eventList[i], behavior);
+                eventList[i] = eventCreator.CreateNextEvent(eventList[i], behavior);
             }
         }
 
@@ -383,7 +385,7 @@ namespace EventSimulator
         {
             for (var i = 0; i < eventList.Count; i++)
             {
-                eventList[i] = EventCreator.CreateClickEvent();
+                eventList[i] = eventCreator.CreateClickEvent();
             }
 
         }
@@ -392,7 +394,7 @@ namespace EventSimulator
         {
             for (var i = 0; i < eventList.Count; i++)
             {
-                eventList[i] = EventCreator.CreatePurchaseEvent();
+                eventList[i] = eventCreator.CreatePurchaseEvent();
             }
         }
 
