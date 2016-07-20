@@ -133,9 +133,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="data\products.csv">
+    <Content Include="data\products.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="EventSimulator_1_TemporaryKey.pfx" />
     <None Include="EventSimulator_2_TemporaryKey.pfx" />
     <None Include="EventSimulator_TemporaryKey.pfx" />
