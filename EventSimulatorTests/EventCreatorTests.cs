@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using EventSimulator;
+using EventSimulator.Events;
 
 namespace EventSimulatorTests
 {
@@ -9,6 +10,7 @@ namespace EventSimulatorTests
     {
         EventCreator eventCreator = new EventCreator();
 
+        #region CreateEventsTests
         [TestMethod]
         public void CreateClickEventTest()
         {
@@ -41,7 +43,9 @@ namespace EventSimulatorTests
                 && p1.Price.Equals(p2.Price)
                 && p1.Quantity.Equals(p2.Quantity));
         }
+        #endregion
 
+        #region CreateNextPurchaseEventTests
         [TestMethod]
         public void CreateNextPurchaseEventWithPurchaseEventTest()
         {
@@ -69,7 +73,9 @@ namespace EventSimulatorTests
             Assert.IsTrue(next.TransactionNum > 0);
 
         }
+        #endregion
 
+        #region CreateNextClickEventTests
         [TestMethod]
         public void CreateNextClickEventFromClickEventTest()
         {
@@ -99,6 +105,9 @@ namespace EventSimulatorTests
             Assert.IsTrue(p.Time <= next.EntryTime);
             Assert.IsTrue(next.ExitTime <= DateTime.Now);
         }
+        #endregion
+
+        #region IsUrlAProductPageTests
 
         [TestMethod]
         public void IsUrlAProductPageTrueTest()
@@ -123,6 +132,65 @@ namespace EventSimulatorTests
         {
             Assert.IsFalse(EventCreator.IsUrlAProductPage("/"));
         }
+
+        #endregion
+
+        #region CreateNextEventTests
+
+        [TestMethod]
+        public void CreateNextEvent_ClickEvent_Browsing()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                var first = eventCreator.CreateClickEvent();
+                var next = eventCreator.CreateNextEvent(first, UserBehavior.Browsing) as ClickEvent;
+
+                Assert.IsNotNull(next);
+                Assert.AreEqual(first.NextUrl, next.CurrentUrl);
+
+                // Check to make sure the urls are done correctly.
+                Assert.AreEqual(first.NextUrl, next.CurrentUrl);
+                // first.CurrentUrl does not have a relationship to next
+
+                // Check to make sure that the dates have been updated.
+                Assert.IsTrue(first.ExitTime <= next.EntryTime);
+                Assert.IsTrue(next.ExitTime <= DateTime.Now);
+            }
+        }
+
+        [TestMethod]
+        public void CreateNextEvent_PurchaseEvent_Browsing()
+        {
+            var first = eventCreator.CreatePurchaseEvent();
+            var next = eventCreator.CreateNextEvent(first, UserBehavior.Browsing) as ClickEvent;
+
+            Assert.IsNotNull(next);
+
+            // Check to make sure that the dates have been updated.
+            Assert.IsTrue(first.Time <= next.EntryTime);
+            Assert.IsTrue(next.ExitTime <= DateTime.Now);
+        }
+
+        [TestMethod]
+        public void CreateNextEvent_ClickEventNotOnProductPage_FastPurchase()
+        {
+            // When not on the product page, the next event should be a click event on a product page
+            var first = eventCreator.CreateClickEvent();
+            first.CurrentUrl = "/notonaproductpage/";
+
+            var next = eventCreator.CreateNextEvent(first, UserBehavior.FastPurchase);
+
+            Assert.IsInstanceOfType(next, typeof(ClickEvent));
+            // TODO: Check to make sure we are on a product page
+        }
+
+        [TestMethod]
+        public void CreateNextEvent_ClickEventOnProductPage_FastPurchase()
+        {
+            
+        }
+
+        #endregion
 
     }
 }
