@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using EventSimulator;
-using EventSimulator.Events;
 
 namespace EventSimulatorTests
 {
@@ -123,7 +121,7 @@ namespace EventSimulatorTests
         [TestMethod]
         public void IsUrlAProductPageFalse3Test()
         {
-            Assert.IsFalse(EventCreator.IsUrlAProductPage($"/"));
+            Assert.IsFalse(EventCreator.IsUrlAProductPage("/"));
         }
 
     }

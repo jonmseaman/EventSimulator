@@ -1,9 +1,9 @@
-﻿using Microsoft.ServiceBus.Messaging;
-using System.Diagnostics;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.ServiceBus.Messaging;
 
 namespace Receiver
 {
@@ -23,8 +23,8 @@ namespace Receiver
         Task IEventProcessor.OpenAsync(PartitionContext context)
         {
             Console.WriteLine("SimpleEventProcessor initialized.  Partition: '{0}', Offset: '{1}'", context.Lease.PartitionId, context.Lease.Offset);
-            this.checkpointStopWatch = new Stopwatch();
-            this.checkpointStopWatch.Start();
+            checkpointStopWatch = new Stopwatch();
+            checkpointStopWatch.Start();
             return Task.FromResult<object>(null);
         }
 
@@ -34,15 +34,14 @@ namespace Receiver
             {
                 string data = Encoding.UTF8.GetString(eventData.GetBytes());
 
-                Console.WriteLine(string.Format("Message received.  Partition: '{0}', Data: '{1}'",
-                    context.Lease.PartitionId, data));
+                Console.WriteLine("Message received.  Partition: '{0}', Data: '{1}'", context.Lease.PartitionId, data);
             }
 
             //Call checkpoint every 5 minutes, so that worker can resume processing from 5 minutes back if it restarts.
-            if (this.checkpointStopWatch.Elapsed > TimeSpan.FromMinutes(5))
+            if (checkpointStopWatch.Elapsed > TimeSpan.FromMinutes(5))
             {
                 await context.CheckpointAsync();
-                this.checkpointStopWatch.Restart();
+                checkpointStopWatch.Restart();
             }
         }
     }

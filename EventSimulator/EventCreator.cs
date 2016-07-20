@@ -118,7 +118,7 @@ namespace EventSimulator
             // If PurchaseEvent, purchase again.
             if (@event is PurchaseEvent)
             {
-                var pEvent = @event as PurchaseEvent;
+                var pEvent = (PurchaseEvent)@event;
                 var nextEvent = new PurchaseEvent(pEvent)
                 {
                     Quantity = RandomProductQuantity(),
@@ -324,7 +324,7 @@ namespace EventSimulator
 
         private int GetPrice(int productId)
         {
-            var price = 0;
+            int price;
             try
             {
                 // Must convert to price in cents.

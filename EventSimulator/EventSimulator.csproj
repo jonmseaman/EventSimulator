@@ -107,6 +107,7 @@
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
@@ -133,9 +134,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="data\products.csv">
+    <Content Include="data\products.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="EventSimulator_1_TemporaryKey.pfx" />
     <None Include="EventSimulator_2_TemporaryKey.pfx" />
     <None Include="EventSimulator_TemporaryKey.pfx" />

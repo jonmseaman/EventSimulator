@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EventSimulator.Events
 {
@@ -27,7 +22,7 @@ namespace EventSimulator.Events
 
         #region Constructors
 
-        public Event()
+        protected Event()
         {
         }
 
@@ -35,7 +30,7 @@ namespace EventSimulator.Events
         /// Makes a shallow copy of e.
         /// </summary>
         /// <param name="e">The event to be copied. </param>
-        public Event(Event e)
+        protected Event(Event e)
         {
             SessionId = e.SessionId;
             Email = e.Email;
