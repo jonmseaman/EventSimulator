@@ -276,6 +276,8 @@ namespace EventSimulator
             }
         }
 
+        #region CreateEvents
+
         public static void CreateEvents(ConcurrentQueue<List<EventData>> dataQueue)
         {
             TimeSpan dt;
@@ -297,14 +299,12 @@ namespace EventSimulator
             var next = DateTime.Now;
             while (true)
             {
-                // If we already have a large backlog, don't make more events.
+                // If we cannot send fast enough, don't keep making more events.
                 if (dataQueue.Count >= 2*settings.ThreadsCount)
                 {
                     Thread.Sleep(50);
                     continue;
                 }
-
-
 
                 // Make an EventData list to add to the queue
                 var dataList = new List<EventData>(eventList.Count);
@@ -326,8 +326,6 @@ namespace EventSimulator
                 next += dt;
             }
         }
-
-        #region CreateEvents
 
         private static List<Event> CreateClickEvents(int batchSize)
         {

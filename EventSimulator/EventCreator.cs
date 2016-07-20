@@ -4,6 +4,8 @@ using System.IO;
 using EventSimulator.Events;
 using System.Text.RegularExpressions;
 using MathNet.Numerics.Distributions;
+using MathNet.Numerics.Random;
+using Microsoft.VisualBasic.CompilerServices;
 using Microsoft.VisualBasic.FileIO;
 
 namespace EventSimulator
@@ -199,20 +201,24 @@ namespace EventSimulator
         /// <returns>An event that could occur after 'prevEvent'.</returns>
         public Event CreateNextEvent(Event prevEvent, UserBehavior behavior)
         {
-            if (prevEvent is PurchaseEvent)
-            {
-                return CreateClickEvent();
-            }
+            Event nextEvent;
+
             switch (behavior)
             {
                 case UserBehavior.Browsing:
-                    return CreateNextClickEvent(prevEvent);
+                    nextEvent = CreateNextClickEvent(prevEvent);
+                    break;
                 case UserBehavior.FastPurchase:
-                    return CreateNextEventFastPurchase(prevEvent);
+                    nextEvent = CreateNextEventFastPurchase(prevEvent);
+                    break;
                 case UserBehavior.SlowPurchase:
-                    return CreateNextEventSlowPurchase(prevEvent);
+                    nextEvent = CreateNextEventSlowPurchase(prevEvent);
+                    break;
+                default:
+                    nextEvent = CreateClickEvent();
+                    break;
             }
-            return CreateClickEvent();
+            return nextEvent;
         }
 
         #region CreateNextEvent specific behaviors
@@ -225,32 +231,33 @@ namespace EventSimulator
         /// <returns>Event generated according to 'FastPurchase' behavior.</returns>
         private Event CreateNextEventFastPurchase(Event e)
         {
-            if (e is PurchaseEvent)
+            Event nextEvent = CreateClickEvent();
+
+            // 50% chance to purchase again
+            if (e is PurchaseEvent && Chance(50))
             {
-                return CreateNextClickEvent(e);
+                nextEvent = CreateNextPurchaseEvent(e);
+            } else if (e is PurchaseEvent)
+            {
+                nextEvent = CreateNextClickEvent(e);
+            }
+            else if (e is ClickEvent && IsUrlAProductPage(((ClickEvent)e).NextUrl))
+            {
+                nextEvent = CreateNextPurchaseEvent(e);
+            }
+            else if (e is ClickEvent)
+            {
+                var clickEvent = (ClickEvent) e;
+                nextEvent = new ClickEvent(e)
+                {
+                    NextUrl = RandomProductUrl(),
+                    EntryTime = clickEvent.ExitTime,
+                    ExitTime = DateTime.Now,
+                    CurrentUrl = clickEvent.NextUrl
+                };
             }
 
-            ClickEvent clickEvent = new ClickEvent();
-            if (e is ClickEvent)
-            {
-                clickEvent = (ClickEvent)e;
-            }
-
-            // If on a product page, purchase it.
-            if (IsUrlAProductPage(clickEvent.NextUrl))
-            {
-                return CreateNextPurchaseEvent(clickEvent);
-            }
-
-            // Else, navigate to a product page.
-            var next = new ClickEvent(e)
-            {
-                NextUrl = RandomProductUrl(),
-                EntryTime = clickEvent.ExitTime,
-                ExitTime = DateTime.Now,
-                CurrentUrl = clickEvent.NextUrl
-            };
-            return next;
+            return nextEvent;
         }
 
         /// <summary>
@@ -261,17 +268,26 @@ namespace EventSimulator
         /// <returns>The next event.</returns>
         private Event CreateNextEventSlowPurchase(Event prevEvent)
         {
-            // If ClickEvent && on Product page, 50% chance to purchase.
-            if (prevEvent is ClickEvent
-                && IsUrlAProductPage(((ClickEvent)prevEvent).NextUrl)
-                && Random.Next(0, 9) < 5)
+            Event nextEvent;
+
+            // 50% chance to make another purchase.
+            if (prevEvent is PurchaseEvent && Chance(50))
             {
-                return CreateNextPurchaseEvent(prevEvent);
+                nextEvent = CreateNextPurchaseEvent(prevEvent);
+            }
+            // 50% chance to buy an item when on a product page.
+            else if (prevEvent is ClickEvent
+                     && IsUrlAProductPage(((ClickEvent)prevEvent).NextUrl)
+                     && Chance(50))
+            {
+                nextEvent = CreateNextPurchaseEvent(prevEvent);
             }
             else
             {
-                return CreateNextClickEvent(prevEvent);
+                nextEvent = CreateNextClickEvent(prevEvent);
             }
+
+            return nextEvent;
         }
 
         #endregion
@@ -280,14 +296,30 @@ namespace EventSimulator
         #endregion
 
         #region Randoms
+
         /// <summary>
         /// Used to randomize click event members. Email, ProductUrl are randomized.
         /// </summary>
         private readonly Random Random = new Random();
 
+        /// <summary>
+        /// Returns true, on average, <code>percent</code> out of every 100 times.
+        /// </summary>
+        /// <param name="percent">The chance that this function will return true.</param>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when percent not in range [0,100].</exception>
+        /// <returns>True percent out of every 100 calls.</returns>
+        private bool Chance(int percent)
+        {
+            if (percent < 0 || 100 < percent)
+            {
+                throw new ArgumentOutOfRangeException("Percent not in range [0,100].");
+            }
+            return Random.Next(0, 99) < percent;
+        }
+
         private int RandomTransactionNumber()
         {
-            return Random.Next(1, 1000000);
+            return Random.Next(1, int.MaxValue);
         }
 
         private string RandomEmail()
