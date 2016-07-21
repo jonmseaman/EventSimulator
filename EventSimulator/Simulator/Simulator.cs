@@ -15,7 +15,29 @@ namespace EventSimulator.Simulator
 {
     public class Simulator
     {
-        #region Member Variables
+        #region Public Variables
+        public int EventsSent => _eventsSent.Sum();
+
+        public bool Sending
+        {
+            get { return _sending; }
+            set
+            {
+                if (_sending == value) return;
+                _sending = value;
+                if (_sending)
+                {
+                    StartSending(_settings.ThreadsCount, _dataQueue);
+                }
+                else
+                {
+                    StopSending();
+                }
+            }
+        }
+        #endregion
+
+        #region Private Variables
 
         /// <summary>
         /// Creates a list of events of length size.
@@ -34,15 +56,16 @@ namespace EventSimulator.Simulator
 
         private readonly EventCreator _eventCreator = new EventCreator();
 
-        private ConcurrentQueue<List<EventData>> _dataQueue = new ConcurrentQueue<List<EventData>>();
+        private readonly ConcurrentQueue<List<EventData>> _dataQueue = new ConcurrentQueue<List<EventData>>();
 
         // Threads
         private Thread[] _senderThreads;
         private Thread _creationThread;
 
+        private bool _sending = false;
+
         // Event sent by threads
         private int[] _eventsSent;
-        public int EventsSent => _eventsSent.Sum();
 
         #endregion
 
@@ -58,18 +81,15 @@ namespace EventSimulator.Simulator
         #region Simulator
 
 
-        // StartSending
         // StopSending
         // SendingStatus
-        // Setup delegates
 
         public void StartSending()
         {
             SetupDelegates(_settings.SendMode);
             _eventHubClient = EventHubClient.CreateFromConnectionString(_settings.ConnectionString);
             // Setup threads
-            // 
-
+            StartSending(_settings.ThreadsCount, _dataQueue);
         }
 
         private void SetupDelegates(SendMode sendMode)
@@ -91,7 +111,7 @@ namespace EventSimulator.Simulator
             }
         }
 
-        private void StartThreads(int numSenders, ConcurrentQueue<List<EventData>> queue )
+        private void StartSending(int numSenders, ConcurrentQueue<List<EventData>> queue)
         {
             // Creation thread
             // Set up creation threads
@@ -109,20 +129,27 @@ namespace EventSimulator.Simulator
             {
                 _eventsSent[i] = 0;
                 var i1 = i; // Make sure the lambda gets the right value of i.
-                _senderThreads[i] = new Thread(() => SendEvents(_settings.ConnectionString, ref _eventsSent[i1], queue));
+                _senderThreads[i] = new Thread(() => SendEvents($"eventSimulator{i1}", ref _eventsSent[i1], queue));
                 _senderThreads[i].Start();
             }
         }
 
+        private void StopSending()
+        {
+            _creationThread.Abort();
+        }
+
         #endregion
 
-        public void SendEvents(string connectionString, ref int eventsSent, ConcurrentQueue<List<EventData>> dataQueue)
-        {
-            List<EventData> eventList;
+        #region SendEvents
 
+        public void SendEvents(string publisher, ref int eventsSent, ConcurrentQueue<List<EventData>> dataQueue)
+        {
+            var sender = _eventHubClient.CreateSender(publisher);
 
             while (true)
             {
+                List<EventData> eventList;
                 if (!dataQueue.TryDequeue(out eventList))
                 {
                     Thread.Sleep(50);
@@ -131,7 +158,7 @@ namespace EventSimulator.Simulator
                 // Send the events
                 try
                 {
-                    _eventHubClient.SendBatch(eventList);
+                    sender.SendBatch(eventList);
                     eventsSent += eventList.Count;
                 }
                 catch (MessageSizeExceededException e)
@@ -144,6 +171,8 @@ namespace EventSimulator.Simulator
                 }
             }
         }
+
+        #endregion
 
         #region CreateEvents
 
@@ -169,7 +198,7 @@ namespace EventSimulator.Simulator
             while (true)
             {
                 // If we cannot send fast enough, don't keep making more events.
-                if (dataQueue.Count >= 2*_settings.ThreadsCount)
+                if (dataQueue.Count >= 2 * _settings.ThreadsCount)
                 {
                     Thread.Sleep(50);
                     continue;
