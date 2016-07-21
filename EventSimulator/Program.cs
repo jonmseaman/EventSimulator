@@ -35,7 +35,7 @@ namespace EventSimulator
         private static EventCreator eventCreator = new EventCreator();
 
         #endregion
-
+        /*
         static void Main(string[] args)
         {
             if (ApplicationDeployment.IsNetworkDeployed)
@@ -163,7 +163,7 @@ namespace EventSimulator
                 threads[i].Abort();
             }
         }
-
+        */
         /// <summary>
         /// Allows the user to specify settings that would otherwise be loaded
         /// from a configuration file.
