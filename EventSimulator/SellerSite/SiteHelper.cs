@@ -15,7 +15,7 @@ namespace EventSimulator.SellerSite
         static SiteHelper()
         {
             // Load product data from file
-            var parser = new TextFieldParser(new StreamReader("data/SellerSite/products.csv"))
+            var parser = new TextFieldParser(new StreamReader("Data/SellerSite/Products.csv"))
             {
                 TextFieldType = FieldType.Delimited
             };
