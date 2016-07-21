@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using EventSimulator.Simulator;
 
 namespace EventSimulator.Pages
 {
@@ -20,6 +21,8 @@ namespace EventSimulator.Pages
     /// </summary>
     public partial class EventHubControl : UserControl
     {
+        private Settings eventHubSettings = new Settings();
+
         public EventHubControl()
         {
             InitializeComponent();
