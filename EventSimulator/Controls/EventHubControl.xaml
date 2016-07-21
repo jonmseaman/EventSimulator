@@ -7,12 +7,6 @@
              d:DesignWidth="300"
              mc:Ignorable="d">
     <StackPanel MaxWidth="450">
-        <!--  Information about the event hub  -->
-        <!--  What about partitions?  -->
-        <Grid>
-            <TextBlock Text="Connection String: " />
-            <TextBlock HorizontalAlignment="Right" Text="" />
-        </Grid>
         <!--  Performance of sender  -->
         <Grid>
             <TextBlock Text="Events Sent: " />
@@ -22,28 +16,16 @@
             <TextBlock Text="Events/s: " />
             <TextBlock HorizontalAlignment="Right" />
         </Grid>
-        <!--  Settings  -->
-        <!--  ConnectionString  -->
-        <Grid>
-            <TextBlock Text="Connection String: " />
-            <TextBox MaxWidth="150"
-                     HorizontalAlignment="Right"
-                     Text="Endpoint=sb://servicebusintern2016.servicebus.windows.net/;SharedAccessKeyName=EventHubSendKey;SharedAccessKey=k5tXsmofhbULo+odj+QmCR8yM6oR0pOPNV1/OP5lhxw=;EntityPath=sellersite " />
-        </Grid>
-        <!--  SendMode  -->
-        <Grid>
-            <TextBlock Text="SendMode: " />
-            <ComboBox Name="SendModes"
-                      MaxWidth="150"
-                      HorizontalAlignment="Right" />
-        </Grid>
-        <!--  Behavior Percents if Simulated  -->
+        <!--  Information about the event hub  -->
+        <!--  What about partitions?  -->
 
         <Button Name="StartStopButton"
                 HorizontalAlignment="Left"
                 Click="StartStopButton_OnClick">
             Start
         </Button>
+        <Button Name="SettingsButton" HorizontalAlignment="Left" />
+
 
     </StackPanel>
 </UserControl>
