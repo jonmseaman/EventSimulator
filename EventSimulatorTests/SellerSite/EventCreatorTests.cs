@@ -1,4 +1,6 @@
 ﻿using System;
+using System.CodeDom;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using EventSimulator.SellerSite;
 using EventSimulator.Events;
@@ -9,6 +11,8 @@ namespace EventSimulatorTests
     public class EventCreatorTests
     {
         EventCreator eventCreator = new EventCreator();
+
+        const int NumTriesForRandoms = 15;
 
         #region CreateEventsTests
         [TestMethod]
@@ -112,7 +116,7 @@ namespace EventSimulatorTests
         [TestMethod]
         public void CreateNextEvent_ClickEvent_Browsing()
         {
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < NumTriesForRandoms; i++)
             {
                 var first = eventCreator.CreateClickEvent();
                 var next = eventCreator.CreateNextEvent(first, UserBehavior.Browsing) as ClickEvent;
@@ -160,7 +164,71 @@ namespace EventSimulatorTests
         [TestMethod]
         public void CreateNextEvent_ClickEventOnProductPage_FastPurchase()
         {
-            
+            // This should result in a purchase event being generated.
+            var first = eventCreator.CreateClickEvent();
+            first.NextUrl = SiteHelper.RandomProductUrl();
+
+            var next = eventCreator.CreateNextEvent(first, UserBehavior.FastPurchase) as PurchaseEvent;
+            Assert.IsNotNull(next);
+            Assert.AreEqual(SiteHelper.ProductIdFromUrl(first.NextUrl), next.ProductId, "Product Ids did not match.");
+        }
+
+        [TestMethod]
+        public void CreateNextEvent_PurchaseEvent_FastPurchase()
+        {
+            // This should sometimes generate a product event.
+            var foundPurchase = false;
+            for (int i = 0; i < NumTriesForRandoms; i++)
+            {
+                var first = eventCreator.CreatePurchaseEvent();
+                var next = eventCreator.CreateNextEvent(first, UserBehavior.FastPurchase);
+
+                foundPurchase = foundPurchase || next is PurchaseEvent;
+            }
+            Assert.IsTrue(foundPurchase);
+        }
+
+        [TestMethod]
+        public void CreateNextEvent_ClickEventOnProductPage_SlowPurchase()
+        {
+            // CreateNextEvent should sometimes generate a purchase event on a product page.
+            var foundPurchase = false;
+            var foundClick = false;
+
+            for (int i = 0; i < NumTriesForRandoms; i++)
+            {
+                var first = eventCreator.CreateClickEvent();
+                first.NextUrl = SiteHelper.RandomProductUrl();
+
+                var next = eventCreator.CreateNextEvent(first, UserBehavior.SlowPurchase);
+                foundPurchase = foundPurchase || next is PurchaseEvent;
+                foundClick = foundClick || next is ClickEvent;
+            }
+
+            Assert.IsTrue(foundPurchase);
+            Assert.IsTrue(foundClick);
+        }
+
+        [TestMethod]
+        public void CreateNextEvent_PurchaseEvent_SlowPurchase()
+        {
+            // CreateNextEvent should sometimes generate another purchase event.
+
+            var foundPurchase = false;
+            var foundClick = false;
+
+            for (int i = 0; i < NumTriesForRandoms; i++)
+            {
+                var first = eventCreator.CreatePurchaseEvent();
+                var next = eventCreator.CreateNextEvent(first, UserBehavior.SlowPurchase);
+
+                foundPurchase = foundPurchase || next is PurchaseEvent;
+                foundClick = foundClick || next is ClickEvent;
+            }
+
+            Assert.IsTrue(foundPurchase);
+            Assert.IsTrue(foundClick);
+
         }
 
         #endregion
