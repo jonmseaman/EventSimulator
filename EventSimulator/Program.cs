@@ -7,9 +7,9 @@ using Microsoft.ServiceBus.Messaging;
 using System.Configuration;
 using System.Deployment.Application;
 using System.Collections.Concurrent;
-using System.Diagnostics.Tracing;
 using System.Text;
 using Newtonsoft.Json;
+using EventSimulator.SellerSite;
 
 namespace EventSimulator
 {
@@ -62,9 +62,7 @@ namespace EventSimulator
             }
 
 
-            // Get or load settings.
             // If the previous section specifies running setup, settings are obtained from user.
-            // Otherwise, they are loaded from a file.
 
             // Get or load settings.
             if (runSetup)
@@ -279,6 +277,8 @@ namespace EventSimulator
             }
         }
 
+        #region CreateEvents
+
         public static void CreateEvents(ConcurrentQueue<List<EventData>> dataQueue)
         {
             TimeSpan dt;
@@ -300,14 +300,12 @@ namespace EventSimulator
             var next = DateTime.Now;
             while (true)
             {
-                // If we already have a large backlog, don't make more events.
+                // If we cannot send fast enough, don't keep making more events.
                 if (dataQueue.Count >= 2*settings.ThreadsCount)
                 {
                     Thread.Sleep(50);
                     continue;
                 }
-
-
 
                 // Make an EventData list to add to the queue
                 var dataList = new List<EventData>(eventList.Count);
@@ -329,8 +327,6 @@ namespace EventSimulator
                 next += dt;
             }
         }
-
-        #region CreateEvents
 
         private static List<Event> CreateClickEvents(int batchSize)
         {
@@ -399,16 +395,6 @@ namespace EventSimulator
         }
 
         #endregion
-
-
-        private static void SleepUntil(DateTime sleepUntil)
-        {
-            if (DateTime.Compare(sleepUntil, DateTime.Now) > 0)
-            {
-                var dt = sleepUntil - DateTime.Now;
-                Thread.Sleep((int)dt.TotalMilliseconds);
-            }
-        }
 
     }
 }
