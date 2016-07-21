@@ -1,6 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using EventSimulator;
+using EventSimulator.SellerSite;
 using EventSimulator.Events;
 
 namespace EventSimulatorTests
@@ -64,7 +64,7 @@ namespace EventSimulatorTests
         public void CreateNextPurchaseEventWithClickEventTest()
         {
             var first = eventCreator.CreateClickEvent();
-            first.NextUrl = EventCreator.ProductUrlFromId(2);
+            first.NextUrl = SiteHelper.ProductUrlFromId(2);
             var next = eventCreator.CreateNextPurchaseEvent(first);
 
             Assert.AreEqual(2, next.ProductId);
@@ -98,41 +98,13 @@ namespace EventSimulatorTests
             var next = eventCreator.CreateNextClickEvent(p);
 
             // Check to make sure the urls are done correctly.
-            Assert.AreEqual(EventCreator.ProductUrlFromId(p.ProductId), next.CurrentUrl);
+            Assert.AreEqual(SiteHelper.ProductUrlFromId(p.ProductId), next.CurrentUrl);
             // first.CurrentUrl does not have a relationship to next
 
             // Check to make sure that the dates have been updated.
             Assert.IsTrue(p.Time <= next.EntryTime);
             Assert.IsTrue(next.ExitTime <= DateTime.Now);
         }
-        #endregion
-
-        #region IsUrlAProductPageTests
-
-        [TestMethod]
-        public void IsUrlAProductPageTrueTest()
-        {
-            Assert.IsTrue(EventCreator.IsUrlAProductPage("/products/2"));
-        }
-
-        [TestMethod]
-        public void IsUrlAProductPageFalseTest()
-        {
-            Assert.IsFalse(EventCreator.IsUrlAProductPage("/products/2/hello"));
-        }
-
-        [TestMethod]
-        public void IsUrlAProductPageFalse2Test()
-        {
-            Assert.IsFalse(EventCreator.IsUrlAProductPage("/notproducts/2/hello"));
-        }
-
-        [TestMethod]
-        public void IsUrlAProductPageFalse3Test()
-        {
-            Assert.IsFalse(EventCreator.IsUrlAProductPage("/"));
-        }
-
         #endregion
 
         #region CreateNextEventTests
@@ -168,6 +140,7 @@ namespace EventSimulatorTests
 
             // Check to make sure that the dates have been updated.
             Assert.IsTrue(first.Time <= next.EntryTime);
+            Assert.IsInstanceOfType(next, typeof(ClickEvent));
             Assert.IsTrue(next.ExitTime <= DateTime.Now);
         }
 
@@ -177,11 +150,11 @@ namespace EventSimulatorTests
             // When not on the product page, the next event should be a click event on a product page
             var first = eventCreator.CreateClickEvent();
             first.CurrentUrl = "/notonaproductpage/";
+            first.NextUrl = "/notonaproductpage/";
 
-            var next = eventCreator.CreateNextEvent(first, UserBehavior.FastPurchase);
-
-            Assert.IsInstanceOfType(next, typeof(ClickEvent));
-            // TODO: Check to make sure we are on a product page
+            var next = eventCreator.CreateNextEvent(first, UserBehavior.FastPurchase) as ClickEvent;
+            Assert.IsNotNull(next);
+            Assert.IsTrue(SiteHelper.IsUrlAProductPage(next.NextUrl));
         }
 
         [TestMethod]

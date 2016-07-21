@@ -8,7 +8,7 @@ using MathNet.Numerics.Random;
 using Microsoft.VisualBasic.CompilerServices;
 using Microsoft.VisualBasic.FileIO;
 
-namespace EventSimulator
+namespace EventSimulator.SellerSite
 {
     public enum UserBehavior
     {
@@ -18,50 +18,6 @@ namespace EventSimulator
     }
     public class EventCreator
     {
-        #region Private Members
-
-        private List<string[]> productData = new List<string[]>();
-        private Dictionary<int, string[]> productDictionary = new Dictionary<int, string[]>();
-
-        private const int ProductPriceIndex = 4;
-        private const int ProductIdIndex = 0;
-
-        #endregion
-
-        #region Constructor
-
-        public EventCreator()
-        {
-            // Load product data from file
-            var parser = new TextFieldParser(new StreamReader("data/products.csv"))
-            {
-                TextFieldType = FieldType.Delimited
-            };
-            parser.SetDelimiters(",");
-            // Load data while can
-            while (!parser.EndOfData)
-            {
-                var data = parser.ReadFields();
-                // Add that data to our list
-                productData.Add(data);
-                try
-                {
-                    // Get the product id from data
-                    int productId = int.Parse(data[ProductIdIndex]);
-                    // Add the data to the map
-                    productDictionary.Add(productId, data);
-                }
-                catch (Exception e) when (e is ArgumentOutOfRangeException || e is IndexOutOfRangeException)
-                {
-                    throw new FormatException("Malformed products.csv");
-                }
-
-            }
-
-        }
-
-        #endregion
-
         #region CreateEvents
 
         /// <summary>
@@ -72,14 +28,15 @@ namespace EventSimulator
         /// <returns> The randomized event. </returns>
         public ClickEvent CreateClickEvent()
         {
+            var rand = new Random();
             var e = new ClickEvent()
             {
                 SessionId = Guid.NewGuid(),
-                Email = RandomEmail(),
-                EntryTime = DateTime.Now - TimeSpan.FromSeconds(Random.Next(1, 60 * 10)),
+                Email = SiteHelper.RandomEmail(),
+                EntryTime = DateTime.Now - TimeSpan.FromSeconds(rand.Next(1, 60 * 10)),
                 ExitTime = DateTime.Now,
-                CurrentUrl = RandomUrl(),
-                NextUrl = RandomUrl(),
+                CurrentUrl = SiteHelper.RandomUrl(),
+                NextUrl = SiteHelper.RandomUrl(),
             };
             return e;
         }
@@ -94,11 +51,11 @@ namespace EventSimulator
             var purchaseEvent = new PurchaseEvent();
             // TODO: Get the actual transaction number. Or, we could use Guid.
             purchaseEvent.SessionId = Guid.NewGuid();
-            purchaseEvent.TransactionNum = RandomTransactionNumber();
-            purchaseEvent.Email = RandomEmail();
-            purchaseEvent.ProductId = RandomProductId();
-            purchaseEvent.Price = RandomPrice();
-            purchaseEvent.Quantity = RandomProductQuantity();
+            purchaseEvent.TransactionNum = SiteHelper.RandomTransactionNumber();
+            purchaseEvent.Email = SiteHelper.RandomEmail();
+            purchaseEvent.ProductId = SiteHelper.RandomProductId();
+            purchaseEvent.Price = SiteHelper.RandomPrice();
+            purchaseEvent.Quantity = SiteHelper.RandomProductQuantity();
             purchaseEvent.Time = DateTime.Now;
             return purchaseEvent;
         }
@@ -123,25 +80,25 @@ namespace EventSimulator
                 var pEvent = (PurchaseEvent)@event;
                 var nextEvent = new PurchaseEvent(pEvent)
                 {
-                    Quantity = RandomProductQuantity(),
+                    Quantity = SiteHelper.RandomProductQuantity(),
                     Time = pEvent.Time,
                 };
                 return nextEvent;
             }
             if (@event is ClickEvent
-                     && IsUrlAProductPage(((ClickEvent)@event).NextUrl))
+                     && SiteHelper.IsUrlAProductPage(((ClickEvent)@event).NextUrl))
             {
                 var clickEvent = (ClickEvent)@event;
                 // Get the product id from the url.
-                var productId = ProductIdFromUrl(clickEvent.NextUrl);
+                var productId = SiteHelper.ProductIdFromUrl(clickEvent.NextUrl);
                 var nextEvent = new PurchaseEvent(@event)
                 {
                     // TODO: Get the price according to the product id and data from csv
                     ProductId = productId,
-                    Price = GetPrice(productId),
-                    Quantity = RandomProductQuantity(),
+                    Price = SiteHelper.GetPrice(productId),
+                    Quantity = SiteHelper.RandomProductQuantity(),
                     Time = DateTime.Now,
-                    TransactionNum = RandomTransactionNumber()
+                    TransactionNum = SiteHelper.RandomTransactionNumber()
                 };
 
                 return nextEvent;
@@ -172,15 +129,15 @@ namespace EventSimulator
                 var old = (ClickEvent)@event;
                 // Make the next event.
                 next.CurrentUrl = old.NextUrl;
-                next.NextUrl = RandomUrl();
+                next.NextUrl = SiteHelper.RandomUrl();
                 next.EntryTime = old.ExitTime;
                 next.ExitTime = DateTime.Now;
             }
             else if (@event is PurchaseEvent)
             {
                 var old = (PurchaseEvent)@event;
-                next.CurrentUrl = ProductUrlFromId(old.ProductId);
-                next.NextUrl = RandomUrl();
+                next.CurrentUrl = SiteHelper.ProductUrlFromId(old.ProductId);
+                next.NextUrl = SiteHelper.RandomUrl();
                 next.EntryTime = old.Time;
                 next.ExitTime = DateTime.Now;
             }
@@ -234,14 +191,14 @@ namespace EventSimulator
             Event nextEvent = CreateClickEvent();
 
             // 50% chance to purchase again
-            if (e is PurchaseEvent && Chance(50))
+            if (e is PurchaseEvent && SiteHelper.Chance(50))
             {
                 nextEvent = CreateNextPurchaseEvent(e);
             } else if (e is PurchaseEvent)
             {
                 nextEvent = CreateNextClickEvent(e);
             }
-            else if (e is ClickEvent && IsUrlAProductPage(((ClickEvent)e).NextUrl))
+            else if (e is ClickEvent && SiteHelper.IsUrlAProductPage(((ClickEvent)e).NextUrl))
             {
                 nextEvent = CreateNextPurchaseEvent(e);
             }
@@ -250,7 +207,7 @@ namespace EventSimulator
                 var clickEvent = (ClickEvent) e;
                 nextEvent = new ClickEvent(e)
                 {
-                    NextUrl = RandomProductUrl(),
+                    NextUrl = SiteHelper.RandomProductUrl(),
                     EntryTime = clickEvent.ExitTime,
                     ExitTime = DateTime.Now,
                     CurrentUrl = clickEvent.NextUrl
@@ -271,14 +228,14 @@ namespace EventSimulator
             Event nextEvent;
 
             // 50% chance to make another purchase.
-            if (prevEvent is PurchaseEvent && Chance(50))
+            if (prevEvent is PurchaseEvent && SiteHelper.Chance(50))
             {
                 nextEvent = CreateNextPurchaseEvent(prevEvent);
             }
             // 50% chance to buy an item when on a product page.
             else if (prevEvent is ClickEvent
-                     && IsUrlAProductPage(((ClickEvent)prevEvent).NextUrl)
-                     && Chance(50))
+                     && SiteHelper.IsUrlAProductPage(((ClickEvent)prevEvent).NextUrl)
+                     && SiteHelper.Chance(50))
             {
                 nextEvent = CreateNextPurchaseEvent(prevEvent);
             }
@@ -292,147 +249,6 @@ namespace EventSimulator
 
         #endregion
 
-
-        #endregion
-
-        #region Randoms
-
-        /// <summary>
-        /// Used to randomize click event members. Email, ProductUrl are randomized.
-        /// </summary>
-        private readonly Random Random = new Random();
-
-        /// <summary>
-        /// Returns true, on average, <code>percent</code> out of every 100 times.
-        /// </summary>
-        /// <param name="percent">The chance that this function will return true.</param>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when percent not in range [0,100].</exception>
-        /// <returns>True percent out of every 100 calls.</returns>
-        private bool Chance(int percent)
-        {
-            if (percent < 0 || 100 < percent)
-            {
-                throw new ArgumentOutOfRangeException("Percent not in range [0,100].");
-            }
-            return Random.Next(0, 99) < percent;
-        }
-
-        private int RandomTransactionNumber()
-        {
-            return Random.Next(1, int.MaxValue);
-        }
-
-        private string RandomEmail()
-        {
-            var rand = (int)Normal.Sample(Random, 25000, 7500);
-            return $"user{rand}@example.com";
-        }
-
-        private int RandomProductId()
-        {
-            // Get num items
-            var cnt = productData.Count;
-            // Standard dev. and mean.
-            var sd = cnt / 0.25;
-            var mu = cnt / 0.5;
-            var randIndex = (int)Normal.Sample(Random, mu, sd);
-            // Make sure index in range of productData
-            randIndex = randIndex < 0 ? 0 : randIndex;
-            randIndex = randIndex >= cnt ? cnt - 1 : randIndex;
-            // Try to get the product id from the selected data.
-            int productId;
-            var idStr = productData[randIndex][ProductIdIndex];
-            int.TryParse(idStr, out productId);
-
-            return productId;
-        }
-
-        private int RandomPrice()
-        {
-            var rand = (int)Normal.Sample(Random, 1250, 250);
-            rand = rand < 250 ? 250 : rand;
-            return rand;
-        }
-
-        private int GetPrice(int productId)
-        {
-            int price;
-            try
-            {
-                // Must convert to price in cents.
-                double dPrice;
-                double.TryParse(productDictionary[productId][ProductPriceIndex], out dPrice);
-                price = (int)Math.Round(100.0 * dPrice);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                price = RandomPrice();
-            }
-            return price;
-        }
-
-        private int RandomProductQuantity()
-        {
-            var rand = (int)Normal.Sample(Random, 5, 2);
-            rand = rand < 1 ? 1 : rand;
-            return rand;
-        }
-
-        private string RandomUrl()
-        {
-            var rand = Random.Next(0, 9);
-            // 30% to go back to the home page.
-            if (rand < 3)
-            {
-                return HomePageUrl;
-            }
-            else
-            {
-                return RandomProductUrl();
-            }
-        }
-
-        private string RandomProductUrl()
-        {
-            return $"{ProductPageUrl}{RandomProductId()}";
-        }
-
-        #endregion
-
-        #region Utilities
-        private static string HomePageUrl { get; } = "/";
-        private static string ProductPageUrl { get; } = "/products/";
-
-        public static string ProductUrlFromId(int productId)
-        {
-            return $"{ProductPageUrl}{productId}";
-        }
-
-        public static bool IsUrlAProductPage(string url)
-        {
-            return Regex.Match(url, $"({ProductPageUrl})[0-9]+").Length == url.Length;
-        }
-
-        public static bool IsUrlTheHomePage(string url)
-        {
-            return url == HomePageUrl;
-        }
-
-        /// <summary>
-        /// Extracts the product id from a product page url.
-        /// </summary>
-        /// <param name="nextUrl">A url corresponding to a product page.</param>
-        /// <exception cref="ArgumentException">Thrown if the url is not a product url.</exception>
-        /// <returns></returns>
-        private static int ProductIdFromUrl(string nextUrl)
-        {
-            if (!nextUrl.StartsWith(ProductPageUrl))
-            {
-                throw new ArgumentException("The url does not correspond to a product page.");
-            }
-            var prodIdStr = nextUrl.Substring(ProductPageUrl.Length);
-            return int.Parse(prodIdStr);
-        }
 
         #endregion
 

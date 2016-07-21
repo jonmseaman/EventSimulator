@@ -9,6 +9,7 @@ using System.Deployment.Application;
 using System.Collections.Concurrent;
 using System.Text;
 using Newtonsoft.Json;
+using EventSimulator.SellerSite;
 
 namespace EventSimulator
 {

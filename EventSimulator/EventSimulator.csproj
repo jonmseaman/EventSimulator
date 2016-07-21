@@ -54,7 +54,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>89990399D8F7EEFAEA7EC42B5493411423F80596</ManifestCertificateThumbprint>
@@ -124,9 +124,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SellerSite\SiteHelper.cs" />
     <Compile Include="Events\ClickEvent.cs" />
     <Compile Include="Events\Event.cs" />
-    <Compile Include="EventCreator.cs" />
+    <Compile Include="SellerSite\EventCreator.cs" />
     <Compile Include="Events\PurchaseEvent.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -134,7 +135,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <Content Include="data\products.csv">
+    <Content Include="data\SellerSite\products.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="EventSimulator_1_TemporaryKey.pfx" />
