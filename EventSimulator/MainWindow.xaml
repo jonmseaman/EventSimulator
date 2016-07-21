@@ -10,10 +10,11 @@
                       Height="350"
                       mc:Ignorable="d">
 
-        <TabControl>
-            <TabItem Header="Home" />
-            <TabItem Header="EventHub">
-                <local:EventHubControl />
-            </TabItem>
-        </TabControl>
+    <TabControl>
+        <TabItem Header="Home" />
+        <TabItem Header="EventHub">
+            <local:EventHubControl />
+        </TabItem>
+        <TabItem Focusable="False" />
+    </TabControl>
 </Controls:MetroWindow>

@@ -11,27 +11,36 @@ using System.Text;
 using Newtonsoft.Json;
 using EventSimulator.SellerSite;
 
-namespace EventSimulator
+namespace EventSimulator.Simulator
 {
     public class Simulator
     {
         #region Member Variables
 
         delegate List<Event> CreateListDelegate(int size);
-        static CreateListDelegate CreateList;
+        CreateListDelegate CreateList;
 
         delegate void UpdateListDelegate(List<Event> events);
-        static UpdateListDelegate UpdateList;
+        UpdateListDelegate UpdateList;
 
-        static Settings settings;
+        Settings settings;
 
-        private static EventHubClient EventHubClient;
+        private EventHubClient EventHubClient;
 
-        private static EventCreator eventCreator = new EventCreator();
+        private EventCreator eventCreator = new EventCreator();
 
         #endregion
 
-        public static void ConsoleMain(string[] args)
+        #region Constructor
+
+        public Simulator(Settings settings)
+        {
+            
+        }
+
+        #endregion
+
+        public void ConsoleMain(string[] args)
         {
             if (ApplicationDeployment.IsNetworkDeployed)
             {
@@ -242,7 +251,7 @@ namespace EventSimulator
 
         }
 
-        public static void SendEvents(string connectionString, ref int eventsSent, ConcurrentQueue<List<EventData>> dataQueue)
+        public void SendEvents(string connectionString, ref int eventsSent, ConcurrentQueue<List<EventData>> dataQueue)
         {
             List<EventData> eventList;
 
@@ -273,7 +282,7 @@ namespace EventSimulator
 
         #region CreateEvents
 
-        public static void CreateEvents(ConcurrentQueue<List<EventData>> dataQueue)
+        public void CreateEvents(ConcurrentQueue<List<EventData>> dataQueue)
         {
             TimeSpan dt;
             List<Event> eventList;
@@ -322,7 +331,7 @@ namespace EventSimulator
             }
         }
 
-        private static List<Event> CreateClickEvents(int batchSize)
+        private List<Event> CreateClickEvents(int batchSize)
         {
             var eventList = new List<Event>();
             for (var i = 0; i < batchSize; i++)
@@ -332,7 +341,7 @@ namespace EventSimulator
             return eventList;
         }
 
-        private static List<Event> CreatePurchaseEvents(int batchSize)
+        private List<Event> CreatePurchaseEvents(int batchSize)
         {
             var eventList = new List<Event>();
             for (var i = 0; i < batchSize; i++)
@@ -346,7 +355,7 @@ namespace EventSimulator
 
         #region UpdateEvents
 
-        private static void UpdateSimulatedEvents(List<Event> eventList)
+        private void UpdateSimulatedEvents(List<Event> eventList)
         {
             // Update list of events to show user action.
             var offset = 0;
@@ -363,7 +372,7 @@ namespace EventSimulator
 
         }
 
-        private static void UpdateSimulatedEventsWithBehavior(int startIndex, int count, List<Event> eventList, UserBehavior behavior)
+        private void UpdateSimulatedEventsWithBehavior(int startIndex, int count, List<Event> eventList, UserBehavior behavior)
         {
             for (var i = startIndex; count > 0; count--, i++)
             {
@@ -371,7 +380,7 @@ namespace EventSimulator
             }
         }
 
-        private static void UpdateClickEvents(List<Event> eventList)
+        private void UpdateClickEvents(List<Event> eventList)
         {
             for (var i = 0; i < eventList.Count; i++)
             {
@@ -380,7 +389,7 @@ namespace EventSimulator
 
         }
 
-        private static void UpdatePurchaseEvents(List<Event> eventList)
+        private void UpdatePurchaseEvents(List<Event> eventList)
         {
             for (var i = 0; i < eventList.Count; i++)
             {
