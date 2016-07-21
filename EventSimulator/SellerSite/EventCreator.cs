@@ -93,7 +93,6 @@ namespace EventSimulator.SellerSite
                 var productId = SiteHelper.ProductIdFromUrl(clickEvent.NextUrl);
                 var nextEvent = new PurchaseEvent(@event)
                 {
-                    // TODO: Get the price according to the product id and data from csv
                     ProductId = productId,
                     Price = SiteHelper.GetPrice(productId),
                     Quantity = SiteHelper.RandomProductQuantity(),

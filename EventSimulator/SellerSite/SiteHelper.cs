@@ -91,8 +91,8 @@ namespace EventSimulator.SellerSite
             // Get num items
             var cnt = productData.Count;
             // Standard dev. and mean.
-            var sd = cnt / 0.25;
-            var mu = cnt / 0.5;
+            var sd = cnt * 0.25;
+            var mu = cnt * 0.5;
             var randIndex = (int)Normal.Sample(Random, mu, sd);
             // Make sure index in range of productData
             randIndex = randIndex < 0 ? 0 : randIndex;
