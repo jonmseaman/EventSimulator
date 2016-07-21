@@ -1,0 +1,46 @@
+﻿<UserControl x:Class="EventSimulator.Pages.EventHubControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DesignHeight="300"
+             d:DesignWidth="300"
+             mc:Ignorable="d">
+    <StackPanel MaxWidth="300">
+        <!--  Information about the event hub  -->
+        <!--  What about partitions?  -->
+        <Grid>
+            <TextBlock Text="Connection String: " />
+            <TextBlock HorizontalAlignment="Right" Text="" />
+        </Grid>
+        <!--  Performance of sender  -->
+        <Grid>
+            <TextBlock Text="Events Sent: " />
+            <TextBlock HorizontalAlignment="Right" />
+        </Grid>
+        <Grid>
+            <TextBlock Text="Events/s: " />
+            <TextBlock HorizontalAlignment="Right" />
+        </Grid>
+        <!--  Settings  -->
+        <!--  ConnectionString  -->
+        <Grid>
+            <TextBlock Text="Connection String: " />
+            <TextBox MaxWidth="150"
+                     HorizontalAlignment="Right"
+                     Text="Endpoint=sb://servicebusintern2016.servicebus.windows.net/;SharedAccessKeyName=EventHubSendKey;SharedAccessKey=k5tXsmofhbULo+odj+QmCR8yM6oR0pOPNV1/OP5lhxw=;EntityPath=sellersite " />
+        </Grid>
+        <!--  SendMode  -->
+        <Grid>
+            <TextBlock Text="SendMode: " />
+            <ComboBox MaxWidth="150" HorizontalAlignment="Right" />
+        </Grid>
+        <!--  Behavior Percents if Simulated  -->
+
+        <Button Name="StartStopButton" HorizontalAlignment="Center"
+                Click="StartStopButton_OnClick">
+            Start
+        </Button>
+
+    </StackPanel>
+</UserControl>

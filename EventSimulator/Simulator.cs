@@ -13,12 +13,7 @@ using EventSimulator.SellerSite;
 
 namespace EventSimulator
 {
-    /// <summary>
-    /// This program is supposed to simulate usage of an ecommerce website.
-    /// This program sends simulated events to an event hub according 
-    /// to its App.config and cmd line arguments.
-    /// </summary>
-    static class Program
+    public class Simulator
     {
         #region Member Variables
 
@@ -35,8 +30,8 @@ namespace EventSimulator
         private static EventCreator eventCreator = new EventCreator();
 
         #endregion
-        /*
-        static void Main(string[] args)
+
+        public static void ConsoleMain(string[] args)
         {
             if (ApplicationDeployment.IsNetworkDeployed)
             {
@@ -60,7 +55,6 @@ namespace EventSimulator
             {
                 runSetup = settings.IsFirstRun;
             }
-
 
             // If the previous section specifies running setup, settings are obtained from user.
 
@@ -163,7 +157,7 @@ namespace EventSimulator
                 threads[i].Abort();
             }
         }
-        */
+
         /// <summary>
         /// Allows the user to specify settings that would otherwise be loaded
         /// from a configuration file.
