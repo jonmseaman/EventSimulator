@@ -6,7 +6,7 @@
              d:DesignHeight="300"
              d:DesignWidth="300"
              mc:Ignorable="d">
-    <StackPanel MaxWidth="300">
+    <StackPanel MaxWidth="450">
         <!--  Information about the event hub  -->
         <!--  What about partitions?  -->
         <Grid>
@@ -33,11 +33,14 @@
         <!--  SendMode  -->
         <Grid>
             <TextBlock Text="SendMode: " />
-            <ComboBox MaxWidth="150" HorizontalAlignment="Right" />
+            <ComboBox Name="SendModes"
+                      MaxWidth="150"
+                      HorizontalAlignment="Right" />
         </Grid>
         <!--  Behavior Percents if Simulated  -->
 
-        <Button Name="StartStopButton" HorizontalAlignment="Center"
+        <Button Name="StartStopButton"
+                HorizontalAlignment="Left"
                 Click="StartStopButton_OnClick">
             Start
         </Button>

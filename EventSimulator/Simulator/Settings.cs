@@ -118,7 +118,7 @@ namespace EventSimulator.Simulator
         /// </summary>
         public int[] BehaviorPercents { get; set; } = { 15, 30, 55 };
 
-        public int EventsPerSecond { get; set; } = 1;
+        public int EventsPerSecond { get; set; } = 10;
 
         public int ThreadsCount { get; set; } = Environment.ProcessorCount;
 
