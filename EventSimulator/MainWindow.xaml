@@ -9,12 +9,74 @@
                       Width="450"
                       Height="350"
                       mc:Ignorable="d">
+    <!--  Flyouts  -->
+    <Controls:MetroWindow.Flyouts>
+        <Controls:FlyoutsControl x:Name="FlyoutsControl">
+            <Controls:Flyout x:Name="SettingsFlyout"
+                             Width="{Binding RelativeSource={RelativeSource FindAncestor,
+                                                                            AncestorType=Controls:MetroWindow},
+                                             Path=ActualWidth}"
+                             MaxWidth="450"
+                             Margin="100 0 0 0"
+                             Controls:ControlsHelper.ContentCharacterCasing="Upper"
+                             AreAnimationsEnabled="False"
+                             FocusedElement="{Binding ElementName=firstTB}"
+                             Header="Settings"
+                             Position="Right">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel>
+                        <TextBlock Grid.Row="0" Text="Something above the ScrollPanel" />
+                        <TextBlock Grid.Row="0" Text="This Flyout animates its opacity when opening and closing." />
+                    </StackPanel>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Orientation="Vertical">
+                            <TextBox Name="TabName"
+                                     Margin="0,5,0,0"
+                                     Controls:TextBoxHelper.Watermark="Tab name" />
+                            <TextBox x:Name="ConnectionStringTextBox" Controls:TextBoxHelper.Watermark="Connection String" />
+                            <TextBox Margin="0,5,0,0" Controls:TextBoxHelper.Watermark="TextBox 02" />
+                            <TextBox Margin="0,5,0,0" Controls:TextBoxHelper.Watermark="TextBox 03" />
+                            <TextBox Margin="0,5,0,0" Controls:TextBoxHelper.Watermark="TextBox 04" />
+                            <TextBox Margin="0,5,0,0" Controls:TextBoxHelper.Watermark="TextBox 05" />
+                            <TextBox Margin="0,5,0,0" Controls:TextBoxHelper.Watermark="TextBox 06" />
+                            <TextBox Margin="0,5,0,0" Controls:TextBoxHelper.Watermark="TextBox 07" />
+                            <TextBox Margin="0,5,0,0" Controls:TextBoxHelper.Watermark="TextBox 08" />
+                            <TextBox Margin="0,5,0,0" Controls:TextBoxHelper.Watermark="TextBox 09" />
+                            <TextBox Margin="0,5,0,0" Controls:TextBoxHelper.Watermark="TextBox 10" />
+                        </StackPanel>
+                    </ScrollViewer>
+                    <UniformGrid Grid.Row="2"
+                                 Margin="10"
+                                 Columns="2">
+                        <Button Margin="10"
+                                Click="CreateNewEventHubTab"
+                                Content="Create"
+                                Style="{DynamicResource SquareButtonStyle}" />
+                        <Button Margin="10"
+                                Click="ToggleFlyout"
+                                Content="Cancel"
+                                Style="{DynamicResource SquareButtonStyle}" />
+                    </UniformGrid>
+                </Grid>
+            </Controls:Flyout>
+        </Controls:FlyoutsControl>
+    </Controls:MetroWindow.Flyouts>
 
-    <TabControl>
-        <TabItem Header="Home" />
-        <TabItem Header="EventHub">
-            <local:EventHubControl />
+
+    <TabControl Name="Tabs">
+        <TabItem Header="Home">
+            <Button Name="NewEventHub"
+                    Margin="0,5,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Click="ToggleFlyout">
+                Open Settings
+            </Button>
         </TabItem>
-        <TabItem Focusable="False" />
     </TabControl>
 </Controls:MetroWindow>

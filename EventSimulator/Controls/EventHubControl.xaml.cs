@@ -21,7 +21,7 @@ namespace EventSimulator.Controls
     /// </summary>
     public partial class EventHubControl : UserControl
     {
-        private Settings eventHubSettings = new Settings();
+        public Settings Settings = new Settings();
         private Simulator.Simulator _simulator;
 
         public EventHubControl()
@@ -34,9 +34,9 @@ namespace EventSimulator.Controls
         {
             if (_started) return;
             _started = true;
-            eventHubSettings.ConnectionString =
+            Settings.ConnectionString =
                 "Endpoint=sb://servicebusintern2016.servicebus.windows.net/;SharedAccessKeyName=EventHubSendKey;SharedAccessKey=k5tXsmofhbULo+odj+QmCR8yM6oR0pOPNV1/OP5lhxw=;EntityPath=sellersite";
-            _simulator = new Simulator.Simulator(eventHubSettings);
+            _simulator = new Simulator.Simulator(Settings);
             _simulator.StartSending();
         }
     }
