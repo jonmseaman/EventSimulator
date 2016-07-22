@@ -14,7 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using EventSimulator.Simulator;
 
-namespace EventSimulator.Pages
+namespace EventSimulator.Controls
 {
     /// <summary>
     /// Interaction logic for UserControl1.xaml
