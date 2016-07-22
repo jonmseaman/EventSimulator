@@ -19,10 +19,11 @@
                              MaxWidth="450"
                              Margin="100 0 0 0"
                              Controls:ControlsHelper.ContentCharacterCasing="Upper"
-                             AreAnimationsEnabled="False"
-                             FocusedElement="{Binding ElementName=firstTB}"
+                             AreAnimationsEnabled="True"
+                             FocusedElement="{Binding ElementName=TabName}"
                              Header="Settings"
-                             Position="Right">
+                             Position="Right"
+                             Theme="Accent">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -38,16 +39,22 @@
                             <TextBox Name="TabName"
                                      Margin="0,5,0,0"
                                      Controls:TextBoxHelper.Watermark="Tab name" />
-                            <TextBox x:Name="ConnectionStringTextBox" Controls:TextBoxHelper.Watermark="Connection String" />
-                            <TextBox Margin="0,5,0,0" Controls:TextBoxHelper.Watermark="TextBox 02" />
-                            <TextBox Margin="0,5,0,0" Controls:TextBoxHelper.Watermark="TextBox 03" />
-                            <TextBox Margin="0,5,0,0" Controls:TextBoxHelper.Watermark="TextBox 04" />
-                            <TextBox Margin="0,5,0,0" Controls:TextBoxHelper.Watermark="TextBox 05" />
-                            <TextBox Margin="0,5,0,0" Controls:TextBoxHelper.Watermark="TextBox 06" />
-                            <TextBox Margin="0,5,0,0" Controls:TextBoxHelper.Watermark="TextBox 07" />
-                            <TextBox Margin="0,5,0,0" Controls:TextBoxHelper.Watermark="TextBox 08" />
-                            <TextBox Margin="0,5,0,0" Controls:TextBoxHelper.Watermark="TextBox 09" />
-                            <TextBox Margin="0,5,0,0" Controls:TextBoxHelper.Watermark="TextBox 10" />
+                            <TextBox Name="ConnectionString"
+                                     Margin="0,5,0,0"
+                                     Controls:TextBoxHelper.Watermark="Connection String" />
+                            <TextBox x:Name="EventsPerSecond"
+                                     Margin="0,5,0,0"
+                                     Controls:TextBoxHelper.Watermark="Events per second" />
+                            <ComboBox Name="SendMode"
+                                      Margin="0,5,0,0"
+                                      Focusable="False"
+                                      IsEditable="True"
+                                      IsReadOnly="True"
+                                      Text="Send Mode">
+                                <ComboBoxItem>ClickEvents</ComboBoxItem>
+                                <ComboBoxItem>PurchaseEvents</ComboBoxItem>
+                                <ComboBoxItem>SimulatedEvents</ComboBoxItem>
+                            </ComboBox>
                         </StackPanel>
                     </ScrollViewer>
                     <UniformGrid Grid.Row="2"
@@ -55,12 +62,11 @@
                                  Columns="2">
                         <Button Margin="10"
                                 Click="CreateNewEventHubTab"
-                                Content="Create"
-                                Style="{DynamicResource SquareButtonStyle}" />
+                                Content="Create" />
                         <Button Margin="10"
                                 Click="ToggleFlyout"
                                 Content="Cancel"
-                                Style="{DynamicResource SquareButtonStyle}" />
+                                IsCancel="True" />
                     </UniformGrid>
                 </Grid>
             </Controls:Flyout>

@@ -41,15 +41,22 @@ namespace EventSimulator
         private void CreateNewEventHubTab(object sender, RoutedEventArgs e)
         {
             // Make a new settings and copy information from flyout
-            var s = new Settings
+            Simulator.SendMode sendMode;
+            var result = Simulator.SendMode.TryParse(SendMode.Text, out sendMode);
+
+
+
+            var settings = new Settings
             {
-                ConnectionString = ConnectionStringTextBox.Text
+                ConnectionString = ConnectionString.Text,
+                EventsPerSecond = int.Parse(EventsPerSecond.Text),
+                SendMode = result ? sendMode : Simulator.SendMode.ClickEvents
             };
 
             // Make the tab with those settings
             var eventHubControl = new EventHubControl()
             {
-                Settings = s
+                Settings = settings
             };
             var newTab = new TabItem()
             {
