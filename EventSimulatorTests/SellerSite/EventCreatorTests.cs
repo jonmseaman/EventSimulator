@@ -183,6 +183,12 @@ namespace EventSimulatorTests
                 var first = eventCreator.CreatePurchaseEvent();
                 var next = eventCreator.CreateNextEvent(first, UserBehavior.FastPurchase);
 
+                var pNext = next as PurchaseEvent;
+                if (pNext != null)
+                {
+                    Assert.AreEqual(first.TransactionNum, pNext.TransactionNum);
+                    Assert.AreEqual(first.Time, pNext.Time);
+                }
                 foundPurchase = foundPurchase || next is PurchaseEvent;
             }
             Assert.IsTrue(foundPurchase);
