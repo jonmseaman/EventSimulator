@@ -55,6 +55,16 @@
                                 <ComboBoxItem>PurchaseEvents</ComboBoxItem>
                                 <ComboBoxItem>SimulatedEvents</ComboBoxItem>
                             </ComboBox>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Controls:TextBoxHelper.Watermark="FastPurchase" Margin="0,5,5,0" Grid.Column="0"></TextBox>
+                                <TextBox Controls:TextBoxHelper.Watermark="SlowPurchase" Margin="0,5,0,0" Grid.Column="1"></TextBox>
+                                <TextBox Controls:TextBoxHelper.Watermark="Browsing" Margin="5,5,0,0" Grid.Column="2"></TextBox>
+                            </Grid>
                         </StackPanel>
                     </ScrollViewer>
                     <UniformGrid Grid.Row="2"

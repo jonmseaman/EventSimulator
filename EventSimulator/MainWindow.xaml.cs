@@ -68,9 +68,11 @@ namespace EventSimulator
                 Header = tabName.Length > 0 ? TabName.Text : (Tabs.Items.Count - 1).ToString(),
                 Content = eventHubControl
             };
-            newTab.Focus();
 
+
+            SettingsFlyout.IsOpen = false;
             Tabs.Items.Add(newTab);
+            newTab.Focus();
         }
     }
 }
