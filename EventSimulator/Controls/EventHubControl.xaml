@@ -11,11 +11,11 @@
         <!--  Performance of sender  -->
         <Grid>
             <TextBlock Text="Events Sent: " />
-            <TextBlock HorizontalAlignment="Right" />
+            <TextBlock Name="TEventsSent" HorizontalAlignment="Right" />
         </Grid>
         <Grid>
             <TextBlock Text="Events/s: " />
-            <TextBlock HorizontalAlignment="Right" />
+            <TextBlock Name="TEventsPerSecond" HorizontalAlignment="Right" />
         </Grid>
         <!--  Information about the event hub  -->
         <!--  What about partitions?  -->
@@ -25,8 +25,5 @@
                 Click="StartStopButton_OnClick">
             Start
         </Button>
-        <Button Name="SettingsButton" HorizontalAlignment="Left" />
-
-
     </StackPanel>
 </UserControl>

@@ -24,6 +24,33 @@ namespace EventSimulator.Controls
         public Settings Settings = new Settings();
         private Simulator.Simulator _simulator;
 
+        private int _eventsPerSecond;
+        public int EventsPerSecond
+        {
+            get { return _eventsPerSecond; }
+            set {
+                if (_eventsPerSecond != value)
+                {
+                    _eventsPerSecond = value;
+                    TEventsPerSecond.Text = value.ToString();
+                }
+            }
+        }
+
+        private int eventsSent;
+        public int EventsSent
+        {
+            get { return eventsSent; }
+            set
+            {
+                if (eventsSent != value)
+                {
+                    eventsSent = value;
+                    TEventsSent.Text = value.ToString();
+                }
+            }
+        }
+
         public EventHubControl()
         {
             InitializeComponent();
