@@ -37,15 +37,15 @@ namespace EventSimulator.Controls
             }
         }
 
-        private int eventsSent;
+        private int _eventsSent;
         public int EventsSent
         {
-            get { return eventsSent; }
+            get { return _eventsSent; }
             set
             {
-                if (eventsSent != value)
+                if (_eventsSent != value)
                 {
-                    eventsSent = value;
+                    _eventsSent = value;
                     TEventsSent.Text = value.ToString();
                 }
             }
