@@ -19,7 +19,20 @@ namespace EventSimulator.Simulator
     public class Simulator : INotifyPropertyChanged
     {
         #region Public Variables
-        public int EventsSent => _eventsSent.Sum();
+
+        private int _eventsSent;
+        public int EventsSent
+        {
+            get { return _eventsSent; }
+            private set
+            {
+                if (value != _eventsSent)
+                {
+                    _eventsSent = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
 
         private SimulatorStatus _simulatorStatus = SimulatorStatus.Stopped;
         public SimulatorStatus Status
@@ -62,9 +75,10 @@ namespace EventSimulator.Simulator
         // Threads
         private Thread[] _senderThreads;
         private Thread _creationThread;
+        private Thread _epsThread;
 
         // Event sent by threads
-        private int[] _eventsSent;
+        private int[] _eventsSentPerThread;
 
         #endregion
 
@@ -106,14 +120,32 @@ namespace EventSimulator.Simulator
 
             // Sender threads
             _senderThreads = new Thread[numSenders];
-            _eventsSent = new int[numSenders];
+            _eventsSentPerThread = new int[numSenders];
             for (var i = 0; i < numSenders; i++)
             {
-                _eventsSent[i] = 0;
+                _eventsSentPerThread[i] = 0;
                 var i1 = i; // Make sure the lambda gets the right value of i.
-                _senderThreads[i] = new Thread(() => SendEvents($"eventSimulator{i1}", ref _eventsSent[i1], queue));
+                _senderThreads[i] = new Thread(() => SendEvents($"eventSimulator{i1}", ref _eventsSentPerThread[i1], queue));
                 _senderThreads[i].Start();
             }
+
+            // Events Per second thread
+            _epsThread = new Thread(() =>
+            {
+                var next = DateTime.Now;
+                var dt = TimeSpan.FromSeconds(1);
+                while (Status == SimulatorStatus.Sending)
+                {
+                    next += dt;
+                    EventsSent = _eventsSentPerThread.Sum();
+                    var now = DateTime.Now;
+                    if (next > now)
+                    {
+                        Thread.Sleep(next - now);
+                    }
+                }
+            });
+            _epsThread.Start();
         }
 
         public void StopSending()
@@ -124,6 +156,7 @@ namespace EventSimulator.Simulator
             {
                 t.Join();
             }
+            _epsThread.Join();
             Status = SimulatorStatus.Stopped;
         }
 
@@ -312,7 +345,7 @@ namespace EventSimulator.Simulator
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

@@ -22,7 +22,7 @@ namespace EventSimulator.Controls
     /// </summary>
     public partial class EventHubControl : UserControl
     {
-        private Simulator.Simulator _simulator;
+        private readonly Simulator.Simulator _simulator;
 
         private int _eventsPerSecond;
         public int EventsPerSecond
@@ -62,8 +62,12 @@ namespace EventSimulator.Controls
             _simulator = new Simulator.Simulator(settings);
 
             // Bind simulator status to GUI
-            var myBinding = new Binding("Status") {Source = _simulator};
-            TSimulatorStatus.SetBinding(TextBlock.TextProperty, myBinding);
+            var statusBinding = new Binding("Status") {Source = _simulator};
+            TSimulatorStatus.SetBinding(TextBlock.TextProperty, statusBinding);
+            // Bind events sent
+            var eventsSentBinding = new Binding("EventsSent") {Source = _simulator};
+            TEventsSent.SetBinding(TextBlock.TextProperty, eventsSentBinding);
+            // Bind events per second
         }
 
         private void StartStopButton_OnClick(object sender, RoutedEventArgs e)
@@ -75,12 +79,14 @@ namespace EventSimulator.Controls
                     {
                         _simulator.StartSending();
                     }).Start();
+                    StartStopButton.Content = "Stop";
                     break;
                 case SimulatorStatus.Sending:
                     new Thread(() =>
                     {
                         _simulator.StopSending();
                     }).Start();
+                    StartStopButton.Content = "Start";
                     break;
                 case SimulatorStatus.Stopping:
                 // Do nothing if SimulatorStatus.Stopping
