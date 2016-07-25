@@ -18,23 +18,8 @@ namespace EventSimulator.Simulator
         #region Public Variables
         public int EventsSent => _eventsSent.Sum();
 
-        public bool Sending
-        {
-            get { return _sending; }
-            set
-            {
-                if (_sending == value) return;
-                _sending = value;
-                if (_sending)
-                {
-                    StartSending(_settings.ThreadsCount, _dataQueue);
-                }
-                else
-                {
-                    StopSending();
-                }
-            }
-        }
+        public SimulatorStatus Status { get; private set; }
+
         #endregion
 
         #region Private Variables
@@ -56,13 +41,11 @@ namespace EventSimulator.Simulator
 
         private readonly EventCreator _eventCreator = new EventCreator();
 
-        private readonly ConcurrentQueue<List<EventData>> _dataQueue = new ConcurrentQueue<List<EventData>>();
+        private ConcurrentQueue<List<EventData>> _dataQueue = new ConcurrentQueue<List<EventData>>();
 
         // Threads
         private Thread[] _senderThreads;
         private Thread _creationThread;
-
-        private bool _sending = false;
 
         // Event sent by threads
         private int[] _eventsSent;
@@ -78,41 +61,24 @@ namespace EventSimulator.Simulator
 
         #endregion
 
-        #region Simulator
-
-
-        // StopSending
-        // SendingStatus
+        #region Sending / Stop Sending
 
         public void StartSending()
         {
+            if (Status == SimulatorStatus.Sending) return;
+            Status = SimulatorStatus.Sending;
             SetupDelegates(_settings.SendMode);
+
             _eventHubClient = EventHubClient.CreateFromConnectionString(_settings.ConnectionString);
             // Setup threads
             StartSending(_settings.ThreadsCount, _dataQueue);
         }
 
-        private void SetupDelegates(SendMode sendMode)
-        {
-            if (sendMode == SendMode.ClickEvents)
-            {
-                _createList = CreateClickEvents;
-                _updateList = UpdateClickEvents;
-            }
-            else if (sendMode == SendMode.PurchaseEvents)
-            {
-                _createList = CreatePurchaseEvents;
-                _updateList = UpdatePurchaseEvents;
-            }
-            else if (sendMode == SendMode.SimulatedEvents)
-            {
-                _createList = CreateClickEvents;
-                _updateList = UpdateSimulatedEvents;
-            }
-        }
-
         private void StartSending(int numSenders, ConcurrentQueue<List<EventData>> queue)
         {
+            // Initialize variables
+            _dataQueue = new ConcurrentQueue<List<EventData>>();
+
             // Creation thread
             // Set up creation threads
             _creationThread = new Thread(() =>
@@ -136,7 +102,52 @@ namespace EventSimulator.Simulator
 
         private void StopSending()
         {
-            _creationThread.Abort();
+            Status = SimulatorStatus.Stopping;
+            _creationThread.Join();
+            foreach (var t in _senderThreads)
+            {
+                t.Join();
+            }
+            Status = SimulatorStatus.Stopped;
+
+            // null variables that are not being used to possibly free some memory
+            NullVariables();
+            
+        }
+
+
+
+        #endregion
+
+        #region Private methods
+
+        #region Setup
+
+        private void SetupDelegates(SendMode sendMode)
+        {
+            if (sendMode == SendMode.ClickEvents)
+            {
+                _createList = CreateClickEvents;
+                _updateList = UpdateClickEvents;
+            }
+            else if (sendMode == SendMode.PurchaseEvents)
+            {
+                _createList = CreatePurchaseEvents;
+                _updateList = UpdatePurchaseEvents;
+            }
+            else if (sendMode == SendMode.SimulatedEvents)
+            {
+                _createList = CreateClickEvents;
+                _updateList = UpdateSimulatedEvents;
+            }
+        }
+
+        private void NullVariables()
+        {
+            _creationThread = null;
+            _senderThreads = null;
+            _eventHubClient = null;
+            _dataQueue = null;
         }
 
         #endregion
@@ -147,7 +158,7 @@ namespace EventSimulator.Simulator
         {
             var sender = _eventHubClient.CreateSender(publisher);
 
-            while (true)
+            while (Status == SimulatorStatus.Sending)
             {
                 List<EventData> eventList;
                 if (!dataQueue.TryDequeue(out eventList))
@@ -195,7 +206,7 @@ namespace EventSimulator.Simulator
             }
 
             var next = DateTime.Now;
-            while (true)
+            while (Status == SimulatorStatus.Sending)
             {
                 // If we cannot send fast enough, don't keep making more events.
                 if (dataQueue.Count >= 2 * _settings.ThreadsCount)
@@ -293,5 +304,14 @@ namespace EventSimulator.Simulator
 
         #endregion
 
+        #endregion
+
+    }
+
+    public enum SimulatorStatus
+    {
+        Sending,
+        Stopping,
+        Stopped,
     }
 }

@@ -9,11 +9,11 @@
              mc:Ignorable="d">
     <StackPanel MaxWidth="450">
         <!--  Performance of sender  -->
-        <Grid>
+        <Grid Margin="5">
             <TextBlock Text="Events Sent: " />
             <TextBlock Name="TEventsSent" HorizontalAlignment="Right" />
         </Grid>
-        <Grid>
+        <Grid Margin="5">
             <TextBlock Text="Events/s: " />
             <TextBlock Name="TEventsPerSecond" HorizontalAlignment="Right" />
         </Grid>
@@ -21,6 +21,7 @@
         <!--  What about partitions?  -->
 
         <Button Name="StartStopButton"
+                Margin="5"
                 HorizontalAlignment="Left"
                 Click="StartStopButton_OnClick">
             Start
