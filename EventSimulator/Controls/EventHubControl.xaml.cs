@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,49 +17,22 @@ using System.Windows.Shapes;
 using EventSimulator.Simulator;
 using System.Threading;
 using System.Windows.Threading;
+using System.Xaml;
 
 namespace EventSimulator.Controls
 {
     /// <summary>
-    /// Interaction logic for UserControl1.xaml
+    /// Interaction logic for EventHubControl.xaml
     /// </summary>
     public partial class EventHubControl : UserControl
     {
         private readonly Simulator.Simulator _simulator;
 
-        private int _eventsPerSecond;
-        public int EventsPerSecond
-        {
-            get { return _eventsPerSecond; }
-            set
-            {
-                if (_eventsPerSecond != value)
-                {
-                    _eventsPerSecond = value;
-                    TEventsPerSecond.Text = value.ToString();
-                }
-            }
-        }
-
-        private int _eventsSent;
-        public int EventsSent
-        {
-            get { return _eventsSent; }
-            set
-            {
-                if (_eventsSent != value)
-                {
-                    _eventsSent = value;
-                    TEventsSent.Text = value.ToString();
-                }
-            }
-        }
-
         public EventHubControl(Settings settings)
         {
             if (settings == null)
             {
-                throw new ArgumentNullException("Settings cannot be null.");
+                throw new ArgumentNullException(nameof(settings));
             }
 
             InitializeComponent();
@@ -74,6 +48,12 @@ namespace EventSimulator.Controls
             var eventsSentBinding = new Binding("EventsSent") { Source = _simulator };
             TEventsSent.SetBinding(TextBlock.TextProperty, eventsSentBinding);
             // Bind events per second
+            var epsBinding = new Binding("EventsPerSecond")
+            {
+                Source = _simulator,
+                StringFormat = "F2"
+            };
+            TEventsPerSecond.SetBinding(TextBlock.TextProperty, epsBinding);
         }
 
         private void StartStopButton_OnClick(object sender, RoutedEventArgs e)

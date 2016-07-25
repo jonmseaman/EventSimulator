@@ -34,6 +34,21 @@ namespace EventSimulator.Simulator
             }
         }
 
+        private double _eventsPerSecond;
+        public double EventsPerSecond
+        {
+            get { return _eventsPerSecond; }
+            set
+            {
+                if (Math.Abs(value - _eventsPerSecond) >= float.Epsilon)
+                {
+                    _eventsPerSecond = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
+
         private SimulatorStatus _simulatorStatus = SimulatorStatus.Stopped;
         public SimulatorStatus Status
         {
@@ -75,7 +90,7 @@ namespace EventSimulator.Simulator
         // Threads
         private Thread[] _senderThreads;
         private Thread _creationThread;
-        private Thread _epsThread;
+        private Thread _eventsCountThread;
 
         // Event sent by threads
         private int[] _eventsSentPerThread;
@@ -130,14 +145,17 @@ namespace EventSimulator.Simulator
             }
 
             // Events Per second thread
-            _epsThread = new Thread(() =>
+            _eventsCountThread = new Thread(() =>
             {
                 var next = DateTime.Now;
                 var dt = TimeSpan.FromSeconds(1);
+                var prevEventsSent = EventsSent;
                 while (Status == SimulatorStatus.Sending)
                 {
                     next += dt;
                     EventsSent = _eventsSentPerThread.Sum();
+                    EventsPerSecond = (EventsSent - prevEventsSent)/dt.TotalSeconds;
+                    prevEventsSent = EventsSent;
                     var now = DateTime.Now;
                     if (next > now)
                     {
@@ -145,7 +163,7 @@ namespace EventSimulator.Simulator
                     }
                 }
             });
-            _epsThread.Start();
+            _eventsCountThread.Start();
         }
 
         public void StopSending()
@@ -156,7 +174,7 @@ namespace EventSimulator.Simulator
             {
                 t.Join();
             }
-            _epsThread.Join();
+            _eventsCountThread.Join();
             Status = SimulatorStatus.Stopped;
         }
 
