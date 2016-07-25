@@ -19,7 +19,7 @@ namespace EventSimulator.Events
         /// Makes a shallow copy of e.
         /// </summary>
         /// <param name="e">The event to be copied.</param>
-        public ClickEvent(ClickEvent e): base(e)
+        public ClickEvent(ClickEvent e) : base(e)
         {
             CurrentUrl = e.CurrentUrl;
             NextUrl = e.NextUrl;

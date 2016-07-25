@@ -10,15 +10,31 @@ using System.Collections.Concurrent;
 using System.Text;
 using Newtonsoft.Json;
 using EventSimulator.SellerSite;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace EventSimulator.Simulator
 {
-    public class Simulator
+    public class Simulator : INotifyPropertyChanged
     {
         #region Public Variables
         public int EventsSent => _eventsSent.Sum();
 
-        public SimulatorStatus Status { get; private set; }
+        private SimulatorStatus _simulatorStatus = SimulatorStatus.Stopped;
+        public SimulatorStatus Status
+        {
+            get { return _simulatorStatus; }
+            set
+            {
+                if (value != _simulatorStatus)
+                {
+                    _simulatorStatus = value;
+                    NotifyPropertyChanged();
+                }
+            }
+
+        }
 
         #endregion
 
@@ -100,7 +116,7 @@ namespace EventSimulator.Simulator
             }
         }
 
-        private void StopSending()
+        public void StopSending()
         {
             Status = SimulatorStatus.Stopping;
             _creationThread.Join();
@@ -109,13 +125,7 @@ namespace EventSimulator.Simulator
                 t.Join();
             }
             Status = SimulatorStatus.Stopped;
-
-            // null variables that are not being used to possibly free some memory
-            NullVariables();
-            
         }
-
-
 
         #endregion
 
@@ -140,14 +150,6 @@ namespace EventSimulator.Simulator
                 _createList = CreateClickEvents;
                 _updateList = UpdateSimulatedEvents;
             }
-        }
-
-        private void NullVariables()
-        {
-            _creationThread = null;
-            _senderThreads = null;
-            _eventHubClient = null;
-            _dataQueue = null;
         }
 
         #endregion
@@ -306,12 +308,23 @@ namespace EventSimulator.Simulator
 
         #endregion
 
+        #region NotifyPropertyChanged
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+
+        #endregion
     }
 
     public enum SimulatorStatus
     {
-        Sending,
-        Stopping,
         Stopped,
+        Stopping,
+        Sending,
     }
 }

@@ -8,6 +8,11 @@
              d:DesignWidth="300"
              mc:Ignorable="d">
     <StackPanel MaxWidth="450">
+        <!--Current Status-->
+        <Grid Margin="5">
+            <TextBlock Text="Current Status: " />
+            <TextBlock Name="TSimulatorStatus" HorizontalAlignment="Right" />
+        </Grid>
         <!--  Performance of sender  -->
         <Grid Margin="5">
             <TextBlock Text="Events Sent: " />

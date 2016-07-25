@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using EventSimulator.Simulator;
+using System.Threading;
 
 namespace EventSimulator.Controls
 {
@@ -21,7 +22,6 @@ namespace EventSimulator.Controls
     /// </summary>
     public partial class EventHubControl : UserControl
     {
-        public Settings Settings = new Settings();
         private Simulator.Simulator _simulator;
 
         private int _eventsPerSecond;
@@ -51,20 +51,38 @@ namespace EventSimulator.Controls
             }
         }
 
-        public EventHubControl()
+        public EventHubControl(Settings settings)
         {
+            if (settings == null)
+            {
+                throw new ArgumentNullException("Settings cannot be null.");
+            }
+
             InitializeComponent();
+            _simulator = new Simulator.Simulator(settings);
+
+            // TODO: Show status on this control somewhere
+            Binding myBinding = new Binding("Status");
+            myBinding.Source = _simulator;
+            TSimulatorStatus.SetBinding(TextBlock.TextProperty, myBinding);
         }
 
-        private bool _started = false;
         private void StartStopButton_OnClick(object sender, RoutedEventArgs e)
         {
-            if (_started) return;
-            _started = true;
-            Settings.ConnectionString =
-                "Endpoint=sb://servicebusintern2016.servicebus.windows.net/;SharedAccessKeyName=EventHubSendKey;SharedAccessKey=k5tXsmofhbULo+odj+QmCR8yM6oR0pOPNV1/OP5lhxw=;EntityPath=sellersite";
-            _simulator = new Simulator.Simulator(Settings);
-            _simulator.StartSending();
+            if (_simulator.Status == SimulatorStatus.Stopped)
+            {
+                new Thread(new ThreadStart(() =>
+                {
+                    _simulator.StartSending();
+                })).Start();
+            } else if (_simulator.Status == SimulatorStatus.Sending)
+            {
+                new Thread(new ThreadStart(() =>
+                {
+                    _simulator.StopSending();
+                })).Start();
+            }
+            // Do nothing if SimulatorStatus.Stopping
         }
     }
 }

@@ -59,16 +59,14 @@ namespace EventSimulator
             }
 
             // Make the tab with those settings
-            var eventHubControl = new EventHubControl()
-            {
-                Settings = settings
-            };
+            var eventHubControl = new EventHubControl(settings);
             var newTab = new TabItem()
             {
                 Header = tabName.Length > 0 ? TabName.Text : (Tabs.Items.Count - 1).ToString(),
                 Content = eventHubControl
             };
 
+            // TODO: Get behavior percents.
 
             SettingsFlyout.IsOpen = false;
             Tabs.Items.Add(newTab);
