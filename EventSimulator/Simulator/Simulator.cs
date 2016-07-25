@@ -38,7 +38,7 @@ namespace EventSimulator.Simulator
         public SimulatorStatus Status
         {
             get { return _simulatorStatus; }
-            set
+            private set
             {
                 if (value != _simulatorStatus)
                 {
