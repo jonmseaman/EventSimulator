@@ -2,9 +2,9 @@
 using System.Configuration;
 using System.Linq;
 
-namespace EventSimulator
+namespace EventSimulator.Simulator
 {
-    internal class Settings
+    public class Settings
     {
         /// <summary>
         ///     Loads settings from App.Config.
@@ -84,7 +84,7 @@ namespace EventSimulator
             SendMode sendMode;
             Enum.TryParse(sendModeStr, out sendMode);
             SendMode = sendMode;
-            
+
         }
 
         public void Save()
@@ -116,9 +116,9 @@ namespace EventSimulator
         ///     [1] - SlowPurchase
         ///     [2] - Browsing
         /// </summary>
-        public int[] BehaviorPercents { get; set; } = {15, 30, 55};
+        public int[] BehaviorPercents { get; set; } = { 15, 30, 55 };
 
-        public int EventsPerSecond { get; set; } = 1;
+        public int EventsPerSecond { get; set; } = 10;
 
         public int ThreadsCount { get; set; } = Environment.ProcessorCount;
 
