@@ -61,28 +61,31 @@ namespace EventSimulator.Controls
             InitializeComponent();
             _simulator = new Simulator.Simulator(settings);
 
-            // TODO: Show status on this control somewhere
-            Binding myBinding = new Binding("Status");
-            myBinding.Source = _simulator;
+            // Bind simulator status to GUI
+            var myBinding = new Binding("Status") {Source = _simulator};
             TSimulatorStatus.SetBinding(TextBlock.TextProperty, myBinding);
         }
 
         private void StartStopButton_OnClick(object sender, RoutedEventArgs e)
         {
-            if (_simulator.Status == SimulatorStatus.Stopped)
+            switch (_simulator.Status)
             {
-                new Thread(new ThreadStart(() =>
-                {
-                    _simulator.StartSending();
-                })).Start();
-            } else if (_simulator.Status == SimulatorStatus.Sending)
-            {
-                new Thread(new ThreadStart(() =>
-                {
-                    _simulator.StopSending();
-                })).Start();
+                case SimulatorStatus.Stopped:
+                    new Thread(() =>
+                    {
+                        _simulator.StartSending();
+                    }).Start();
+                    break;
+                case SimulatorStatus.Sending:
+                    new Thread(() =>
+                    {
+                        _simulator.StopSending();
+                    }).Start();
+                    break;
+                case SimulatorStatus.Stopping:
+                // Do nothing if SimulatorStatus.Stopping
+                    break;
             }
-            // Do nothing if SimulatorStatus.Stopping
         }
     }
 }

@@ -43,22 +43,8 @@ namespace EventSimulator
             // Make a new settings and copy information from flyout
             var tabName = TabName.Text;
 
-            var connectionString = ConnectionString.Text;
-            var settings = new Settings {ConnectionString = connectionString};
-
-            int eventsPerSecond;
-            if (int.TryParse(EventsPerSecond.Text, out eventsPerSecond))
-            {
-                settings.EventsPerSecond = eventsPerSecond;
-            }
-
-            Simulator.SendMode sendMode;
-            if (Enum.TryParse(SendMode.Text, out sendMode))
-            {
-                settings.SendMode = sendMode;
-            }
-
             // Make the tab with those settings
+            var settings = GetSettingsFromFlyout();
             var eventHubControl = new EventHubControl(settings);
             var newTab = new TabItem()
             {
@@ -66,11 +52,48 @@ namespace EventSimulator
                 Content = eventHubControl
             };
 
-            // TODO: Get behavior percents.
-
             SettingsFlyout.IsOpen = false;
             Tabs.Items.Add(newTab);
             newTab.Focus();
+        }
+
+        private Settings GetSettingsFromFlyout()
+        {
+            var connectionString = ConnectionString.Text;
+            var settings = new Settings { ConnectionString = connectionString };
+
+            int eventsPerSecond;
+            if (int.TryParse(EventsPerSecond.Text, out eventsPerSecond))
+            {
+                settings.EventsPerSecond = eventsPerSecond;
+            }
+
+            SendMode sendMode;
+            if (Enum.TryParse(SendMode.Text, out sendMode))
+            {
+                settings.SendMode = sendMode;
+            }
+
+            // Get behavior percents
+            int fastPurchasePercent;
+            if (int.TryParse(TFastPurchase.Text, out fastPurchasePercent))
+            {
+                settings.BehaviorPercents[0] = fastPurchasePercent;
+            }
+
+            int slowPurchasePercent;
+            if (int.TryParse(TFastPurchase.Text, out slowPurchasePercent))
+            {
+                settings.BehaviorPercents[1] = slowPurchasePercent;
+            }
+
+            int browsingPercent;
+            if (int.TryParse(TFastPurchase.Text, out browsingPercent))
+            {
+                settings.BehaviorPercents[2] = browsingPercent;
+            }
+
+            return settings;
         }
     }
 }

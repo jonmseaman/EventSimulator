@@ -41,8 +41,8 @@
                                      Controls:TextBoxHelper.Watermark="Tab name" />
                             <TextBox Name="ConnectionString"
                                      Margin="0,5,0,0"
-                                     Controls:TextBoxHelper.Watermark="Connection String"
-                                     Controls:TextBoxHelper.SelectAllOnFocus="True"/>
+                                     Controls:TextBoxHelper.SelectAllOnFocus="True"
+                                     Controls:TextBoxHelper.Watermark="Connection String" />
                             <TextBox x:Name="EventsPerSecond"
                                      Margin="0,5,0,0"
                                      Controls:TextBoxHelper.Watermark="Events per second" />
@@ -58,13 +58,22 @@
                             </ComboBox>
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition/>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
                                 </Grid.ColumnDefinitions>
-                                <TextBox Controls:TextBoxHelper.Watermark="FastPurchase" Margin="0,5,5,0" Grid.Column="0"></TextBox>
-                                <TextBox Controls:TextBoxHelper.Watermark="SlowPurchase" Margin="0,5,0,0" Grid.Column="1"></TextBox>
-                                <TextBox Controls:TextBoxHelper.Watermark="Browsing" Margin="5,5,0,0" Grid.Column="2"></TextBox>
+                                <TextBox Name="TFastPurchase"
+                                         Grid.Column="0"
+                                         Margin="0,5,5,0"
+                                         Controls:TextBoxHelper.Watermark="FastPurchase" />
+                                <TextBox Name="TSlowPurchase"
+                                         Grid.Column="1"
+                                         Margin="0,5,0,0"
+                                         Controls:TextBoxHelper.Watermark="SlowPurchase" />
+                                <TextBox Name="TBrowsing"
+                                         Grid.Column="2"
+                                         Margin="5,5,0,0"
+                                         Controls:TextBoxHelper.Watermark="Browsing" />
                             </Grid>
                         </StackPanel>
                     </ScrollViewer>
