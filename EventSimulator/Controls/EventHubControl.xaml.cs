@@ -60,6 +60,8 @@ namespace EventSimulator.Controls
 
         #endregion
 
+        #region Events
+
         private void ToggleSimulatorSending(object sender, RoutedEventArgs e)
         {
             switch (_simulator.Status)
@@ -81,6 +83,42 @@ namespace EventSimulator.Controls
                     break;
             }
         }
+
+        private void OpenSettingsFlyout(object sender, RoutedEventArgs args)
+        {
+            // TODO: Implement this.
+            MessageBox.Show("Sorry, this feature is not yet implemented.", "Settings Menu", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+        }
+
+        public void Shutdown(object sender, RoutedEventArgs args)
+        {
+            if (_simulator.Status == SimulatorStatus.Sending)
+            {
+                new Thread(() =>
+                {
+                    _simulator.StopSending();
+                }).Start();
+            }
+        }
+
+        public void SimulatorPropertyChanged(object sender, PropertyChangedEventArgs args)
+        {
+            if (sender != _simulator || !args.PropertyName.Equals("Status")) return;
+            
+            if (Dispatcher.CheckAccess())
+            {
+                UpdateStartStopButton(_simulator.Status);
+            }
+            else
+            {
+                Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
+                    {
+                       UpdateStartStopButton(_simulator.Status); 
+                    }));
+            }
+        }
+
+        #endregion
 
         private void UpdateStartStopButton(SimulatorStatus status)
         {
@@ -104,27 +142,5 @@ namespace EventSimulator.Controls
             }
         }
 
-        private void OpenSettingsFlyout(object sender, RoutedEventArgs args)
-        {
-            // TODO: Implement this.
-            MessageBox.Show("Sorry, this feature is not yet implemented.", "Settings Menu", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-        }
-
-        public void SimulatorPropertyChanged(object sender, PropertyChangedEventArgs args)
-        {
-            if (sender != _simulator || !args.PropertyName.Equals("Status")) return;
-            
-            if (Dispatcher.CheckAccess())
-            {
-                UpdateStartStopButton(_simulator.Status);
-            }
-            else
-            {
-                Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
-                    {
-                       UpdateStartStopButton(_simulator.Status); 
-                    }));
-            }
-        }
     }
 }

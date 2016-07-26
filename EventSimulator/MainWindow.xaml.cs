@@ -45,7 +45,7 @@ namespace EventSimulator
             var tabItem = sender as TabItem;
             if (tabItem != null)
             {
-                tabItem.Visibility = Visibility.Collapsed;
+                Tabs.Items.Remove(tabItem);
             }
         }
 
@@ -64,6 +64,7 @@ namespace EventSimulator
                 Header = tabName.Length > 0 ? TabName.Text : (Tabs.Items.Count - 1).ToString(),
                 Content = eventHubControl
             };
+            newTab.Unloaded += eventHubControl.Shutdown;
 
             SettingsFlyout.IsOpen = false;
             Tabs.Items.Add(newTab);

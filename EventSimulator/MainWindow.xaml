@@ -35,10 +35,6 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <StackPanel>
-                        <TextBlock Grid.Row="0" Text="Something above the ScrollPanel" />
-                        <TextBlock Grid.Row="0" Text="This Flyout animates its opacity when opening and closing." />
-                    </StackPanel>
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                         <StackPanel Orientation="Vertical">
                             <TextBox Name="TabName"
