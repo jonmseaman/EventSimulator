@@ -28,6 +28,8 @@ namespace EventSimulator.Controls
     {
         private readonly Simulator.Simulator _simulator;
 
+        #region Constructor
+
         public EventHubControl(Settings settings)
         {
             if (settings == null)
@@ -55,6 +57,8 @@ namespace EventSimulator.Controls
             };
             TEventsPerSecond.SetBinding(TextBlock.TextProperty, epsBinding);
         }
+
+        #endregion
 
         private void StartStopButton_OnClick(object sender, RoutedEventArgs e)
         {

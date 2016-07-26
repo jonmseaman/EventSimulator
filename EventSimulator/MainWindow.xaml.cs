@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using EventSimulator.Controls;
 using EventSimulator.Simulator;
+using MahApps.Metro;
 
 namespace EventSimulator
 {
@@ -57,6 +58,10 @@ namespace EventSimulator
             newTab.Focus();
         }
 
+        /// <summary>
+        /// Gets the settings the user entered into the settings flyout.
+        /// </summary>
+        /// <returns>The settings object with values filled from the flyout.</returns>
         private Settings GetSettingsFromFlyout()
         {
             var connectionString = ConnectionString.Text;
