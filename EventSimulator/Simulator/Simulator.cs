@@ -149,7 +149,7 @@ namespace EventSimulator.Simulator
             {
                 var next = DateTime.Now;
                 var dt = TimeSpan.FromSeconds(1);
-                var prevEventsSent = EventsSent;
+                var prevEventsSent = 0;
                 while (Status == SimulatorStatus.Sending)
                 {
                     next += dt;

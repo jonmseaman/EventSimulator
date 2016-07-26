@@ -82,13 +82,13 @@ namespace EventSimulator
             }
 
             int slowPurchasePercent;
-            if (int.TryParse(TFastPurchase.Text, out slowPurchasePercent))
+            if (int.TryParse(TSlowPurchase.Text, out slowPurchasePercent))
             {
                 settings.BehaviorPercents[1] = slowPurchasePercent;
             }
 
             int browsingPercent;
-            if (int.TryParse(TFastPurchase.Text, out browsingPercent))
+            if (int.TryParse(TBrowsing.Text, out browsingPercent))
             {
                 settings.BehaviorPercents[2] = browsingPercent;
             }
