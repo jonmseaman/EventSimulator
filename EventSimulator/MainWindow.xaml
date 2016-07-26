@@ -9,6 +9,11 @@
                       Width="450"
                       Height="355"
                       mc:Ignorable="d">
+    <!--Commands-->
+    <Window.CommandBindings>
+        <CommandBinding Command="ApplicationCommands.Close" CanExecute="CloseTabCommand_CanExecute" Executed="CloseTabCommand_Executed" />
+    </Window.CommandBindings>
+    
     <!--  Flyouts  -->
     <Controls:MetroWindow.Flyouts>
         <Controls:FlyoutsControl x:Name="FlyoutsControl">
@@ -82,7 +87,8 @@
                                  Columns="2">
                         <Button Margin="10"
                                 Click="CreateNewEventHubTab"
-                                Content="Create" />
+                                Content="Create"
+                                IsDefault="True"/>
                         <Button Margin="10"
                                 Click="ToggleFlyout"
                                 Content="Cancel"
@@ -94,8 +100,8 @@
     </Controls:MetroWindow.Flyouts>
 
 
-    <TabControl Name="Tabs">
-        <TabItem Header="Home">
+    <Controls:MetroTabControl Name="Tabs" Controls:TabControlHelper.IsUnderlined="True">
+        <Controls:MetroTabItem Header="Home">
             <Button Name="NewEventHub"
                     Margin="0,5,0,0"
                     HorizontalAlignment="Left"
@@ -103,6 +109,6 @@
                     Click="ToggleFlyout">
                 Create
             </Button>
-        </TabItem>
-    </TabControl>
+        </Controls:MetroTabItem>
+    </Controls:MetroTabControl>
 </Controls:MetroWindow>

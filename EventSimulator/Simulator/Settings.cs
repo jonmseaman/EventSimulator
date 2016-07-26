@@ -44,7 +44,7 @@ namespace EventSimulator.Simulator
             var objectString = "";
             using (StreamReader sr = File.OpenText(filePath))
             {
-                objectString = sr.ReadToEnd();
+                objectString = await sr.ReadToEndAsync();
 
             }
             return JsonConvert.DeserializeObject<Settings>(objectString);

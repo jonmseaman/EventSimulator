@@ -60,7 +60,7 @@ namespace EventSimulator.Controls
 
         #endregion
 
-        private void StartStopButton_OnClick(object sender, RoutedEventArgs e)
+        private void ToggleSimulatorSending(object sender, RoutedEventArgs e)
         {
             switch (_simulator.Status)
             {
@@ -91,7 +91,7 @@ namespace EventSimulator.Controls
                     StartStopButton.Background = Brushes.Green;
                     break;
                 case SimulatorStatus.Stopping:
-                    //StartStopButton.Content = "Stopping";
+                    StartStopButton.Content = "Stopping";
                     StartStopButton.Background = Brushes.DarkOrange;
                     break;
                 case SimulatorStatus.Sending:
@@ -102,6 +102,12 @@ namespace EventSimulator.Controls
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private void OpenSettingsFlyout(object sender, RoutedEventArgs args)
+        {
+            // TODO: Implement this.
+            MessageBox.Show("Sorry, this feature is not yet implemented.", "Settings Menu", MessageBoxButton.OK, MessageBoxImage.Exclamation);
         }
 
         public void SimulatorPropertyChanged(object sender, PropertyChangedEventArgs args)

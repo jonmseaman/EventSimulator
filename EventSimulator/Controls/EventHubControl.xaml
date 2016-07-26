@@ -22,15 +22,18 @@
             <TextBlock Text="Events/s: " />
             <TextBlock Name="TEventsPerSecond" HorizontalAlignment="Right" />
         </Grid>
-        <!--  Information about the event hub  -->
-        <!--  What about partitions?  -->
-
+        <!--Buttons-->
+        <UniformGrid Margin="10">
         <Button Name="StartStopButton"
-                Margin="5"
-                HorizontalAlignment="Left"
+                Margin="10"
                 Background="Green"
-                Click="StartStopButton_OnClick">
+                Click="ToggleSimulatorSending">
             Start
         </Button>
+            <Button Name="SettingsButton"
+                    Margin="10"
+                    Click="OpenSettingsFlyout"
+                    Content="Settings"/>
+        </UniformGrid>
     </StackPanel>
 </UserControl>

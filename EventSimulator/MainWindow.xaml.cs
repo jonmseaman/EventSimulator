@@ -29,14 +29,24 @@ namespace EventSimulator
             InitializeComponent();
         }
 
-        private void ToggleSettingsFlyout()
+        private void ToggleFlyout(object sender, RoutedEventArgs e)
         {
             SettingsFlyout.IsOpen = !SettingsFlyout.IsOpen;
         }
 
-        private void ToggleFlyout(object sender, RoutedEventArgs e)
+        private void CloseTabCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            ToggleSettingsFlyout();
+            e.CanExecute = true;
+        }
+
+        private void CloseTabCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            // Stop sending the events
+            var tabItem = sender as TabItem;
+            if (tabItem != null)
+            {
+                tabItem.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void CreateNewEventHubTab(object sender, RoutedEventArgs e)
@@ -47,8 +57,10 @@ namespace EventSimulator
             // Make the tab with those settings
             var settings = GetSettingsFromFlyout();
             var eventHubControl = new EventHubControl(settings);
-            var newTab = new TabItem()
+            var newTab = new MetroTabItem()
             {
+                CloseButtonEnabled = true,
+                CloseTabCommand = ApplicationCommands.Close,
                 Header = tabName.Length > 0 ? TabName.Text : (Tabs.Items.Count - 1).ToString(),
                 Content = eventHubControl
             };
