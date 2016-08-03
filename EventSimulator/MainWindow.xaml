@@ -9,92 +9,12 @@
                       Width="450"
                       Height="355"
                       mc:Ignorable="d">
-    <!--Commands-->
+    <!--  Commands  -->
     <Window.CommandBindings>
-        <CommandBinding Command="ApplicationCommands.Close" CanExecute="CloseTabCommand_CanExecute" Executed="CloseTabCommand_Executed" />
+        <CommandBinding CanExecute="CloseTabCommand_CanExecute"
+                        Command="ApplicationCommands.Close"
+                        Executed="CloseTabCommand_Executed" />
     </Window.CommandBindings>
-    
-    <!--  Flyouts  -->
-    <Controls:MetroWindow.Flyouts>
-        <Controls:FlyoutsControl x:Name="FlyoutsControl">
-            <Controls:Flyout x:Name="SettingsFlyout"
-                             Width="{Binding RelativeSource={RelativeSource FindAncestor,
-                                                                            AncestorType=Controls:MetroWindow},
-                                             Path=ActualWidth}"
-                             MaxWidth="450"
-                             Margin="100 0 0 0"
-                             Controls:ControlsHelper.ContentCharacterCasing="Upper"
-                             AreAnimationsEnabled="True"
-                             FocusedElement="{Binding ElementName=TabName}"
-                             Header="Settings"
-                             Position="Right"
-                             Theme="Accent">
-                <Grid Margin="10">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                        <StackPanel Orientation="Vertical">
-                            <TextBox Name="TabName"
-                                     Margin="0,5,0,0"
-                                     Controls:TextBoxHelper.Watermark="Tab name" />
-                            <TextBox Name="ConnectionString"
-                                     Margin="0,5,0,0"
-                                     Controls:TextBoxHelper.SelectAllOnFocus="True"
-                                     Controls:TextBoxHelper.Watermark="Connection String" />
-                            <TextBox x:Name="EventsPerSecond"
-                                     Margin="0,5,0,0"
-                                     Controls:TextBoxHelper.Watermark="Events per second" />
-                            <ComboBox Name="SendMode"
-                                      Margin="0,5,0,0"
-                                      Focusable="False"
-                                      IsEditable="True"
-                                      IsReadOnly="True"
-                                      Text="Send Mode">
-                                <ComboBoxItem>ClickEvents</ComboBoxItem>
-                                <ComboBoxItem>PurchaseEvents</ComboBoxItem>
-                                <ComboBoxItem>SimulatedEvents</ComboBoxItem>
-                            </ComboBox>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
-                                    <ColumnDefinition />
-                                    <ColumnDefinition />
-                                </Grid.ColumnDefinitions>
-                                <TextBox Name="TFastPurchase"
-                                         Grid.Column="0"
-                                         Margin="0,5,5,0"
-                                         Controls:TextBoxHelper.Watermark="FastPurchase" />
-                                <TextBox Name="TSlowPurchase"
-                                         Grid.Column="1"
-                                         Margin="0,5,0,0"
-                                         Controls:TextBoxHelper.Watermark="SlowPurchase" />
-                                <TextBox Name="TBrowsing"
-                                         Grid.Column="2"
-                                         Margin="5,5,0,0"
-                                         Controls:TextBoxHelper.Watermark="Browsing" />
-                            </Grid>
-                        </StackPanel>
-                    </ScrollViewer>
-                    <UniformGrid Grid.Row="2"
-                                 Margin="10"
-                                 Columns="2">
-                        <Button Margin="10"
-                                Click="CreateNewEventHubTab"
-                                Content="Create"
-                                IsDefault="True"/>
-                        <Button Margin="10"
-                                Click="ToggleFlyout"
-                                Content="Cancel"
-                                IsCancel="True" />
-                    </UniformGrid>
-                </Grid>
-            </Controls:Flyout>
-        </Controls:FlyoutsControl>
-    </Controls:MetroWindow.Flyouts>
-
 
     <Controls:MetroTabControl Name="Tabs" Controls:TabControlHelper.IsUnderlined="True">
         <Controls:MetroTabItem Header="Home">
@@ -102,9 +22,8 @@
                     Margin="0,5,0,0"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top"
-                    Click="ToggleFlyout">
-                Create
-            </Button>
+                    Click="CreateNewEventHubTab"
+                    Content="Create Event Simulator" />
         </Controls:MetroTabItem>
     </Controls:MetroTabControl>
 </Controls:MetroWindow>

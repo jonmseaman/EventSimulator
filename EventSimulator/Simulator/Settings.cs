@@ -55,6 +55,8 @@ namespace EventSimulator.Simulator
             var fName = Path.GetFileNameWithoutExtension(jsonFileName);
             Debug.Assert(fName != null && fName.Equals(jsonFileName));
             var filePath = $"{SaveDir}{jsonFileName}.json";
+            // Make sure that the directory exists.
+            Directory.CreateDirectory(filePath);
 
             using (StreamWriter sw = File.CreateText(filePath))
             {

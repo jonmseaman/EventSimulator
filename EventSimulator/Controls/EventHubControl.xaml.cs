@@ -1,23 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using EventSimulator.Simulator;
 using System.Threading;
 using System.Windows.Threading;
-using System.Xaml;
 
 namespace EventSimulator.Controls
 {
@@ -27,6 +16,8 @@ namespace EventSimulator.Controls
     public partial class EventHubControl : UserControl
     {
         private readonly Simulator.Simulator _simulator;
+
+        public EventHubSettingsFlyout settingsFlyout { get; private set; }
 
         #region Constructor
 
@@ -56,6 +47,9 @@ namespace EventSimulator.Controls
                 StringFormat = "F2"
             };
             TEventsPerSecond.SetBinding(TextBlock.TextProperty, epsBinding);
+
+            // Make the settings flyout
+            settingsFlyout = new EventHubSettingsFlyout(settings);
         }
 
         #endregion
@@ -84,10 +78,9 @@ namespace EventSimulator.Controls
             }
         }
 
-        private void OpenSettingsFlyout(object sender, RoutedEventArgs args)
+        private void ToggleSettingsFlyout(object sender, RoutedEventArgs args)
         {
-            // TODO: Implement this.
-            MessageBox.Show("Sorry, this feature is not yet implemented.", "Settings Menu", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            settingsFlyout.IsOpen = !settingsFlyout.IsOpen;
         }
 
         public void Shutdown(object sender, RoutedEventArgs args)
