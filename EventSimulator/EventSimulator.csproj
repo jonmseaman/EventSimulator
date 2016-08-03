@@ -53,6 +53,8 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>false</SignManifests>
@@ -150,6 +152,9 @@
     <Compile Include="Controls\EventHubControl.xaml.cs">
       <DependentUpon>EventHubControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\EventHubSettingsFlyout.xaml.cs">
+      <DependentUpon>EventHubSettingsFlyout.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
@@ -188,6 +193,10 @@
     </ApplicationDefinition>
     <Page Include="Controls\EventHubControl.xaml">
       <SubType>UserControl</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\EventHubSettingsFlyout.xaml">
+      <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MainWindow.xaml">

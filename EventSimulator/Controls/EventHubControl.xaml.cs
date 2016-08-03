@@ -1,23 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using EventSimulator.Simulator;
 using System.Threading;
 using System.Windows.Threading;
-using System.Xaml;
 
 namespace EventSimulator.Controls
 {
@@ -27,6 +16,10 @@ namespace EventSimulator.Controls
     public partial class EventHubControl : UserControl
     {
         private readonly Simulator.Simulator _simulator;
+
+        public EventHubSettingsFlyout settingsFlyout { get; private set; }
+
+        #region Constructor
 
         public EventHubControl(Settings settings)
         {
@@ -54,9 +47,16 @@ namespace EventSimulator.Controls
                 StringFormat = "F2"
             };
             TEventsPerSecond.SetBinding(TextBlock.TextProperty, epsBinding);
+
+            // Make the settings flyout
+            settingsFlyout = new EventHubSettingsFlyout(settings);
         }
 
-        private void StartStopButton_OnClick(object sender, RoutedEventArgs e)
+        #endregion
+
+        #region Events
+
+        private void ToggleSimulatorSending(object sender, RoutedEventArgs e)
         {
             switch (_simulator.Status)
             {
@@ -78,25 +78,19 @@ namespace EventSimulator.Controls
             }
         }
 
-        private void UpdateStartStopButton(SimulatorStatus status)
+        private void ToggleSettingsFlyout(object sender, RoutedEventArgs args)
         {
-            switch (status)
-            {
-                case SimulatorStatus.Stopped:
-                    StartStopButton.Content = "Start";
-                    StartStopButton.Background = Brushes.Green;
-                    break;
-                case SimulatorStatus.Stopping:
-                    //StartStopButton.Content = "Stopping";
-                    StartStopButton.Background = Brushes.DarkOrange;
-                    break;
-                case SimulatorStatus.Sending:
-                    StartStopButton.Content = "Stop";
-                    StartStopButton.Background = Brushes.Firebrick;
+            settingsFlyout.IsOpen = !settingsFlyout.IsOpen;
+        }
 
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+        public void Shutdown(object sender, RoutedEventArgs args)
+        {
+            if (_simulator.Status == SimulatorStatus.Sending)
+            {
+                new Thread(() =>
+                {
+                    _simulator.StopSending();
+                }).Start();
             }
         }
 
@@ -116,5 +110,30 @@ namespace EventSimulator.Controls
                     }));
             }
         }
+
+        #endregion
+
+        private void UpdateStartStopButton(SimulatorStatus status)
+        {
+            switch (status)
+            {
+                case SimulatorStatus.Stopped:
+                    StartStopButton.Content = "Start";
+                    StartStopButton.Background = Brushes.Green;
+                    break;
+                case SimulatorStatus.Stopping:
+                    StartStopButton.Content = "Stopping";
+                    StartStopButton.Background = Brushes.DarkOrange;
+                    break;
+                case SimulatorStatus.Sending:
+                    StartStopButton.Content = "Stop";
+                    StartStopButton.Background = Brushes.Firebrick;
+
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
     }
 }

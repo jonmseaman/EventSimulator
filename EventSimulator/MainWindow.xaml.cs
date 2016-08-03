@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using EventSimulator.Controls;
 using EventSimulator.Simulator;
+using MahApps.Metro;
 
 namespace EventSimulator
 {
@@ -28,72 +29,52 @@ namespace EventSimulator
             InitializeComponent();
         }
 
-        private void ToggleSettingsFlyout()
+        private void CloseTabCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            SettingsFlyout.IsOpen = !SettingsFlyout.IsOpen;
+            e.CanExecute = true;
         }
 
-        private void ToggleFlyout(object sender, RoutedEventArgs e)
+        private void CloseTabCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            ToggleSettingsFlyout();
+            // Stop sending the events.
+            var tabItem = sender as EventHubControl;
+            if (tabItem == null) return;
+            Tabs.Items.Remove(tabItem);
+            var flyout = tabItem.settingsFlyout;
+            this.Flyouts.Items.Remove(flyout);
         }
 
+        /// <summary>
+        /// Adds a tab to the main window that allows you to send to use
+        /// an event simulator. <see cref="Simulator.Simulator"/>.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CreateNewEventHubTab(object sender, RoutedEventArgs e)
         {
-            // Make a new settings and copy information from flyout
-            var tabName = TabName.Text;
+            // Setup the tab
+            var eventHubControl = new EventHubControl(new Settings());
 
-            // Make the tab with those settings
-            var settings = GetSettingsFromFlyout();
-            var eventHubControl = new EventHubControl(settings);
-            var newTab = new TabItem()
+            var tabNameBinding = new Binding("Text")
             {
-                Header = tabName.Length > 0 ? TabName.Text : (Tabs.Items.Count - 1).ToString(),
+                Source = eventHubControl.settingsFlyout.TabName
+            };
+            var newTab = new MetroTabItem()
+            {
+                CloseButtonEnabled = true,
+                CloseTabCommand = ApplicationCommands.Close,
+                Header = "New tab",
                 Content = eventHubControl
             };
+            newTab.SetBinding(TabItem.HeaderProperty, tabNameBinding);
+            newTab.Unloaded += eventHubControl.Shutdown;
 
-            SettingsFlyout.IsOpen = false;
+            // Add tab
+            var flyoutsControl = new FlyoutsControl();
+            Flyouts.Items.Add(eventHubControl.settingsFlyout);
             Tabs.Items.Add(newTab);
             newTab.Focus();
-        }
-
-        private Settings GetSettingsFromFlyout()
-        {
-            var connectionString = ConnectionString.Text;
-            var settings = new Settings { ConnectionString = connectionString };
-
-            int eventsPerSecond;
-            if (int.TryParse(EventsPerSecond.Text, out eventsPerSecond))
-            {
-                settings.EventsPerSecond = eventsPerSecond;
-            }
-
-            SendMode sendMode;
-            if (Enum.TryParse(SendMode.Text, out sendMode))
-            {
-                settings.SendMode = sendMode;
-            }
-
-            // Get behavior percents
-            int fastPurchasePercent;
-            if (int.TryParse(TFastPurchase.Text, out fastPurchasePercent))
-            {
-                settings.BehaviorPercents[0] = fastPurchasePercent;
-            }
-
-            int slowPurchasePercent;
-            if (int.TryParse(TSlowPurchase.Text, out slowPurchasePercent))
-            {
-                settings.BehaviorPercents[1] = slowPurchasePercent;
-            }
-
-            int browsingPercent;
-            if (int.TryParse(TBrowsing.Text, out browsingPercent))
-            {
-                settings.BehaviorPercents[2] = browsingPercent;
-            }
-
-            return settings;
+            eventHubControl.settingsFlyout.IsOpen = true;
         }
     }
 }
