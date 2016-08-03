@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Tooltips>
+  <EventHubSettingsControl>
+    <ConnectionString>Connection string to the event hub that events will be sent to.\n
+Looks like this:
+Endpoint=sb://[ns].servicebus.windows.net/;SharedAccessKeyName=[keyName];SharedAccessKey=[key];EntityPath=[eventHubName]</ConnectionString>
+    <EventsPerSecond>The number of events sent to the event hub every second.</EventsPerSecond>
+    <SendMode> * ClickEvents - Only click events will be sent to the event hub.
+ * PurchaseEvents - Only purchase events will be sent to the event hub.
+ * SimulatedEvents - User behavior will be simulated. Events of both types will be sent.</SendMode>
+    
+  </EventHubSettingsControl>
+</Tooltips>

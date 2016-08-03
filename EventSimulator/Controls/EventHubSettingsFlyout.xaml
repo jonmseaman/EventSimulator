@@ -18,6 +18,9 @@
                  Position="Right"
                  Theme="Accent"
                  mc:Ignorable="d">
+    <Controls:Flyout.DataContext>
+        <XmlDataProvider Source="../Data/Configuration/Tooltips/EventHubTooltips.xml" XPath="/Tooltips" />
+    </Controls:Flyout.DataContext>
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -29,23 +32,28 @@
                 <TextBox Name="TabName"
                          Margin="0,5,0,0"
                          Controls:TextBoxHelper.UseFloatingWatermark="True"
-                         Controls:TextBoxHelper.Watermark="Tab name" />
+                         Controls:TextBoxHelper.Watermark="Tab name"
+                         ToolTip="{Binding XPath=/Tooltips/Tooltip/name}" />
                 <TextBox Name="ConnectionString"
                          Margin="0,5,0,0"
                          Controls:TextBoxHelper.SelectAllOnFocus="True"
                          Controls:TextBoxHelper.UseFloatingWatermark="True"
-                         Controls:TextBoxHelper.Watermark="Connection String" />
+                         Controls:TextBoxHelper.Watermark="Connection String"
+                         ToolTip="{Binding XPath=/Tooltips/EventHubSettingsControl/ConnectionString}" />
                 <TextBox x:Name="EventsPerSecond"
                          Margin="0,5,0,0"
                          Controls:TextBoxHelper.UseFloatingWatermark="True"
-                         Controls:TextBoxHelper.Watermark="Events per second" />
+                         Controls:TextBoxHelper.Watermark="Events per second"
+                         ToolTip="{Binding XPath=/Tooltips/EventHubSettingsControl/EventsPerSecond}" />
                 <ComboBox Name="SendMode"
                           Margin="0,5,0,0"
                           Controls:TextBoxHelper.UseFloatingWatermark="True"
                           Controls:TextBoxHelper.Watermark="Send mode"
                           Focusable="False"
                           IsEditable="True"
-                          IsReadOnly="True">
+                          IsReadOnly="True"
+                          IsTabStop="True"
+                          ToolTip="{Binding XPath=/Tooltips/EventHubSettingsControl/SendMode}">
                     <ComboBoxItem>ClickEvents</ComboBoxItem>
                     <ComboBoxItem>PurchaseEvents</ComboBoxItem>
                     <ComboBoxItem>SimulatedEvents</ComboBoxItem>
