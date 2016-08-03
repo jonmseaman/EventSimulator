@@ -28,21 +28,24 @@
             <StackPanel Orientation="Vertical">
                 <TextBox Name="TabName"
                          Margin="0,5,0,0"
-                         Controls:TextBoxHelper.Watermark="Tab name"
-                         ToolTip="Hey2" />
+                         Controls:TextBoxHelper.UseFloatingWatermark="True"
+                         Controls:TextBoxHelper.Watermark="Tab name" />
                 <TextBox Name="ConnectionString"
                          Margin="0,5,0,0"
                          Controls:TextBoxHelper.SelectAllOnFocus="True"
+                         Controls:TextBoxHelper.UseFloatingWatermark="True"
                          Controls:TextBoxHelper.Watermark="Connection String" />
                 <TextBox x:Name="EventsPerSecond"
                          Margin="0,5,0,0"
+                         Controls:TextBoxHelper.UseFloatingWatermark="True"
                          Controls:TextBoxHelper.Watermark="Events per second" />
                 <ComboBox Name="SendMode"
                           Margin="0,5,0,0"
+                          Controls:TextBoxHelper.UseFloatingWatermark="True"
+                          Controls:TextBoxHelper.Watermark="Send mode"
                           Focusable="False"
                           IsEditable="True"
-                          IsReadOnly="True"
-                          Text="Send Mode">
+                          IsReadOnly="True">
                     <ComboBoxItem>ClickEvents</ComboBoxItem>
                     <ComboBoxItem>PurchaseEvents</ComboBoxItem>
                     <ComboBoxItem>SimulatedEvents</ComboBoxItem>
@@ -56,14 +59,17 @@
                     <TextBox Name="TFastPurchase"
                              Grid.Column="0"
                              Margin="0,5,5,0"
+                             Controls:TextBoxHelper.UseFloatingWatermark="True"
                              Controls:TextBoxHelper.Watermark="FastPurchase" />
                     <TextBox Name="TSlowPurchase"
                              Grid.Column="1"
                              Margin="0,5,0,0"
+                             Controls:TextBoxHelper.UseFloatingWatermark="True"
                              Controls:TextBoxHelper.Watermark="SlowPurchase" />
                     <TextBox Name="TBrowsing"
                              Grid.Column="2"
                              Margin="5,5,0,0"
+                             Controls:TextBoxHelper.UseFloatingWatermark="True"
                              Controls:TextBoxHelper.Watermark="Browsing" />
                 </Grid>
             </StackPanel>
