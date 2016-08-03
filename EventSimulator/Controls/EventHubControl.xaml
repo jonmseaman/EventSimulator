@@ -6,7 +6,7 @@
              d:DesignHeight="300"
              d:DesignWidth="300"
              mc:Ignorable="d">
-    <StackPanel MaxWidth="450">
+    <StackPanel MaxWidth="450" Margin="10">
         <!--  Current Status  -->
         <Grid Margin="5">
             <TextBlock Text="Current Status: " />
@@ -21,18 +21,18 @@
             <TextBlock Text="Events/s: " />
             <TextBlock Name="TEventsPerSecond" HorizontalAlignment="Right" />
         </Grid>
-        <!--Buttons-->
-        <UniformGrid Margin="10">
-        <Button Name="StartStopButton"
-                Margin="10"
-                Background="Green"
-                Click="ToggleSimulatorSending">
-            Start
-        </Button>
+        <!--  Buttons  -->
+        <UniformGrid Margin="5">
+            <Button Name="StartStopButton"
+                    Margin="0,10,10,10"
+                    Background="Green"
+                    Click="ToggleSimulatorSending">
+                Start
+            </Button>
             <Button Name="SettingsButton"
-                    Margin="10"
+                    Margin="10,10,0,10"
                     Click="ToggleSettingsFlyout"
-                    Content="Settings"/>
+                    Content="Settings" />
         </UniformGrid>
     </StackPanel>
 </UserControl>

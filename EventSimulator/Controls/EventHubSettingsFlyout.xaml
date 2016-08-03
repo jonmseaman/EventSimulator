@@ -10,8 +10,8 @@
                                  Path=ActualWidth}"
                  MaxWidth="450"
                  Margin="100 0 0 0"
-                 d:DesignHeight="300"
-                 d:DesignWidth="300"
+                 d:DesignHeight="450"
+                 d:DesignWidth="450"
                  AreAnimationsEnabled="True"
                  FocusedElement="{Binding ElementName=TabName}"
                  Header="Settings"
@@ -28,7 +28,8 @@
             <StackPanel Orientation="Vertical">
                 <TextBox Name="TabName"
                          Margin="0,5,0,0"
-                         Controls:TextBoxHelper.Watermark="Tab name" />
+                         Controls:TextBoxHelper.Watermark="Tab name"
+                         ToolTip="Hey2" />
                 <TextBox Name="ConnectionString"
                          Margin="0,5,0,0"
                          Controls:TextBoxHelper.SelectAllOnFocus="True"
