@@ -54,9 +54,9 @@
                           IsReadOnly="True"
                           IsTabStop="True"
                           ToolTip="{Binding XPath=/Tooltips/EventHubSettingsControl/SendMode}">
-                    <ComboBoxItem>ClickEvents</ComboBoxItem>
-                    <ComboBoxItem>PurchaseEvents</ComboBoxItem>
-                    <ComboBoxItem>SimulatedEvents</ComboBoxItem>
+                    <ComboBoxItem ToolTip="{Binding XPath=/Tooltips/EventHubSettingsControl/SendModes/ClickEvents}">ClickEvents</ComboBoxItem>
+                    <ComboBoxItem ToolTip="{Binding XPath=/Tooltips/EventHubSettingsControl/SendModes/SimulatedEvents}">PurchaseEvents</ComboBoxItem>
+                    <ComboBoxItem ToolTip="{Binding XPath=/Tooltips/EventHubSettingsControl/SendModes/SimulatedEvents}">SimulatedEvents</ComboBoxItem>
                 </ComboBox>
                 <Grid>
                     <Grid.ColumnDefinitions>

@@ -1,6 +1,7 @@
 ﻿using MahApps.Metro.Controls;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,7 +47,7 @@ namespace EventSimulator
 
         /// <summary>
         /// Adds a tab to the main window that allows you to send to use
-        /// an event simulator. <see cref="Simulator.Simulator"/>.
+        /// an event simulator. <see cref="Simulator"/>.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -57,7 +58,8 @@ namespace EventSimulator
 
             var tabNameBinding = new Binding("Text")
             {
-                Source = eventHubControl.settingsFlyout.TabName
+                Source = eventHubControl.settingsFlyout.TabName,
+                Converter = new TabNameConverter()
             };
             var newTab = new MetroTabItem()
             {
@@ -66,15 +68,38 @@ namespace EventSimulator
                 Header = "New tab",
                 Content = eventHubControl
             };
-            newTab.SetBinding(TabItem.HeaderProperty, tabNameBinding);
+            newTab.SetBinding(HeaderedContentControl.HeaderProperty, tabNameBinding);
             newTab.Unloaded += eventHubControl.Shutdown;
 
             // Add tab
-            var flyoutsControl = new FlyoutsControl();
             Flyouts.Items.Add(eventHubControl.settingsFlyout);
             Tabs.Items.Add(newTab);
             newTab.Focus();
             eventHubControl.settingsFlyout.IsOpen = true;
         }
+
+
+        public class TabNameConverter : IValueConverter
+        {
+            public object Convert(object value, Type targetType,
+                object parameter, CultureInfo culture)
+            {
+                // Do the conversion from bool to visibility
+                var tabName = value as string;
+                if (string.IsNullOrEmpty(tabName))
+                {
+                    tabName = "New tab";
+                }
+                return tabName;
+            }
+
+            public object ConvertBack(object value, Type targetType,
+                object parameter, CultureInfo culture)
+            {
+                // Do the conversion from visibility to bool
+                return value;
+            }
+        }
+
     }
 }

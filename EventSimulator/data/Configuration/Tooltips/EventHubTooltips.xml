@@ -6,14 +6,17 @@
 Looks like this:
 Endpoint=sb://[ns].servicebus.windows.net/;SharedAccessKeyName=[keyName];SharedAccessKey=[key];EntityPath=[eventHubName]</ConnectionString>
     <EventsPerSecond>The number of events sent to the event hub every second.</EventsPerSecond>
-    <SendMode> * ClickEvents - Only click events will be sent to the event hub.
- * PurchaseEvents - Only purchase events will be sent to the event hub.
- * SimulatedEvents - User behavior will be simulated. Events of both types will be sent.</SendMode>
     <FastPurchase>The user browses to a product page, then purchases the product.
 Every time the user is on a product page, the user buys the product.</FastPurchase>
     <SlowPurchase>The user browses to a product page, then may buy the product
 or it may not buy the product.</SlowPurchase>
     <Browsing>The user navigates to various pages on the site, but never
 actually buys the product.</Browsing>
+    <SendMode>Specifies how the program decides what events to send.</SendMode>
+<SendModes>
+  <ClickEvents>Only click events will be sent to the event hub.</ClickEvents>
+  <PurchaseEvents>Only purchase events will be sent to the event hub.</PurchaseEvents>
+  <SimulatedEvents>User behavior will be simulated. Events of both types will be sent.</SimulatedEvents>
+</SendModes>
   </EventHubSettingsControl>
 </Tooltips>
