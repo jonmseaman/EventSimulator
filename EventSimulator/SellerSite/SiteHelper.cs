@@ -31,7 +31,10 @@ namespace EventSimulator.SellerSite
                     // Get the product id from data
                     int productId = int.Parse(data[ProductIdIndex]);
                     // Add the data to the map
-                    productDictionary.Add(productId, data);
+                    if (!productDictionary.ContainsKey(productId))
+                    {
+                        productDictionary.Add(productId, data);
+                    }
                 }
                 catch (Exception e) when (e is ArgumentOutOfRangeException || e is IndexOutOfRangeException)
                 {
@@ -46,7 +49,7 @@ namespace EventSimulator.SellerSite
         private static List<string[]> productData = new List<string[]>();
         private static Dictionary<int, string[]> productDictionary = new Dictionary<int, string[]>();
 
-        private const int ProductPriceIndex = 4;
+        private const int ProductPriceIndex = 1;
         private const int ProductIdIndex = 0;
 
         private static string HomePageUrl { get; } = "/";
