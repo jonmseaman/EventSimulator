@@ -16,11 +16,20 @@ using System.Threading.Tasks;
 
 namespace EventSimulator.Simulator
 {
+
+    /// <summary>
+    /// Class that manages the creation and sending of events.
+    /// Uses <see cref="EventSimulator.SellerSite.EventCreator"/> for event creation.
+    /// </summary>
     public class Simulator : INotifyPropertyChanged
     {
         #region Public Variables
 
         private int _eventsSent;
+        /// <summary>
+        /// The number of events sent by the simulator to the
+        /// event hub.
+        /// </summary>
         public int EventsSent
         {
             get { return _eventsSent; }
@@ -35,6 +44,10 @@ namespace EventSimulator.Simulator
         }
 
         private double _eventsPerSecond;
+        /// <summary>
+        /// The number of events sent each second.
+        /// Calculated and updated manually in this class.
+        /// </summary>
         public double EventsPerSecond
         {
             get { return _eventsPerSecond; }
