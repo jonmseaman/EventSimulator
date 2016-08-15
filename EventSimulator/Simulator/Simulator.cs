@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using EventSimulator.SellerSite;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.ServiceModel;
 using System.Threading.Tasks;
 
 namespace EventSimulator.Simulator
@@ -232,6 +233,14 @@ namespace EventSimulator.Simulator
                     Console.WriteLine(e.Message);
                     Console.ResetColor();
                     break;
+                }
+                catch (ServerBusyException)
+                {
+                    Thread.Sleep(4000);
+                }
+                catch (ServerTooBusyException)
+                {
+                    Thread.Sleep(50);
                 }
             }
         }

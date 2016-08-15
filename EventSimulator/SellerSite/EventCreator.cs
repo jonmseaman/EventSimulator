@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.IO;
 using EventSimulator.Events;
 using System.Text.RegularExpressions;
@@ -48,15 +49,16 @@ namespace EventSimulator.SellerSite
         /// <returns> The randomly generate event. </returns>
         public PurchaseEvent CreatePurchaseEvent()
         {
-            var purchaseEvent = new PurchaseEvent();
-            // TODO: Get the actual transaction number. Or, we could use Guid.
-            purchaseEvent.SessionId = Guid.NewGuid();
-            purchaseEvent.TransactionNum = SiteHelper.RandomTransactionNumber();
-            purchaseEvent.Email = SiteHelper.RandomEmail();
-            purchaseEvent.ProductId = SiteHelper.RandomProductId();
-            purchaseEvent.Price = SiteHelper.RandomPrice();
-            purchaseEvent.Quantity = SiteHelper.RandomProductQuantity();
-            purchaseEvent.Time = DateTime.Now;
+            var purchaseEvent = new PurchaseEvent
+            {
+                SessionId = Guid.NewGuid(),
+                TransactionNum = SiteHelper.RandomTransactionNumber(),
+                Email = SiteHelper.RandomEmail(),
+                ProductId = SiteHelper.RandomProductId(),
+                Price = SiteHelper.RandomPrice(),
+                Quantity = SiteHelper.RandomProductQuantity(),
+                Time = DateTime.Now
+            };
             return purchaseEvent;
         }
 
@@ -81,8 +83,9 @@ namespace EventSimulator.SellerSite
                 var nextEvent = new PurchaseEvent(pEvent)
                 {
                     Quantity = SiteHelper.RandomProductQuantity(),
-                    Time = pEvent.Time,
+                    Time = pEvent.Time
                 };
+                nextEvent.ProductId = SiteHelper.SimilarProductId(nextEvent.ProductId);
                 return nextEvent;
             }
             if (@event is ClickEvent
@@ -128,7 +131,8 @@ namespace EventSimulator.SellerSite
                 var old = (ClickEvent)@event;
                 // Make the next event.
                 next.CurrentUrl = old.NextUrl;
-                next.NextUrl = SiteHelper.RandomUrl();
+                next.NextUrl = SiteHelper.IsUrlTheHomePage(next.CurrentUrl) 
+                    ? SiteHelper.RandomProductUrl() : SiteHelper.RandomUrl();
                 next.EntryTime = old.ExitTime;
                 next.ExitTime = DateTime.Now;
             }
@@ -189,8 +193,8 @@ namespace EventSimulator.SellerSite
         {
             Event nextEvent = CreateClickEvent();
 
-            // 50% chance to purchase again
-            if (e is PurchaseEvent && SiteHelper.Chance(50))
+            // 60% chance to purchase again
+            if (e is PurchaseEvent && SiteHelper.Chance(60))
             {
                 nextEvent = CreateNextPurchaseEvent(e);
             } else if (e is PurchaseEvent)
@@ -226,8 +230,8 @@ namespace EventSimulator.SellerSite
         {
             Event nextEvent;
 
-            // 50% chance to make another purchase.
-            if (prevEvent is PurchaseEvent && SiteHelper.Chance(50))
+            // 60% chance to make another purchase.
+            if (prevEvent is PurchaseEvent && SiteHelper.Chance(60))
             {
                 nextEvent = CreateNextPurchaseEvent(prevEvent);
             }

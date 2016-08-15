@@ -21,33 +21,45 @@ namespace EventSimulator.SellerSite
             };
             parser.SetDelimiters(",");
             // Load data while can
+            var index = -1;
             while (!parser.EndOfData)
             {
+                index++;
                 var data = parser.ReadFields();
                 // Add that data to our list
-                productData.Add(data);
+                ProductData.Add(data);
                 try
                 {
                     // Get the product id from data
                     int productId = int.Parse(data[ProductIdIndex]);
                     // Add the data to the map
-                    if (!productDictionary.ContainsKey(productId))
+                    if (!ProductDictionary.ContainsKey(productId))
                     {
-                        productDictionary.Add(productId, data);
+                        ProductIndexDictionary.Add(productId, index);
+                        ProductDictionary.Add(productId, data);
                     }
                 }
                 catch (Exception e) when (e is ArgumentOutOfRangeException || e is IndexOutOfRangeException)
                 {
                     throw new FormatException("Malformed products.csv");
                 }
-
             }
 
         }
 
         #region Private Members
-        private static List<string[]> productData = new List<string[]>();
-        private static Dictionary<int, string[]> productDictionary = new Dictionary<int, string[]>();
+        /// <summary>
+        /// List of all product datas
+        /// </summary>
+        private static readonly List<string[]> ProductData = new List<string[]>();
+        /// <summary>
+        /// ProductId, ProductData map.
+        /// </summary>
+        private static readonly Dictionary<int, string[]> ProductDictionary = new Dictionary<int, string[]>();
+        /// <summary>
+        /// ProductId, Index in ProductData. Used to change the distribution of the product data.
+        /// </summary>
+        private static readonly Dictionary<int, int> ProductIndexDictionary = new Dictionary<int, int>();
 
         private const int ProductPriceIndex = 1;
         private const int ProductIdIndex = 0;
@@ -73,7 +85,7 @@ namespace EventSimulator.SellerSite
         {
             if (percent < 0 || 100 < percent)
             {
-                throw new ArgumentOutOfRangeException("Percent not in range [0,100].");
+                throw new ArgumentOutOfRangeException(nameof(percent));
             }
             return Random.Next(0, 99) < percent;
         }
@@ -92,7 +104,7 @@ namespace EventSimulator.SellerSite
         public static int RandomProductId()
         {
             // Get num items
-            var cnt = productData.Count;
+            var cnt = ProductData.Count;
             // Standard dev. and mean.
             var sd = cnt * 0.25;
             var mu = cnt * 0.5;
@@ -102,10 +114,30 @@ namespace EventSimulator.SellerSite
             randIndex = randIndex >= cnt ? cnt - 1 : randIndex;
             // Try to get the product id from the selected data.
             int productId;
-            var idStr = productData[randIndex][ProductIdIndex];
+            var idStr = ProductData[randIndex][ProductIdIndex];
             int.TryParse(idStr, out productId);
 
             return productId;
+        }
+
+        public static int SimilarProductId(int productId)
+        {
+            if (!ProductIndexDictionary.ContainsKey(productId))
+                throw new ArgumentOutOfRangeException(nameof(productId));
+
+            var oldIndex = ProductIndexDictionary[productId];
+            var newIndex = oldIndex == ProductData.Count - 1 ? 0 : oldIndex + Random.Next(-10,10);
+            newIndex = newIndex % ProductData.Count;
+            if (newIndex < 0)
+            {
+                newIndex = ProductData.Count + newIndex;
+            }
+            // Get the product id associated with that index.
+            int newProductId;
+            var idStr = ProductData[newIndex][ProductIdIndex];
+            int.TryParse(idStr, out newProductId);
+
+            return newProductId;
         }
 
         public static int RandomPrice()
@@ -122,7 +154,7 @@ namespace EventSimulator.SellerSite
             {
                 // Must convert to price in cents.
                 double dPrice;
-                double.TryParse(productDictionary[productId][ProductPriceIndex], out dPrice);
+                double.TryParse(ProductDictionary[productId][ProductPriceIndex], out dPrice);
                 price = (int)Math.Round(100.0 * dPrice);
             }
             catch (ArgumentOutOfRangeException)
