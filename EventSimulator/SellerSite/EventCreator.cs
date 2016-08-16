@@ -131,7 +131,7 @@ namespace EventSimulator.SellerSite
                 var old = (ClickEvent)@event;
                 // Make the next event.
                 next.CurrentUrl = old.NextUrl;
-                next.NextUrl = SiteHelper.IsUrlTheHomePage(next.CurrentUrl) 
+                next.NextUrl = SiteHelper.IsUrlTheHomePage(next.CurrentUrl)
                     ? SiteHelper.RandomProductUrl() : SiteHelper.RandomUrl();
                 next.EntryTime = old.ExitTime;
                 next.ExitTime = DateTime.Now;
@@ -167,6 +167,9 @@ namespace EventSimulator.SellerSite
             {
                 case UserBehavior.Browsing:
                     nextEvent = CreateNextClickEvent(prevEvent);
+                    // Limit the number of sesssions a user has.
+                    if (SiteHelper.Chance(7))
+                        nextEvent.Email = SiteHelper.RandomEmail();
                     break;
                 case UserBehavior.FastPurchase:
                     nextEvent = CreateNextEventFastPurchase(prevEvent);
@@ -197,7 +200,8 @@ namespace EventSimulator.SellerSite
             if (e is PurchaseEvent && SiteHelper.Chance(60))
             {
                 nextEvent = CreateNextPurchaseEvent(e);
-            } else if (e is PurchaseEvent)
+            }
+            else if (e is PurchaseEvent)
             {
                 nextEvent = CreateNextClickEvent(e);
             }
@@ -207,7 +211,7 @@ namespace EventSimulator.SellerSite
             }
             else if (e is ClickEvent)
             {
-                var clickEvent = (ClickEvent) e;
+                var clickEvent = (ClickEvent)e;
                 nextEvent = new ClickEvent(e)
                 {
                     NextUrl = SiteHelper.RandomProductUrl(),
@@ -215,6 +219,12 @@ namespace EventSimulator.SellerSite
                     ExitTime = DateTime.Now,
                     CurrentUrl = clickEvent.NextUrl
                 };
+            }
+
+            // Limit the number of sesssions a user has.
+            if (e is PurchaseEvent && nextEvent is ClickEvent && SiteHelper.Chance(33))
+            {
+                nextEvent.Email = SiteHelper.RandomEmail();
             }
 
             return nextEvent;
@@ -245,6 +255,12 @@ namespace EventSimulator.SellerSite
             else
             {
                 nextEvent = CreateNextClickEvent(prevEvent);
+            }
+
+            // Limit the number of sesssions a user has.
+            if (prevEvent is PurchaseEvent && nextEvent is ClickEvent && SiteHelper.Chance(50))
+            {
+                nextEvent.Email = SiteHelper.RandomEmail();
             }
 
             return nextEvent;
