@@ -35,6 +35,11 @@ namespace EventSimulator
             e.CanExecute = true;
         }
 
+        /// <summary>
+        /// Remove tab from the main window.
+        /// </summary>
+        /// <param name="sender">The tab to remove.</param>
+        /// <param name="e"></param>
         private void CloseTabCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             // Stop sending the events.
@@ -49,8 +54,8 @@ namespace EventSimulator
         /// Adds a tab to the main window that allows you to send to use
         /// an event simulator. <see cref="Simulator"/>.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender">Not used in method.</param>
+        /// <param name="e">Not used in method.</param>
         private void CreateNewEventHubTab(object sender, RoutedEventArgs e)
         {
             // Setup the tab
@@ -79,8 +84,18 @@ namespace EventSimulator
         }
 
 
+        /// <summary>
+        /// Converts a string to a tab name. Will convert to a default
+        /// value 'New tab' if the supplied value is null or empty. 
+        /// </summary>
         public class TabNameConverter : IValueConverter
         {
+            /// <summary>
+            /// Converts an empty string value to 'New tab'.
+            /// Otherwise, leaves the value unchanged.
+            /// </summary>
+            /// <param name="value">The string to convert.</param>
+            /// <returns>The converted tab name.</returns>
             public object Convert(object value, Type targetType,
                 object parameter, CultureInfo culture)
             {
@@ -93,6 +108,10 @@ namespace EventSimulator
                 return tabName;
             }
 
+            /// <summary>
+            /// Reverse conversion. Does not change the value.
+            /// </summary>
+            /// <returns>Returns the parameter 'value'.</returns>
             public object ConvertBack(object value, Type targetType,
                 object parameter, CultureInfo culture)
             {
