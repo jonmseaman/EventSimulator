@@ -59,6 +59,7 @@ namespace EventSimulator.Simulator
 
 
         private SimulatorStatus simulatorStatus = SimulatorStatus.Stopped;
+
         /// <summary>
         /// Used so that the GUI can know if the <see cref="Simulator"/> is
         /// sending, shutting down, or stopped.

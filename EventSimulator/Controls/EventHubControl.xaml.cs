@@ -34,23 +34,23 @@ namespace EventSimulator.Controls
                 throw new ArgumentNullException(nameof(settings));
             }
 
-            InitializeComponent();
+            this.InitializeComponent();
             this.simulator = new Simulator(settings);
 
             // List to Status change to update StartStopButton text
-            this.simulator.PropertyChanged += SimulatorPropertyChanged;
+            this.simulator.PropertyChanged += this.SimulatorPropertyChanged;
 
             // Bind simulator status to GUI
             var statusBinding = new Binding("Status") { Source = this.simulator };
-            TSimulatorStatus.SetBinding(TextBlock.TextProperty, statusBinding);
+            this.TSimulatorStatus.SetBinding(TextBlock.TextProperty, statusBinding);
 
             // Bind events sent
             var eventsSentBinding = new Binding("EventsSent") { Source = this.simulator };
-            TEventsSent.SetBinding(TextBlock.TextProperty, eventsSentBinding);
+            this.TEventsSent.SetBinding(TextBlock.TextProperty, eventsSentBinding);
 
             // Bind events per second
             var epsBinding = new Binding("EventsPerSecond") { Source = this.simulator, StringFormat = "F2" };
-            TEventsPerSecond.SetBinding(TextBlock.TextProperty, epsBinding);
+            this.TEventsPerSecond.SetBinding(TextBlock.TextProperty, epsBinding);
 
             // Make the settings flyout
             this.SettingsFlyout = new EventHubSettingsFlyout(settings);
@@ -97,15 +97,15 @@ namespace EventSimulator.Controls
         {
             if (sender != this.simulator || !args.PropertyName.Equals("Status")) return;
             
-            if (Dispatcher.CheckAccess())
+            if (this.Dispatcher.CheckAccess())
             {
-                UpdateStartStopButton(this.simulator.Status);
+                this.UpdateStartStopButton(this.simulator.Status);
             }
             else
             {
-                Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
                     {
-                        UpdateStartStopButton(this.simulator.Status); 
+                        this.UpdateStartStopButton(this.simulator.Status); 
                     }));
             }
         }
@@ -117,16 +117,16 @@ namespace EventSimulator.Controls
             switch (status)
             {
                 case SimulatorStatus.Stopped:
-                    StartStopButton.Content = "Start";
-                    StartStopButton.Background = Brushes.Green;
+                    this.StartStopButton.Content = "Start";
+                    this.StartStopButton.Background = Brushes.Green;
                     break;
                 case SimulatorStatus.Stopping:
-                    StartStopButton.Content = "Stopping";
-                    StartStopButton.Background = Brushes.DarkOrange;
+                    this.StartStopButton.Content = "Stopping";
+                    this.StartStopButton.Background = Brushes.DarkOrange;
                     break;
                 case SimulatorStatus.Sending:
-                    StartStopButton.Content = "Stop";
-                    StartStopButton.Background = Brushes.Firebrick;
+                    this.StartStopButton.Content = "Stop";
+                    this.StartStopButton.Background = Brushes.Firebrick;
 
                     break;
                 default:

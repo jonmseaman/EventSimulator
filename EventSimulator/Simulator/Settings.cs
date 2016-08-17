@@ -1,11 +1,12 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-
+﻿
 namespace EventSimulator.Simulator
 {
+    using System;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Threading.Tasks;
+    using Newtonsoft.Json;
+
     public class Settings
     {
         #region Settings
@@ -74,12 +75,12 @@ namespace EventSimulator.Simulator
         /// <summary>
         /// Just send click events.
         /// </summary>
-        ClickEvents, 
+        ClickEvents,
 
         /// <summary>
         /// Just send Purchase events
         /// </summary>
-        PurchaseEvents, 
+        PurchaseEvents,
 
         /// <summary>
         /// Send simulated purchase events and click events.

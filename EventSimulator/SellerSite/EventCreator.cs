@@ -151,19 +151,19 @@ namespace EventSimulator.SellerSite
             switch (behavior)
             {
                 case UserBehavior.Browsing:
-                    nextEvent = CreateNextClickEvent(prevEvent);
+                    nextEvent = this.CreateNextClickEvent(prevEvent);
 
                     // Limit the number of sesssions a user has.
                     if (SiteHelper.Chance(7)) nextEvent.Email = SiteHelper.RandomEmail();
                     break;
                 case UserBehavior.FastPurchase:
-                    nextEvent = CreateNextEventFastPurchase(prevEvent);
+                    nextEvent = this.CreateNextEventFastPurchase(prevEvent);
                     break;
                 case UserBehavior.SlowPurchase:
-                    nextEvent = CreateNextEventSlowPurchase(prevEvent);
+                    nextEvent = this.CreateNextEventSlowPurchase(prevEvent);
                     break;
                 default:
-                    nextEvent = CreateClickEvent();
+                    nextEvent = this.CreateClickEvent();
                     break;
             }
 
@@ -180,20 +180,20 @@ namespace EventSimulator.SellerSite
         /// <returns>Event generated according to 'FastPurchase' behavior.</returns>
         private Event CreateNextEventFastPurchase(Event e)
         {
-            Event nextEvent = CreateClickEvent();
+            Event nextEvent = this.CreateClickEvent();
 
             // 60% chance to purchase again
             if (e is PurchaseEvent && SiteHelper.Chance(60))
             {
-                nextEvent = CreateNextPurchaseEvent(e);
+                nextEvent = this.CreateNextPurchaseEvent(e);
             }
             else if (e is PurchaseEvent)
             {
-                nextEvent = CreateNextClickEvent(e);
+                nextEvent = this.CreateNextClickEvent(e);
             }
             else if (e is ClickEvent && SiteHelper.IsUrlAProductPage(((ClickEvent)e).NextUrl))
             {
-                nextEvent = CreateNextPurchaseEvent(e);
+                nextEvent = this.CreateNextPurchaseEvent(e);
             }
             else if (e is ClickEvent)
             {
@@ -229,18 +229,18 @@ namespace EventSimulator.SellerSite
             // 60% chance to make another purchase.
             if (prevEvent is PurchaseEvent && SiteHelper.Chance(60))
             {
-                nextEvent = CreateNextPurchaseEvent(prevEvent);
+                nextEvent = this.CreateNextPurchaseEvent(prevEvent);
             }
 
             // 50% chance to buy an item when on a product page.
             else if (prevEvent is ClickEvent && SiteHelper.IsUrlAProductPage(((ClickEvent)prevEvent).NextUrl)
                      && SiteHelper.Chance(50))
             {
-                nextEvent = CreateNextPurchaseEvent(prevEvent);
+                nextEvent = this.CreateNextPurchaseEvent(prevEvent);
             }
             else
             {
-                nextEvent = CreateNextClickEvent(prevEvent);
+                nextEvent = this.CreateNextClickEvent(prevEvent);
             }
 
             // Limit the number of sesssions a user has.

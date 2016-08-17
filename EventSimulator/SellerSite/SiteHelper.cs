@@ -75,6 +75,7 @@ namespace EventSimulator.SellerSite
         /// Indicates that the ProductId is the first column in CSV.
         /// </summary>
         private const int ProductIdIndex = 0;
+
         /// <summary>
         /// Indicates that the Price is the second column in CSV.
         /// </summary>
@@ -84,6 +85,7 @@ namespace EventSimulator.SellerSite
         /// The url of the home page on the ecommerce site.
         /// </summary>
         private static string HomePageUrl { get; } = "/";
+
         /// <summary>
         /// The url prefix for product pages.
         /// </summary>
