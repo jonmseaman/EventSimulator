@@ -1,12 +1,14 @@
-﻿using MathNet.Numerics.Distributions;
-using Microsoft.VisualBasic.FileIO;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+
+using MathNet.Numerics.Distributions;
+
+using Microsoft.VisualBasic.FileIO;
 
 namespace EventSimulator.SellerSite
 {
@@ -16,22 +18,27 @@ namespace EventSimulator.SellerSite
         {
             // Load product data from file
             var parser = new TextFieldParser(new StreamReader("Data/SellerSite/Products.csv"))
-            {
-                TextFieldType = FieldType.Delimited
-            };
+                             {
+                                 TextFieldType =
+                                     FieldType
+                                     .Delimited
+                             };
             parser.SetDelimiters(",");
+
             // Load data while can
             var index = -1;
             while (!parser.EndOfData)
             {
                 index++;
                 var data = parser.ReadFields();
+
                 // Add that data to our list
                 ProductData.Add(data);
                 try
                 {
                     // Get the product id from data
                     int productId = int.Parse(data[ProductIdIndex]);
+
                     // Add the data to the map
                     if (!ProductDictionary.ContainsKey(productId))
                     {
@@ -44,18 +51,20 @@ namespace EventSimulator.SellerSite
                     throw new FormatException("Malformed products.csv");
                 }
             }
-
         }
 
         #region Private Members
+
         /// <summary>
         /// List of all product datas
         /// </summary>
         private static readonly List<string[]> ProductData = new List<string[]>();
+
         /// <summary>
         /// ProductId, ProductData map.
         /// </summary>
         private static readonly Dictionary<int, string[]> ProductDictionary = new Dictionary<int, string[]>();
+
         /// <summary>
         /// ProductId, Index in ProductData. Used to change the distribution of the product data.
         /// </summary>
@@ -87,6 +96,7 @@ namespace EventSimulator.SellerSite
             {
                 throw new ArgumentOutOfRangeException(nameof(percent));
             }
+
             return Random.Next(0, 99) < percent;
         }
 
@@ -105,13 +115,16 @@ namespace EventSimulator.SellerSite
         {
             // Get num items
             var cnt = ProductData.Count;
+
             // Standard dev. and mean.
             var sd = cnt * 0.16;
             var mu = cnt * 0.5;
             var randIndex = (int)Normal.Sample(Random, mu, sd);
+
             // Make sure index in range of productData
             randIndex = randIndex < 0 ? 0 : randIndex;
             randIndex = randIndex >= cnt ? cnt - 1 : randIndex;
+
             // Try to get the product id from the selected data.
             int productId;
             var idStr = ProductData[randIndex][ProductIdIndex];
@@ -122,16 +135,16 @@ namespace EventSimulator.SellerSite
 
         public static int SimilarProductId(int productId)
         {
-            if (!ProductIndexDictionary.ContainsKey(productId))
-                throw new ArgumentOutOfRangeException(nameof(productId));
+            if (!ProductIndexDictionary.ContainsKey(productId)) throw new ArgumentOutOfRangeException(nameof(productId));
 
             var oldIndex = ProductIndexDictionary[productId];
-            var newIndex = oldIndex == ProductData.Count - 1 ? 0 : oldIndex + Random.Next(-10,10);
+            var newIndex = oldIndex == ProductData.Count - 1 ? 0 : oldIndex + Random.Next(-10, 10);
             newIndex = newIndex % ProductData.Count;
             if (newIndex < 0)
             {
                 newIndex = ProductData.Count + newIndex;
             }
+
             // Get the product id associated with that index.
             int newProductId;
             var idStr = ProductData[newIndex][ProductIdIndex];
@@ -161,6 +174,7 @@ namespace EventSimulator.SellerSite
             {
                 price = RandomPrice();
             }
+
             return price;
         }
 
@@ -174,6 +188,7 @@ namespace EventSimulator.SellerSite
         public static string RandomUrl()
         {
             var rand = Random.Next(0, 9);
+
             // 30% to go back to the home page.
             if (rand < 3)
             {
@@ -221,6 +236,7 @@ namespace EventSimulator.SellerSite
             {
                 throw new ArgumentException("The url does not correspond to a product page.");
             }
+
             var prodIdStr = nextUrl.Substring(ProductPageUrl.Length);
             return int.Parse(prodIdStr);
         }

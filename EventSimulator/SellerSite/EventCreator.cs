@@ -1,22 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlTypes;
-using System.IO;
-using EventSimulator.Events;
-using System.Text.RegularExpressions;
-using MathNet.Numerics.Distributions;
-using MathNet.Numerics.Random;
-using Microsoft.VisualBasic.CompilerServices;
-using Microsoft.VisualBasic.FileIO;
-
+﻿
 namespace EventSimulator.SellerSite
 {
-    public enum UserBehavior
-    {
-        Browsing,
-        FastPurchase,
-        SlowPurchase,
-    }
+    using System;
+    using Events;
+
+    /// <summary>
+    /// This class is used to create events which can later be sent to the
+    /// event hub. 
+    /// </summary>
     public class EventCreator
     {
         #region CreateEvents
@@ -32,12 +23,12 @@ namespace EventSimulator.SellerSite
             var rand = new Random();
             var e = new ClickEvent()
             {
-                SessionId = Guid.NewGuid(),
-                Email = SiteHelper.RandomEmail(),
-                EntryTime = DateTime.Now - TimeSpan.FromSeconds(rand.Next(1, 60 * 10)),
-                ExitTime = DateTime.Now,
-                CurrentUrl = SiteHelper.RandomUrl(),
-                NextUrl = SiteHelper.RandomUrl(),
+                SessionId = Guid.NewGuid(), 
+                Email = SiteHelper.RandomEmail(), 
+                EntryTime = DateTime.Now - TimeSpan.FromSeconds(rand.Next(1, 60 * 10)), 
+                ExitTime = DateTime.Now, 
+                CurrentUrl = SiteHelper.RandomUrl(), 
+                NextUrl = SiteHelper.RandomUrl(), 
             };
             return e;
         }
@@ -51,12 +42,12 @@ namespace EventSimulator.SellerSite
         {
             var purchaseEvent = new PurchaseEvent
             {
-                SessionId = Guid.NewGuid(),
-                TransactionNum = SiteHelper.RandomTransactionNumber(),
-                Email = SiteHelper.RandomEmail(),
-                ProductId = SiteHelper.RandomProductId(),
-                Price = SiteHelper.RandomPrice(),
-                Quantity = SiteHelper.RandomProductQuantity(),
+                SessionId = Guid.NewGuid(), 
+                TransactionNum = SiteHelper.RandomTransactionNumber(), 
+                Email = SiteHelper.RandomEmail(), 
+                ProductId = SiteHelper.RandomProductId(), 
+                Price = SiteHelper.RandomPrice(), 
+                Quantity = SiteHelper.RandomProductQuantity(), 
                 Time = DateTime.Now
             };
             return purchaseEvent;
@@ -69,76 +60,70 @@ namespace EventSimulator.SellerSite
         /// <summary>
         /// Creates a purchase that could follow from the previous event.
         /// </summary>
-        /// <param name="event"></param>
-        /// <exception cref="ArgumentException">Event must be a PurchaseEvent 
-        /// or ClickEvent that corresponds to navigating to a product page.
-        /// </exception>
-        /// <returns></returns>
-        public PurchaseEvent CreateNextPurchaseEvent(Event @event)
+        /// <param name="prevEvent">The previous event.</param>
+        /// <returns>An event simulated which comes after <see cref="prevEvent"/>.</returns>
+        public PurchaseEvent CreateNextPurchaseEvent(Event prevEvent)
         {
             // If PurchaseEvent, purchase again.
-            if (@event is PurchaseEvent)
+            var purchase = prevEvent as PurchaseEvent;
+            if (purchase != null)
             {
-                var pEvent = (PurchaseEvent)@event;
-                var nextEvent = new PurchaseEvent(pEvent)
+                var nextEvent = new PurchaseEvent(purchase)
                 {
-                    Quantity = SiteHelper.RandomProductQuantity(),
-                    Time = pEvent.Time
+                    Quantity = SiteHelper.RandomProductQuantity(), 
+                    Time = purchase.Time
                 };
                 nextEvent.ProductId = SiteHelper.SimilarProductId(nextEvent.ProductId);
                 return nextEvent;
             }
-            if (@event is ClickEvent
-                     && SiteHelper.IsUrlAProductPage(((ClickEvent)@event).NextUrl))
+
+            var click = prevEvent as ClickEvent;
+            if (click != null
+                     && SiteHelper.IsUrlAProductPage(((ClickEvent)prevEvent).NextUrl))
             {
-                var clickEvent = (ClickEvent)@event;
-                // Get the product id from the url.
-                var productId = SiteHelper.ProductIdFromUrl(clickEvent.NextUrl);
-                var nextEvent = new PurchaseEvent(@event)
+                //// Get the product id from the url.
+                var productId = SiteHelper.ProductIdFromUrl(click.NextUrl);
+                var nextEvent = new PurchaseEvent(click)
                 {
-                    ProductId = productId,
-                    Price = SiteHelper.GetPrice(productId),
-                    Quantity = SiteHelper.RandomProductQuantity(),
-                    Time = DateTime.Now,
+                    ProductId = productId, 
+                    Price = SiteHelper.GetPrice(productId), 
+                    Quantity = SiteHelper.RandomProductQuantity(), 
+                    Time = DateTime.Now, 
                     TransactionNum = SiteHelper.RandomTransactionNumber()
                 };
 
                 return nextEvent;
             }
-            else
-            {
-                throw new ArgumentException("Event must be a PurchaseEvent "
-                    + "or ClickEvent that corresponds to navigating to a "
-                    + "product page.");
-            }
+
+            throw new NotImplementedException($"Cannot generate event for '{prevEvent.GetType()}'");
         }
 
         /// <summary>
-        /// Creates a click event that could come after @event.
+        /// Creates a click event that could come after <see cref="prevEvent"/>.
         /// </summary>
-        /// <param name="event">The event which precedes the event
+        /// <param name="prevEvent">The event which precedes the event
         /// being created. Can be a purchase event or click event.</param>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the event is
-        /// not of type ClickEvent or PurchaseEvent.</exception>
-        /// <returns>The created event. </returns>
-        public ClickEvent CreateNextClickEvent(Event @event)
+        /// <returns>The event the comes after <see cref="prevEvent"/>.</returns>
+        public ClickEvent CreateNextClickEvent(Event prevEvent)
         {
-            var next = new ClickEvent(@event);
+            var next = new ClickEvent(prevEvent);
 
             // Get the type of the event
-            if (@event is ClickEvent)
+            if (prevEvent is ClickEvent)
             {
-                var old = (ClickEvent)@event;
-                // Make the next event.
+                var old = (ClickEvent)prevEvent;
+
+                //// Make the next event.
                 next.CurrentUrl = old.NextUrl;
                 next.NextUrl = SiteHelper.IsUrlTheHomePage(next.CurrentUrl)
-                    ? SiteHelper.RandomProductUrl() : SiteHelper.RandomUrl();
+                                   ? SiteHelper.RandomProductUrl()
+                                   : SiteHelper.RandomUrl();
                 next.EntryTime = old.ExitTime;
                 next.ExitTime = DateTime.Now;
             }
-            else if (@event is PurchaseEvent)
+            else if (prevEvent is PurchaseEvent)
             {
-                var old = (PurchaseEvent)@event;
+                var old = (PurchaseEvent)prevEvent;
                 next.CurrentUrl = SiteHelper.ProductUrlFromId(old.ProductId);
                 next.NextUrl = SiteHelper.RandomUrl();
                 next.EntryTime = old.Time;
@@ -146,7 +131,7 @@ namespace EventSimulator.SellerSite
             }
             else
             {
-                throw new ArgumentOutOfRangeException();
+                throw new NotImplementedException($"Cannot create next clickevent from '{prevEvent.GetType()}'");
             }
 
             return next;
@@ -167,9 +152,9 @@ namespace EventSimulator.SellerSite
             {
                 case UserBehavior.Browsing:
                     nextEvent = CreateNextClickEvent(prevEvent);
+
                     // Limit the number of sesssions a user has.
-                    if (SiteHelper.Chance(7))
-                        nextEvent.Email = SiteHelper.RandomEmail();
+                    if (SiteHelper.Chance(7)) nextEvent.Email = SiteHelper.RandomEmail();
                     break;
                 case UserBehavior.FastPurchase:
                     nextEvent = CreateNextEventFastPurchase(prevEvent);
@@ -181,6 +166,7 @@ namespace EventSimulator.SellerSite
                     nextEvent = CreateClickEvent();
                     break;
             }
+
             return nextEvent;
         }
 
@@ -214,9 +200,9 @@ namespace EventSimulator.SellerSite
                 var clickEvent = (ClickEvent)e;
                 nextEvent = new ClickEvent(e)
                 {
-                    NextUrl = SiteHelper.RandomProductUrl(),
-                    EntryTime = clickEvent.ExitTime,
-                    ExitTime = DateTime.Now,
+                    NextUrl = SiteHelper.RandomProductUrl(), 
+                    EntryTime = clickEvent.ExitTime, 
+                    ExitTime = DateTime.Now, 
                     CurrentUrl = clickEvent.NextUrl
                 };
             }
@@ -245,9 +231,9 @@ namespace EventSimulator.SellerSite
             {
                 nextEvent = CreateNextPurchaseEvent(prevEvent);
             }
+
             // 50% chance to buy an item when on a product page.
-            else if (prevEvent is ClickEvent
-                     && SiteHelper.IsUrlAProductPage(((ClickEvent)prevEvent).NextUrl)
+            else if (prevEvent is ClickEvent && SiteHelper.IsUrlAProductPage(((ClickEvent)prevEvent).NextUrl)
                      && SiteHelper.Chance(50))
             {
                 nextEvent = CreateNextPurchaseEvent(prevEvent);

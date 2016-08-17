@@ -1,8 +1,10 @@
 ﻿using System;
-using System.Text;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Text;
+
 using EventSimulator.SellerSite;
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace EventSimulatorTests.SellerSite
 {

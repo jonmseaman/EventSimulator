@@ -41,12 +41,13 @@ namespace EventSimulator.Simulator
             Debug.Assert(fName != null && fName.Equals(jsonFileName));
             var filePath = $"{SaveDir}{jsonFileName}.json";
 
-            var objectString = "";
+            var objectString = string.Empty;
             using (StreamReader sr = File.OpenText(filePath))
             {
                 objectString = await sr.ReadToEndAsync();
 
             }
+
             return JsonConvert.DeserializeObject<Settings>(objectString);
         }
 
@@ -55,6 +56,7 @@ namespace EventSimulator.Simulator
             var fName = Path.GetFileNameWithoutExtension(jsonFileName);
             Debug.Assert(fName != null && fName.Equals(jsonFileName));
             var filePath = $"{SaveDir}{jsonFileName}.json";
+
             // Make sure that the directory exists.
             Directory.CreateDirectory(filePath);
 
@@ -75,11 +77,13 @@ namespace EventSimulator.Simulator
         /// <summary>
         /// Just send click events.
         /// </summary>
-        ClickEvents,
+        ClickEvents, 
+
         /// <summary>
         /// Just send Purchase events
         /// </summary>
-        PurchaseEvents,
+        PurchaseEvents, 
+
         /// <summary>
         /// Send simulated purchase events and click events.
         /// </summary>

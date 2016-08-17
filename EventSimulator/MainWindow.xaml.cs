@@ -1,5 +1,4 @@
-﻿using MahApps.Metro.Controls;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -14,9 +13,12 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+
 using EventSimulator.Controls;
 using EventSimulator.Simulator;
+
 using MahApps.Metro;
+using MahApps.Metro.Controls;
 
 namespace EventSimulator
 {
@@ -30,7 +32,7 @@ namespace EventSimulator
             InitializeComponent();
         }
 
-        private void CloseTabCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        private void CloseTabCommandCanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = true;
         }
@@ -40,14 +42,14 @@ namespace EventSimulator
         /// </summary>
         /// <param name="sender">The tab to remove.</param>
         /// <param name="e"></param>
-        private void CloseTabCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        private void CloseTabCommandExecuted(object sender, ExecutedRoutedEventArgs e)
         {
             // Stop sending the events.
             var tabItem = sender as EventHubControl;
             if (tabItem == null) return;
             Tabs.Items.Remove(tabItem);
-            var flyout = tabItem.settingsFlyout;
-            this.Flyouts.Items.Remove(flyout);
+            var flyout = tabItem.SettingsFlyout;
+            Flyouts.Items.Remove(flyout);
         }
 
         /// <summary>
@@ -63,24 +65,24 @@ namespace EventSimulator
 
             var tabNameBinding = new Binding("Text")
             {
-                Source = eventHubControl.settingsFlyout.TabName,
+                Source = eventHubControl.SettingsFlyout.TabName, 
                 Converter = new TabNameConverter()
             };
             var newTab = new MetroTabItem()
             {
-                CloseButtonEnabled = true,
-                CloseTabCommand = ApplicationCommands.Close,
-                Header = "New tab",
+                CloseButtonEnabled = true, 
+                CloseTabCommand = ApplicationCommands.Close, 
+                Header = "New tab", 
                 Content = eventHubControl
             };
             newTab.SetBinding(HeaderedContentControl.HeaderProperty, tabNameBinding);
             newTab.Unloaded += eventHubControl.Shutdown;
 
             // Add tab
-            Flyouts.Items.Add(eventHubControl.settingsFlyout);
+            Flyouts.Items.Add(eventHubControl.SettingsFlyout);
             Tabs.Items.Add(newTab);
             newTab.Focus();
-            eventHubControl.settingsFlyout.IsOpen = true;
+            eventHubControl.SettingsFlyout.IsOpen = true;
         }
 
 
@@ -96,7 +98,7 @@ namespace EventSimulator
             /// </summary>
             /// <param name="value">The string to convert.</param>
             /// <returns>The converted tab name.</returns>
-            public object Convert(object value, Type targetType,
+            public object Convert(object value, Type targetType, 
                 object parameter, CultureInfo culture)
             {
                 // Do the conversion from bool to visibility
@@ -105,6 +107,7 @@ namespace EventSimulator
                 {
                     tabName = "New tab";
                 }
+
                 return tabName;
             }
 
@@ -112,7 +115,7 @@ namespace EventSimulator
             /// Reverse conversion. Does not change the value.
             /// </summary>
             /// <returns>Returns the parameter 'value'.</returns>
-            public object ConvertBack(object value, Type targetType,
+            public object ConvertBack(object value, Type targetType, 
                 object parameter, CultureInfo culture)
             {
                 // Do the conversion from visibility to bool
