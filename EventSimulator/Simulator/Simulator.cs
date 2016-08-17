@@ -10,13 +10,9 @@ namespace EventSimulator.Simulator
     using System.ServiceModel;
     using System.Text;
     using System.Threading;
-
     using Events;
-
     using Microsoft.ServiceBus.Messaging;
-
     using Newtonsoft.Json;
-
     using SellerSite;
 
     /// <summary>
@@ -38,11 +34,9 @@ namespace EventSimulator.Simulator
             get { return this.eventsSent; }
             private set
             {
-                if (value != this.eventsSent)
-                {
-                    this.eventsSent = value;
-                    this.NotifyPropertyChanged();
-                }
+                if (value == this.eventsSent) return;
+                this.eventsSent = value;
+                this.NotifyPropertyChanged();
             }
         }
 
@@ -57,26 +51,26 @@ namespace EventSimulator.Simulator
             get { return this.eventsPerSecond; }
             set
             {
-                if (Math.Abs(value - this.eventsPerSecond) >= float.Epsilon)
-                {
-                    this.eventsPerSecond = value;
-                    this.NotifyPropertyChanged();
-                }
+                if (!(Math.Abs(value - this.eventsPerSecond) >= float.Epsilon)) return;
+                this.eventsPerSecond = value;
+                this.NotifyPropertyChanged();
             }
         }
 
 
         private SimulatorStatus simulatorStatus = SimulatorStatus.Stopped;
+        /// <summary>
+        /// Used so that the GUI can know if the <see cref="Simulator"/> is
+        /// sending, shutting down, or stopped.
+        /// </summary>
         public SimulatorStatus Status
         {
             get { return this.simulatorStatus; }
             private set
             {
-                if (value != this.simulatorStatus)
-                {
-                    this.simulatorStatus = value;
-                    this.NotifyPropertyChanged();
-                }
+                if (value == this.simulatorStatus) return;
+                this.simulatorStatus = value;
+                this.NotifyPropertyChanged();
             }
 
         }
@@ -90,14 +84,30 @@ namespace EventSimulator.Simulator
         /// </summary>
         /// <param name="size">The length of the list to create.</param>
         /// <returns>A list of created events.</returns>
-        delegate List<Event> CreateListDelegate(int size);
-        CreateListDelegate createList;
+        private delegate List<Event> CreateListDelegate(int size);
 
-        delegate void UpdateListDelegate(List<Event> events);
-        UpdateListDelegate updateList;
+        /// <summary>
+        /// The method that is used to create a single batch of events.
+        /// </summary>
+        private CreateListDelegate createList;
 
+        private delegate void UpdateListDelegate(List<Event> events);
+
+        /// <summary>
+        /// The method that is used to create the next batch of events from
+        /// an existing batch.
+        /// </summary>
+        private UpdateListDelegate updateList;
+
+        /// <summary>
+        /// Contains settings that tell the simulator what event hub to send
+        /// to, how many, what type, etc.
+        /// </summary>
         private readonly Settings settings;
 
+        /// <summary>
+        /// This is the client that is used to create event senders.
+        /// </summary>
         private EventHubClient eventHubClient;
 
         private readonly EventCreator eventCreator = new EventCreator();
@@ -226,14 +236,21 @@ namespace EventSimulator.Simulator
 
         #region SendEvents
 
-        public void SendEvents(string publisher, ref int eventsSent, ConcurrentQueue<List<EventData>> dataQueue)
+        /// <summary>
+        /// Takes batches from <see cref="batchQueue"/> and sends them to the event hub.
+        /// </summary>
+        /// <param name="publisher">A name that identifies the sender to the event hub.</param>
+        /// <param name="count">When this method sends events, the number of events 
+        /// sent are added to <see cref="count"/>.</param>
+        /// <param name="batchQueue">The queue that batches are taken from before they are sent.</param>
+        public void SendEvents(string publisher, ref int count, ConcurrentQueue<List<EventData>> batchQueue)
         {
             var sender = this.eventHubClient.CreateSender(publisher);
 
             while (this.Status == SimulatorStatus.Sending)
             {
                 List<EventData> eventList;
-                if (!dataQueue.TryDequeue(out eventList))
+                if (!batchQueue.TryDequeue(out eventList))
                 {
                     Thread.Sleep(50);
                     continue;
@@ -243,7 +260,7 @@ namespace EventSimulator.Simulator
                 try
                 {
                     sender.SendBatch(eventList);
-                    eventsSent += eventList.Count;
+                    count += eventList.Count;
                 }
                 catch (MessageSizeExceededException e)
                 {
@@ -268,7 +285,12 @@ namespace EventSimulator.Simulator
 
         #region CreateEvents
 
-        public void CreateEvents(ConcurrentQueue<List<EventData>> dataQueue)
+        /// <summary>
+        /// Creates batches of simulated events, converts them to <see cref="EventData"/>
+        /// then adds them to <see cref="batchQueue"/>.
+        /// </summary>
+        /// <param name="batchQueue">A Queue of batches of <see cref="EventData"/>.</param>
+        public void CreateEvents(ConcurrentQueue<List<EventData>> batchQueue)
         {
             TimeSpan dt;
             List<Event> eventList;
@@ -291,7 +313,7 @@ namespace EventSimulator.Simulator
             while (this.Status == SimulatorStatus.Sending)
             {
                 // If we cannot send fast enough, don't keep making more events.
-                if (dataQueue.Count >= 2 * this.settings.ThreadsCount)
+                if (batchQueue.Count >= 2 * this.settings.ThreadsCount)
                 {
                     Thread.Sleep(50);
                     continue;
@@ -305,7 +327,7 @@ namespace EventSimulator.Simulator
                     dataList.Add(new EventData(Encoding.UTF8.GetBytes(serializedString)));
                 }
 
-                dataQueue.Enqueue(dataList);
+                batchQueue.Enqueue(dataList);
 
                 // Update
                 this.updateList(eventList);
