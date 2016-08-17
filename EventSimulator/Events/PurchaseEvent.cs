@@ -27,11 +27,11 @@ namespace EventSimulator.Events
         /// <param name="e">The event to be copied.</param>
         public PurchaseEvent(PurchaseEvent e) : base(e)
         {
-            TransactionNum = e.TransactionNum;
-            ProductId = e.ProductId;
-            Price = e.Price;
-            Quantity = e.Quantity;
-            Time = e.Time;
+            this.TransactionNum = e.TransactionNum;
+            this.ProductId = e.ProductId;
+            this.Price = e.Price;
+            this.Quantity = e.Quantity;
+            this.Time = e.Time;
         }
 
         /// <summary>

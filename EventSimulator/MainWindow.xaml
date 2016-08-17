@@ -11,9 +11,9 @@
                       mc:Ignorable="d">
     <!--  Commands  -->
     <Window.CommandBindings>
-        <CommandBinding CanExecute="CloseTabCommand_CanExecute"
+        <CommandBinding CanExecute="CloseTabCommandCanExecute"
                         Command="ApplicationCommands.Close"
-                        Executed="CloseTabCommand_Executed" />
+                        Executed="CloseTabCommandExecuted" />
     </Window.CommandBindings>
 
     <Controls:MetroTabControl Name="Tabs" Controls:TabControlHelper.IsUnderlined="True">

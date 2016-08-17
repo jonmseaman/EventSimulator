@@ -1,9 +1,11 @@
 ﻿using System;
 using System.CodeDom;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using EventSimulator.SellerSite;
+
 using EventSimulator.Events;
+using EventSimulator.SellerSite;
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace EventSimulatorTests
 {
@@ -47,6 +49,7 @@ namespace EventSimulatorTests
                 && p1.Price.Equals(p2.Price)
                 && p1.Quantity.Equals(p2.Quantity));
         }
+
         #endregion
 
         #region CreateNextPurchaseEventTests
@@ -59,6 +62,7 @@ namespace EventSimulatorTests
             // Event Members
             Assert.AreEqual(first.SessionId, next.SessionId);
             Assert.AreEqual(first.Email, next.Email);
+
             // PurchaseEvent Members
             Assert.AreEqual(first.ProductId, next.ProductId);
             Assert.AreEqual(first.Time, next.Time);
@@ -77,6 +81,7 @@ namespace EventSimulatorTests
             Assert.IsTrue(next.TransactionNum > 0);
 
         }
+
         #endregion
 
         #region CreateNextClickEventTests
@@ -88,6 +93,7 @@ namespace EventSimulatorTests
 
             // Check to make sure the urls are done correctly.
             Assert.AreEqual(first.NextUrl, next.CurrentUrl);
+
             // first.CurrentUrl does not have a relationship to next
 
             // Check to make sure that the dates have been updated.
@@ -103,12 +109,14 @@ namespace EventSimulatorTests
 
             // Check to make sure the urls are done correctly.
             Assert.AreEqual(SiteHelper.ProductUrlFromId(p.ProductId), next.CurrentUrl);
+
             // first.CurrentUrl does not have a relationship to next
 
             // Check to make sure that the dates have been updated.
             Assert.IsTrue(p.Time <= next.EntryTime);
             Assert.IsTrue(next.ExitTime <= DateTime.Now);
         }
+
         #endregion
 
         #region CreateNextEventTests
@@ -126,6 +134,7 @@ namespace EventSimulatorTests
 
                 // Check to make sure the urls are done correctly.
                 Assert.AreEqual(first.NextUrl, next.CurrentUrl);
+
                 // first.CurrentUrl does not have a relationship to next
 
                 // Check to make sure that the dates have been updated.
@@ -189,8 +198,10 @@ namespace EventSimulatorTests
                     Assert.AreEqual(first.TransactionNum, pNext.TransactionNum);
                     Assert.AreEqual(first.Time, pNext.Time);
                 }
+
                 foundPurchase = foundPurchase || next is PurchaseEvent;
             }
+
             Assert.IsTrue(foundPurchase);
         }
 
@@ -219,7 +230,6 @@ namespace EventSimulatorTests
         public void CreateNextEvent_PurchaseEvent_SlowPurchase()
         {
             // CreateNextEvent should sometimes generate another purchase event.
-
             var foundPurchase = false;
             var foundClick = false;
 

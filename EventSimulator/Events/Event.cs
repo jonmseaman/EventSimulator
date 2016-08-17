@@ -32,8 +32,8 @@ namespace EventSimulator.Events
         /// <param name="e">The event to be copied. </param>
         protected Event(Event e)
         {
-            SessionId = e.SessionId;
-            Email = e.Email;
+            this.SessionId = e.SessionId;
+            this.Email = e.Email;
         }
 
         #endregion

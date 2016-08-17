@@ -3,17 +3,19 @@ using System.Windows;
 
 namespace EventSimulator.Controls
 {
+    using EventSimulator.Simulator;
+
     /// <summary>
     /// Interaction logic for EventHubSettingsFlyout.xaml
     /// </summary>
     public partial class EventHubSettingsFlyout : MahApps.Metro.Controls.Flyout
     {
-        public Simulator.Settings settings { get; private set; }
+        public Settings Settings { get; private set; }
 
-        public EventHubSettingsFlyout(Simulator.Settings settings)
+        public EventHubSettingsFlyout(Settings settings)
         {
-            InitializeComponent();
-            this.settings = settings;
+            this.InitializeComponent();
+            this.Settings = settings;
         }
 
         private void CloseFlyout(object sender, RoutedEventArgs e)
@@ -23,43 +25,43 @@ namespace EventSimulator.Controls
 
         private void UpdateSettings(object sender, RoutedEventArgs e)
         {
-            settings.ConnectionString = ConnectionString.Text;
+            this.Settings.ConnectionString = this.ConnectionString.Text;
 
             int eventsPerSecond;
-            if (int.TryParse(EventsPerSecond.Text, out eventsPerSecond))
+            if (int.TryParse(this.EventsPerSecond.Text, out eventsPerSecond))
             {
-                settings.EventsPerSecond = eventsPerSecond;
+                this.Settings.EventsPerSecond = eventsPerSecond;
             }
 
 
-            Simulator.SendMode sendMode;
-            if (Enum.TryParse(SendMode.Text, out sendMode))
+            SendMode sendMode;
+            if (Enum.TryParse(this.SendMode.Text, out sendMode))
             {
-                settings.SendMode = sendMode;
+                this.Settings.SendMode = sendMode;
             }
 
             // Get behavior percents 
             int fastPurchasePercent;
-            if (int.TryParse(TFastPurchase.Text, out fastPurchasePercent))
+            if (int.TryParse(this.TFastPurchase.Text, out fastPurchasePercent))
             {
-                settings.BehaviorPercents[0] = fastPurchasePercent;
+                this.Settings.BehaviorPercents[0] = fastPurchasePercent;
             }
 
             int slowPurchasePercent;
-            if (int.TryParse(TSlowPurchase.Text, out slowPurchasePercent))
+            if (int.TryParse(this.TSlowPurchase.Text, out slowPurchasePercent))
             {
-                settings.BehaviorPercents[1] = slowPurchasePercent;
+                this.Settings.BehaviorPercents[1] = slowPurchasePercent;
             }
 
 
             int browsingPercent;
-            if (int.TryParse(TBrowsing.Text, out browsingPercent))
+            if (int.TryParse(this.TBrowsing.Text, out browsingPercent))
             {
-                settings.BehaviorPercents[2] = browsingPercent;
+                this.Settings.BehaviorPercents[2] = browsingPercent;
             }
 
-            if (TabName.Text.Length == 0) TabName.Text = "New tab";
-            CloseFlyout(sender, e);
+            if (this.TabName.Text.Length == 0) this.TabName.Text = "New tab";
+            this.CloseFlyout(sender, e);
         }
     }
 }

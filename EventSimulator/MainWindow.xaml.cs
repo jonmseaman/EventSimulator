@@ -1,22 +1,14 @@
-﻿using MahApps.Metro.Controls;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+
 using EventSimulator.Controls;
 using EventSimulator.Simulator;
-using MahApps.Metro;
+
+using MahApps.Metro.Controls;
 
 namespace EventSimulator
 {
@@ -27,10 +19,10 @@ namespace EventSimulator
     {
         public MainWindow()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
-        private void CloseTabCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        private void CloseTabCommandCanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = true;
         }
@@ -40,13 +32,13 @@ namespace EventSimulator
         /// </summary>
         /// <param name="sender">The tab to remove.</param>
         /// <param name="e"></param>
-        private void CloseTabCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        private void CloseTabCommandExecuted(object sender, ExecutedRoutedEventArgs e)
         {
             // Stop sending the events.
             var tabItem = sender as EventHubControl;
             if (tabItem == null) return;
-            Tabs.Items.Remove(tabItem);
-            var flyout = tabItem.settingsFlyout;
+            this.Tabs.Items.Remove(tabItem);
+            var flyout = tabItem.SettingsFlyout;
             this.Flyouts.Items.Remove(flyout);
         }
 
@@ -63,24 +55,24 @@ namespace EventSimulator
 
             var tabNameBinding = new Binding("Text")
             {
-                Source = eventHubControl.settingsFlyout.TabName,
+                Source = eventHubControl.SettingsFlyout.TabName, 
                 Converter = new TabNameConverter()
             };
             var newTab = new MetroTabItem()
             {
-                CloseButtonEnabled = true,
-                CloseTabCommand = ApplicationCommands.Close,
-                Header = "New tab",
+                CloseButtonEnabled = true, 
+                CloseTabCommand = ApplicationCommands.Close, 
+                Header = "New tab", 
                 Content = eventHubControl
             };
             newTab.SetBinding(HeaderedContentControl.HeaderProperty, tabNameBinding);
             newTab.Unloaded += eventHubControl.Shutdown;
 
             // Add tab
-            Flyouts.Items.Add(eventHubControl.settingsFlyout);
-            Tabs.Items.Add(newTab);
+            this.Flyouts.Items.Add(eventHubControl.SettingsFlyout);
+            this.Tabs.Items.Add(newTab);
             newTab.Focus();
-            eventHubControl.settingsFlyout.IsOpen = true;
+            eventHubControl.SettingsFlyout.IsOpen = true;
         }
 
 
@@ -96,7 +88,7 @@ namespace EventSimulator
             /// </summary>
             /// <param name="value">The string to convert.</param>
             /// <returns>The converted tab name.</returns>
-            public object Convert(object value, Type targetType,
+            public object Convert(object value, Type targetType, 
                 object parameter, CultureInfo culture)
             {
                 // Do the conversion from bool to visibility
@@ -105,6 +97,7 @@ namespace EventSimulator
                 {
                     tabName = "New tab";
                 }
+
                 return tabName;
             }
 
@@ -112,7 +105,7 @@ namespace EventSimulator
             /// Reverse conversion. Does not change the value.
             /// </summary>
             /// <returns>Returns the parameter 'value'.</returns>
-            public object ConvertBack(object value, Type targetType,
+            public object ConvertBack(object value, Type targetType, 
                 object parameter, CultureInfo culture)
             {
                 // Do the conversion from visibility to bool

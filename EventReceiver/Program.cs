@@ -1,7 +1,7 @@
-﻿using Microsoft.ServiceBus.Messaging;
-using System;
+﻿using System;
 using System.Deployment.Application;
 
+using Microsoft.ServiceBus.Messaging;
 
 namespace Receiver
 {

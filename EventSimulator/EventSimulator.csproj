@@ -158,6 +158,7 @@
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SellerSite\UserBehavior.cs" />
     <Compile Include="Simulator\Simulator.cs" />
     <Compile Include="SellerSite\SiteHelper.cs" />
     <Compile Include="Events\ClickEvent.cs" />

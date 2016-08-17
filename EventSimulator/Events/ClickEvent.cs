@@ -21,10 +21,10 @@ namespace EventSimulator.Events
         /// <param name="e">The event to be copied.</param>
         public ClickEvent(ClickEvent e) : base(e)
         {
-            CurrentUrl = e.CurrentUrl;
-            NextUrl = e.NextUrl;
-            EntryTime = e.EntryTime;
-            ExitTime = e.ExitTime;
+            this.CurrentUrl = e.CurrentUrl;
+            this.NextUrl = e.NextUrl;
+            this.EntryTime = e.EntryTime;
+            this.ExitTime = e.ExitTime;
         }
 
         /// <summary>

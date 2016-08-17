@@ -1,14 +1,12 @@
-﻿using System;
-using System.Configuration;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-
+﻿
 namespace EventSimulator.Simulator
 {
+    using System;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Threading.Tasks;
+    using Newtonsoft.Json;
+
     public class Settings
     {
         #region Settings
@@ -41,12 +39,13 @@ namespace EventSimulator.Simulator
             Debug.Assert(fName != null && fName.Equals(jsonFileName));
             var filePath = $"{SaveDir}{jsonFileName}.json";
 
-            var objectString = "";
+            var objectString = string.Empty;
             using (StreamReader sr = File.OpenText(filePath))
             {
                 objectString = await sr.ReadToEndAsync();
 
             }
+
             return JsonConvert.DeserializeObject<Settings>(objectString);
         }
 
@@ -55,6 +54,7 @@ namespace EventSimulator.Simulator
             var fName = Path.GetFileNameWithoutExtension(jsonFileName);
             Debug.Assert(fName != null && fName.Equals(jsonFileName));
             var filePath = $"{SaveDir}{jsonFileName}.json";
+
             // Make sure that the directory exists.
             Directory.CreateDirectory(filePath);
 
@@ -76,10 +76,12 @@ namespace EventSimulator.Simulator
         /// Just send click events.
         /// </summary>
         ClickEvents,
+
         /// <summary>
         /// Just send Purchase events
         /// </summary>
         PurchaseEvents,
+
         /// <summary>
         /// Send simulated purchase events and click events.
         /// </summary>
