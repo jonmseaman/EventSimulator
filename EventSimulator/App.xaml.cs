@@ -1,7 +1,8 @@
-﻿using System.Windows;
-
+﻿
 namespace EventSimulator
 {
+    using System.Windows;
+
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>

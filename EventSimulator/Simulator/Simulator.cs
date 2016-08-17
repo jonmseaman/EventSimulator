@@ -1,6 +1,9 @@
-﻿
-namespace EventSimulator.Simulator
+﻿namespace EventSimulator.Simulator
 {
+    using Events;
+    using Microsoft.ServiceBus.Messaging;
+    using Newtonsoft.Json;
+    using SellerSite;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -10,10 +13,6 @@ namespace EventSimulator.Simulator
     using System.ServiceModel;
     using System.Text;
     using System.Threading;
-    using Events;
-    using Microsoft.ServiceBus.Messaging;
-    using Newtonsoft.Json;
-    using SellerSite;
 
     /// <summary>
     /// Class that manages the creation and sending of events.

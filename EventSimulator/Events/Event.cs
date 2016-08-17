@@ -1,13 +1,30 @@
-﻿using System;
-
+﻿
 namespace EventSimulator.Events
 {
+    using System;
+
+    /// <summary>
+    /// Represents an event generated from the ecommerce site.
+    /// </summary>
     public abstract class Event
     {
         #region Data Members
+
+        /// <summary>
+        /// A unique id for the user's session. A session includes
+        /// the series of click events and purchase events that are
+        /// generated before a user signs off or stops using the site.
+        /// </summary>
         public Guid SessionId { get; set; }
+
+        /// <summary>
+        /// The user's email.
+        /// </summary>
         public string Email { get; set; }
 
+        /// <summary>
+        /// Used by back end system to identify the type of the event.
+        /// </summary>
         public int EventType
         {
             get
@@ -18,7 +35,6 @@ namespace EventSimulator.Events
         }
 
         #endregion
-
 
         #region Constructors
 

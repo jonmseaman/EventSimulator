@@ -1,17 +1,16 @@
-﻿using System;
-using System.Globalization;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Input;
-
-using EventSimulator.Controls;
-using EventSimulator.Simulator;
-
-using MahApps.Metro.Controls;
-
+﻿
 namespace EventSimulator
 {
+    using System;
+    using System.Globalization;
+    using System.Windows;
+    using System.Windows.Controls;
+    using System.Windows.Data;
+    using System.Windows.Input;
+    using Controls;
+    using Simulator;
+    using MahApps.Metro.Controls;
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>

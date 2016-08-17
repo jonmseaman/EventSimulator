@@ -9,7 +9,7 @@ namespace EventSimulator.SellerSite
     using Microsoft.VisualBasic.FileIO;
 
     /// <summary>
-    /// The class contains tools specific to the ecomerce site such as random
+    /// The class contains tools specific to the ecommerce site such as random
     /// data generation and loading data from the product catalog. 
     /// </summary>
     public class SiteHelper
@@ -57,7 +57,7 @@ namespace EventSimulator.SellerSite
         #region Private Members
 
         /// <summary>
-        /// List of all product datas
+        /// List of all product data
         /// </summary>
         private static readonly List<string[]> ProductData = new List<string[]>();
 
@@ -82,12 +82,12 @@ namespace EventSimulator.SellerSite
         private const int ProductPriceIndex = 1;
 
         /// <summary>
-        /// The url of the home page on the ecommerce site.
+        /// The URL of the home page on the ecommerce site.
         /// </summary>
         private static string HomePageUrl { get; } = "/";
 
         /// <summary>
-        /// The url prefix for product pages.
+        /// The URL prefix for product pages.
         /// </summary>
         private static string ProductPageUrl { get; } = "/products/";
         #endregion
@@ -137,10 +137,10 @@ namespace EventSimulator.SellerSite
         /// <returns>The product id.</returns>
         public static int RandomProductId()
         {
-            // Get num items
+            // Get number of items
             var cnt = ProductData.Count;
 
-            // Standard dev. and mean.
+            // Standard deviation and mean.
             var sd = cnt * 0.16;
             var mu = cnt * 0.5;
             var randIndex = (int)Normal.Sample(Random, mu, sd);
@@ -184,6 +184,10 @@ namespace EventSimulator.SellerSite
             return newProductId;
         }
 
+        /// <summary>
+        /// Gets a random price that 
+        /// </summary>
+        /// <returns>The price in pennies.</returns>
         public static int RandomPrice()
         {
             var rand = (int)Normal.Sample(Random, 1250, 250);
@@ -191,6 +195,11 @@ namespace EventSimulator.SellerSite
             return rand;
         }
 
+        /// <summary>
+        /// Gets the price of the product associated with the product id.
+        /// </summary>
+        /// <param name="productId">The product id of the product.</param>
+        /// <returns>The price of the product associated with <see cref="productId"/></returns>
         public static int GetPrice(int productId)
         {
             int price;
@@ -221,14 +230,7 @@ namespace EventSimulator.SellerSite
             var rand = Random.Next(0, 9);
 
             // 30% to go back to the home page.
-            if (rand < 3)
-            {
-                return HomePageUrl;
-            }
-            else
-            {
-                return RandomProductUrl();
-            }
+            return rand < 3 ? HomePageUrl : RandomProductUrl();
         }
 
         public static string RandomProductUrl()
@@ -256,10 +258,10 @@ namespace EventSimulator.SellerSite
         }
 
         /// <summary>
-        /// Extracts the product id from a product page url.
+        /// Extracts the product id from a product page URL.
         /// </summary>
-        /// <param name="nextUrl">A url corresponding to a product page.</param>
-        /// <exception cref="ArgumentException">Thrown if the url is not a product url.</exception>
+        /// <param name="nextUrl">A URL corresponding to a product page.</param>
+        /// <exception cref="ArgumentException">Thrown if the URL is not a product URL.</exception>
         /// <returns></returns>
         public static int ProductIdFromUrl(string nextUrl)
         {
