@@ -10,6 +10,9 @@ namespace EventSimulator.Controls
     /// </summary>
     public partial class EventHubSettingsFlyout : MahApps.Metro.Controls.Flyout
     {
+        /// <summary>
+        /// The settings object that the user's input will be written to.
+        /// </summary>
         public Settings Settings { get; private set; }
 
         public EventHubSettingsFlyout(Settings settings)

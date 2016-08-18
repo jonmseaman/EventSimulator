@@ -135,6 +135,9 @@
 
         #region Sending / Stop Sending
 
+        /// <summary>
+        /// Start sending events to event hub.
+        /// </summary>
         public void StartSending()
         {
             if (this.Status == SimulatorStatus.Sending) return;
@@ -194,6 +197,9 @@
             this.eventsCountThread.Start();
         }
 
+        /// <summary>
+        /// Stop sending events to the event hub.
+        /// </summary>
         public void StopSending()
         {
             this.Status = SimulatorStatus.Stopping;
