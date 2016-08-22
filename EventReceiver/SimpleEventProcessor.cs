@@ -9,7 +9,7 @@ namespace Receiver
 {
     class SimpleEventProcessor : IEventProcessor
     {
-        Stopwatch checkpointStopWatch;
+        Stopwatch _checkpointStopWatch;
 
         async Task IEventProcessor.CloseAsync(PartitionContext context, CloseReason reason)
         {
@@ -23,8 +23,8 @@ namespace Receiver
         Task IEventProcessor.OpenAsync(PartitionContext context)
         {
             Console.WriteLine("SimpleEventProcessor initialized.  Partition: '{0}', Offset: '{1}'", context.Lease.PartitionId, context.Lease.Offset);
-            checkpointStopWatch = new Stopwatch();
-            checkpointStopWatch.Start();
+            _checkpointStopWatch = new Stopwatch();
+            _checkpointStopWatch.Start();
             return Task.FromResult<object>(null);
         }
 
@@ -38,10 +38,10 @@ namespace Receiver
             }
 
             // Call checkpoint every 5 minutes, so that worker can resume processing from 5 minutes back if it restarts.
-            if (checkpointStopWatch.Elapsed > TimeSpan.FromMinutes(5))
+            if (_checkpointStopWatch.Elapsed > TimeSpan.FromMinutes(5))
             {
                 await context.CheckpointAsync();
-                checkpointStopWatch.Restart();
+                _checkpointStopWatch.Restart();
             }
         }
     }

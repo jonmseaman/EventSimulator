@@ -12,7 +12,7 @@ namespace EventSimulatorTests
     [TestClass]
     public class EventCreatorTests
     {
-        EventCreator eventCreator = new EventCreator();
+        EventCreator _eventCreator = new EventCreator();
 
         const int NumTriesForRandoms = 15;
 
@@ -20,8 +20,8 @@ namespace EventSimulatorTests
         [TestMethod]
         public void CreateClickEventTest()
         {
-            var c1 = eventCreator.CreateClickEvent();
-            var c2 = eventCreator.CreateClickEvent();
+            var c1 = _eventCreator.CreateClickEvent();
+            var c2 = _eventCreator.CreateClickEvent();
 
             Assert.IsFalse(c1.SessionId.Equals(c2.SessionId));
 
@@ -37,8 +37,8 @@ namespace EventSimulatorTests
         [TestMethod]
         public void CreatePurchaseEventTest()
         {
-            var p1 = eventCreator.CreatePurchaseEvent();
-            var p2 = eventCreator.CreatePurchaseEvent();
+            var p1 = _eventCreator.CreatePurchaseEvent();
+            var p2 = _eventCreator.CreatePurchaseEvent();
 
             Assert.IsFalse(p1.SessionId.Equals(p2.SessionId));
 
@@ -56,8 +56,8 @@ namespace EventSimulatorTests
         [TestMethod]
         public void CreateNextPurchaseEventWithPurchaseEventTest()
         {
-            var first = eventCreator.CreatePurchaseEvent();
-            var next = eventCreator.CreateNextPurchaseEvent(first);
+            var first = _eventCreator.CreatePurchaseEvent();
+            var next = _eventCreator.CreateNextPurchaseEvent(first);
 
             // Event Members
             Assert.AreEqual(first.SessionId, next.SessionId);
@@ -71,9 +71,9 @@ namespace EventSimulatorTests
         [TestMethod]
         public void CreateNextPurchaseEventWithClickEventTest()
         {
-            var first = eventCreator.CreateClickEvent();
+            var first = _eventCreator.CreateClickEvent();
             first.NextUrl = SiteHelper.ProductUrlFromId(2);
-            var next = eventCreator.CreateNextPurchaseEvent(first);
+            var next = _eventCreator.CreateNextPurchaseEvent(first);
 
             Assert.AreEqual(2, next.ProductId);
             Assert.IsTrue(next.Price > 0);
@@ -88,8 +88,8 @@ namespace EventSimulatorTests
         [TestMethod]
         public void CreateNextClickEventFromClickEventTest()
         {
-            var first = eventCreator.CreateClickEvent();
-            var next = eventCreator.CreateNextClickEvent(first);
+            var first = _eventCreator.CreateClickEvent();
+            var next = _eventCreator.CreateNextClickEvent(first);
 
             // Check to make sure the urls are done correctly.
             Assert.AreEqual(first.NextUrl, next.CurrentUrl);
@@ -104,8 +104,8 @@ namespace EventSimulatorTests
         [TestMethod]
         public void CreateNextClickEventFromPurchaseEventTest()
         {
-            var p = eventCreator.CreatePurchaseEvent();
-            var next = eventCreator.CreateNextClickEvent(p);
+            var p = _eventCreator.CreatePurchaseEvent();
+            var next = _eventCreator.CreateNextClickEvent(p);
 
             // Check to make sure the urls are done correctly.
             Assert.AreEqual(SiteHelper.ProductUrlFromId(p.ProductId), next.CurrentUrl);
@@ -126,8 +126,8 @@ namespace EventSimulatorTests
         {
             for (int i = 0; i < NumTriesForRandoms; i++)
             {
-                var first = eventCreator.CreateClickEvent();
-                var next = eventCreator.CreateNextEvent(first, UserBehavior.Browsing) as ClickEvent;
+                var first = _eventCreator.CreateClickEvent();
+                var next = _eventCreator.CreateNextEvent(first, UserBehavior.Browsing) as ClickEvent;
 
                 Assert.IsNotNull(next);
                 Assert.AreEqual(first.NextUrl, next.CurrentUrl);
@@ -146,8 +146,8 @@ namespace EventSimulatorTests
         [TestMethod]
         public void CreateNextEvent_PurchaseEvent_Browsing()
         {
-            var first = eventCreator.CreatePurchaseEvent();
-            var next = eventCreator.CreateNextEvent(first, UserBehavior.Browsing) as ClickEvent;
+            var first = _eventCreator.CreatePurchaseEvent();
+            var next = _eventCreator.CreateNextEvent(first, UserBehavior.Browsing) as ClickEvent;
 
             Assert.IsNotNull(next);
 
@@ -161,11 +161,11 @@ namespace EventSimulatorTests
         public void CreateNextEvent_ClickEventNotOnProductPage_FastPurchase()
         {
             // When not on the product page, the next event should be a click event on a product page
-            var first = eventCreator.CreateClickEvent();
+            var first = _eventCreator.CreateClickEvent();
             first.CurrentUrl = "/notonaproductpage/";
             first.NextUrl = "/notonaproductpage/";
 
-            var next = eventCreator.CreateNextEvent(first, UserBehavior.FastPurchase) as ClickEvent;
+            var next = _eventCreator.CreateNextEvent(first, UserBehavior.FastPurchase) as ClickEvent;
             Assert.IsNotNull(next);
             Assert.IsTrue(SiteHelper.IsUrlAProductPage(next.NextUrl));
         }
@@ -174,10 +174,10 @@ namespace EventSimulatorTests
         public void CreateNextEvent_ClickEventOnProductPage_FastPurchase()
         {
             // This should result in a purchase event being generated.
-            var first = eventCreator.CreateClickEvent();
+            var first = _eventCreator.CreateClickEvent();
             first.NextUrl = SiteHelper.RandomProductUrl();
 
-            var next = eventCreator.CreateNextEvent(first, UserBehavior.FastPurchase) as PurchaseEvent;
+            var next = _eventCreator.CreateNextEvent(first, UserBehavior.FastPurchase) as PurchaseEvent;
             Assert.IsNotNull(next);
             Assert.AreEqual(SiteHelper.ProductIdFromUrl(first.NextUrl), next.ProductId, "Product Ids did not match.");
         }
@@ -189,8 +189,8 @@ namespace EventSimulatorTests
             var foundPurchase = false;
             for (int i = 0; i < NumTriesForRandoms; i++)
             {
-                var first = eventCreator.CreatePurchaseEvent();
-                var next = eventCreator.CreateNextEvent(first, UserBehavior.FastPurchase);
+                var first = _eventCreator.CreatePurchaseEvent();
+                var next = _eventCreator.CreateNextEvent(first, UserBehavior.FastPurchase);
 
                 var pNext = next as PurchaseEvent;
                 if (pNext != null)
@@ -214,10 +214,10 @@ namespace EventSimulatorTests
 
             for (int i = 0; i < NumTriesForRandoms; i++)
             {
-                var first = eventCreator.CreateClickEvent();
+                var first = _eventCreator.CreateClickEvent();
                 first.NextUrl = SiteHelper.RandomProductUrl();
 
-                var next = eventCreator.CreateNextEvent(first, UserBehavior.SlowPurchase);
+                var next = _eventCreator.CreateNextEvent(first, UserBehavior.SlowPurchase);
                 foundPurchase = foundPurchase || next is PurchaseEvent;
                 foundClick = foundClick || next is ClickEvent;
             }
@@ -235,8 +235,8 @@ namespace EventSimulatorTests
 
             for (int i = 0; i < NumTriesForRandoms; i++)
             {
-                var first = eventCreator.CreatePurchaseEvent();
-                var next = eventCreator.CreateNextEvent(first, UserBehavior.SlowPurchase);
+                var first = _eventCreator.CreatePurchaseEvent();
+                var next = _eventCreator.CreateNextEvent(first, UserBehavior.SlowPurchase);
 
                 foundPurchase = foundPurchase || next is PurchaseEvent;
                 foundClick = foundClick || next is ClickEvent;

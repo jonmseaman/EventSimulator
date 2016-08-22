@@ -20,7 +20,7 @@ namespace EventSimulator.Controls
         /// <summary>
         /// The simulator which generates and sends events to the event hub.
         /// </summary>
-        private readonly Simulator simulator;
+        private readonly Simulator _simulator;
 
         #region Constructor
 
@@ -37,26 +37,26 @@ namespace EventSimulator.Controls
                 throw new ArgumentNullException(nameof(settings));
             }
 
-            this.InitializeComponent();
-            this.simulator = new Simulator(settings);
+            InitializeComponent();
+            _simulator = new Simulator(settings);
 
             // List to Status change to update StartStopButton text
-            this.simulator.PropertyChanged += this.SimulatorPropertyChanged;
+            _simulator.PropertyChanged += SimulatorPropertyChanged;
 
             // Bind simulator status to GUI
-            var statusBinding = new Binding("Status") { Source = this.simulator };
-            this.TSimulatorStatus.SetBinding(TextBlock.TextProperty, statusBinding);
+            var statusBinding = new Binding("Status") { Source = _simulator };
+            TSimulatorStatus.SetBinding(TextBlock.TextProperty, statusBinding);
 
             // Bind events sent
-            var eventsSentBinding = new Binding("EventsSent") { Source = this.simulator };
-            this.TEventsSent.SetBinding(TextBlock.TextProperty, eventsSentBinding);
+            var eventsSentBinding = new Binding("EventsSent") { Source = _simulator };
+            TEventsSent.SetBinding(TextBlock.TextProperty, eventsSentBinding);
 
             // Bind events per second
-            var epsBinding = new Binding("EventsPerSecond") { Source = this.simulator, StringFormat = "F2" };
-            this.TEventsPerSecond.SetBinding(TextBlock.TextProperty, epsBinding);
+            var epsBinding = new Binding("EventsPerSecond") { Source = _simulator, StringFormat = "F2" };
+            TEventsPerSecond.SetBinding(TextBlock.TextProperty, epsBinding);
 
             // Make the settings flyout
-            this.SettingsFlyout = new EventHubSettingsFlyout(settings);
+            SettingsFlyout = new EventHubSettingsFlyout(settings);
         }
 
         #endregion
@@ -75,14 +75,14 @@ namespace EventSimulator.Controls
         /// <param name="e"></param>
         private void ToggleSimulatorSending(object sender, RoutedEventArgs e)
         {
-            switch (this.simulator.Status)
+            switch (_simulator.Status)
             {
                 case SimulatorStatus.Stopped:
                     // TODO: Use task factory?
-                    new Thread(() => { this.simulator.StartSending(); }).Start();
+                    new Thread(() => { _simulator.StartSending(); }).Start();
                     break;
                 case SimulatorStatus.Sending:
-                    new Thread(() => { this.simulator.StopSending(); }).Start();
+                    new Thread(() => { _simulator.StopSending(); }).Start();
                     break;
                 case SimulatorStatus.Stopping:
                     // Do nothing if SimulatorStatus.Stopping
@@ -97,7 +97,7 @@ namespace EventSimulator.Controls
         /// <param name="args">The parameter is not used.</param>
         public void ToggleSettingsFlyout(object sender, RoutedEventArgs args)
         {
-            this.SettingsFlyout.IsOpen = !this.SettingsFlyout.IsOpen;
+            SettingsFlyout.IsOpen = !SettingsFlyout.IsOpen;
         }
 
         /// <summary>
@@ -107,34 +107,34 @@ namespace EventSimulator.Controls
         /// <param name="args">The parameter is not used.</param>
         public void Shutdown(object sender, RoutedEventArgs args)
         {
-            if (this.simulator.Status == SimulatorStatus.Sending)
+            if (_simulator.Status == SimulatorStatus.Sending)
             {
                 new Thread(() =>
                 {
-                    this.simulator.StopSending();
+                    _simulator.StopSending();
                 }).Start();
             }
         }
 
         /// <summary>
-        /// Updates the UI when a property of the <see cref="simulator"/> changes.
+        /// Updates the UI when a property of the <see cref="_simulator"/> changes.
         /// </summary>
         /// <param name="sender">The simulator that had a property change.</param>
         /// <param name="args">Not used.</param>
         public void SimulatorPropertyChanged(object sender, PropertyChangedEventArgs args)
         {
             // Only need to handle 'Status' change.
-            if (sender != this.simulator || !args.PropertyName.Equals("Status")) return;
+            if (sender != _simulator || !args.PropertyName.Equals("Status")) return;
 
-            if (this.Dispatcher.CheckAccess())
+            if (Dispatcher.CheckAccess())
             {
-                this.UpdateStartStopButton(this.simulator.Status);
+                UpdateStartStopButton(_simulator.Status);
             }
             else
             {
-                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
+                Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
                     {
-                        this.UpdateStartStopButton(this.simulator.Status);
+                        UpdateStartStopButton(_simulator.Status);
                     }));
             }
         }
@@ -150,16 +150,16 @@ namespace EventSimulator.Controls
             switch (status)
             {
                 case SimulatorStatus.Stopped:
-                    this.StartStopButton.Content = "Start";
-                    this.StartStopButton.Background = Brushes.Green;
+                    StartStopButton.Content = "Start";
+                    StartStopButton.Background = Brushes.Green;
                     break;
                 case SimulatorStatus.Stopping:
-                    this.StartStopButton.Content = "Stopping";
-                    this.StartStopButton.Background = Brushes.DarkOrange;
+                    StartStopButton.Content = "Stopping";
+                    StartStopButton.Background = Brushes.DarkOrange;
                     break;
                 case SimulatorStatus.Sending:
-                    this.StartStopButton.Content = "Stop";
-                    this.StartStopButton.Background = Brushes.Firebrick;
+                    StartStopButton.Content = "Stop";
+                    StartStopButton.Background = Brushes.Firebrick;
 
                     break;
                 default:

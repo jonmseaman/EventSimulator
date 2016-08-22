@@ -22,7 +22,7 @@
     {
         #region Public Variables
 
-        private int eventsSent;
+        private int _eventsSent;
 
         /// <summary>
         /// The number of events sent by the simulator to the
@@ -30,16 +30,16 @@
         /// </summary>
         public int EventsSent
         {
-            get { return this.eventsSent; }
+            get { return _eventsSent; }
             private set
             {
-                if (value == this.eventsSent) return;
-                this.eventsSent = value;
-                this.NotifyPropertyChanged();
+                if (value == _eventsSent) return;
+                _eventsSent = value;
+                NotifyPropertyChanged();
             }
         }
 
-        private double eventsPerSecond;
+        private double _eventsPerSecond;
 
         /// <summary>
         /// The number of events sent each second.
@@ -47,17 +47,17 @@
         /// </summary>
         public double EventsPerSecond
         {
-            get { return this.eventsPerSecond; }
+            get { return _eventsPerSecond; }
             set
             {
-                if (!(Math.Abs(value - this.eventsPerSecond) >= float.Epsilon)) return;
-                this.eventsPerSecond = value;
-                this.NotifyPropertyChanged();
+                if (!(Math.Abs(value - _eventsPerSecond) >= float.Epsilon)) return;
+                _eventsPerSecond = value;
+                NotifyPropertyChanged();
             }
         }
 
 
-        private SimulatorStatus simulatorStatus = SimulatorStatus.Stopped;
+        private SimulatorStatus _simulatorStatus = SimulatorStatus.Stopped;
 
         /// <summary>
         /// Used so that the GUI can know if the <see cref="Simulator"/> is
@@ -65,12 +65,12 @@
         /// </summary>
         public SimulatorStatus Status
         {
-            get { return this.simulatorStatus; }
+            get { return _simulatorStatus; }
             private set
             {
-                if (value == this.simulatorStatus) return;
-                this.simulatorStatus = value;
-                this.NotifyPropertyChanged();
+                if (value == _simulatorStatus) return;
+                _simulatorStatus = value;
+                NotifyPropertyChanged();
             }
 
         }
@@ -89,7 +89,7 @@
         /// <summary>
         /// The method that is used to create a single batch of events.
         /// </summary>
-        private CreateListDelegate createList;
+        private CreateListDelegate _createList;
 
         private delegate void UpdateListDelegate(List<Event> events);
 
@@ -97,30 +97,30 @@
         /// The method that is used to create the next batch of events from
         /// an existing batch.
         /// </summary>
-        private UpdateListDelegate updateList;
+        private UpdateListDelegate _updateList;
 
         /// <summary>
         /// Contains settings that tell the simulator what event hub to send
         /// to, how many, what type, etc.
         /// </summary>
-        private readonly Settings settings;
+        private readonly Settings _settings;
 
         /// <summary>
         /// This is the client that is used to create event senders.
         /// </summary>
-        private EventHubClient eventHubClient;
+        private EventHubClient _eventHubClient;
 
-        private readonly EventCreator eventCreator = new EventCreator();
+        private readonly EventCreator _eventCreator = new EventCreator();
 
-        private ConcurrentQueue<List<EventData>> dataQueue = new ConcurrentQueue<List<EventData>>();
+        private ConcurrentQueue<List<EventData>> _dataQueue = new ConcurrentQueue<List<EventData>>();
 
         // Threads
-        private Thread[] senderThreads;
-        private Thread creationThread;
-        private Thread eventsCountThread;
+        private Thread[] _senderThreads;
+        private Thread _creationThread;
+        private Thread _eventsCountThread;
 
         // Event sent by threads
-        private int[] eventsSentPerThread;
+        private int[] _eventsSentPerThread;
 
         #endregion
 
@@ -128,7 +128,7 @@
 
         public Simulator(Settings s)
         {
-            this.settings = s;
+            _settings = s;
         }
 
         #endregion
@@ -140,53 +140,53 @@
         /// </summary>
         public void StartSending()
         {
-            if (this.Status == SimulatorStatus.Sending) return;
-            this.Status = SimulatorStatus.Sending;
-            this.SetupDelegates(this.settings.SendMode);
+            if (Status == SimulatorStatus.Sending) return;
+            Status = SimulatorStatus.Sending;
+            SetupDelegates(_settings.SendMode);
 
-            this.eventHubClient = EventHubClient.CreateFromConnectionString(this.settings.ConnectionString);
+            _eventHubClient = EventHubClient.CreateFromConnectionString(_settings.ConnectionString);
 
             // Setup threads
-            this.StartSending(this.settings.ThreadsCount, this.dataQueue);
+            StartSending(_settings.ThreadsCount, _dataQueue);
         }
 
         private void StartSending(int numSenders, ConcurrentQueue<List<EventData>> queue)
         {
             // Initialize variables
-            this.dataQueue = new ConcurrentQueue<List<EventData>>();
+            _dataQueue = new ConcurrentQueue<List<EventData>>();
 
             // Creation thread
             // Set up creation threads
-            this.creationThread = new Thread(() =>
+            _creationThread = new Thread(() =>
             {
-                this.CreateEvents(queue);
+                CreateEvents(queue);
             });
-            this.creationThread.Start();
+            _creationThread.Start();
 
 
             // Sender threads
-            this.senderThreads = new Thread[numSenders];
-            this.eventsSentPerThread = new int[numSenders];
+            _senderThreads = new Thread[numSenders];
+            _eventsSentPerThread = new int[numSenders];
             for (var i = 0; i < numSenders; i++)
             {
-                this.eventsSentPerThread[i] = 0;
+                _eventsSentPerThread[i] = 0;
                 var i1 = i; // Make sure the lambda gets the right value of i.
-                this.senderThreads[i] = new Thread(() => this.SendEvents($"eventSimulator{i1}", ref this.eventsSentPerThread[i1], queue));
-                this.senderThreads[i].Start();
+                _senderThreads[i] = new Thread(() => SendEvents($"eventSimulator{i1}", ref _eventsSentPerThread[i1], queue));
+                _senderThreads[i].Start();
             }
 
             // Events Per second thread
-            this.eventsCountThread = new Thread(() =>
+            _eventsCountThread = new Thread(() =>
             {
                 var next = DateTime.Now;
                 var dt = TimeSpan.FromSeconds(1);
                 var prevEventsSent = 0;
-                while (this.Status == SimulatorStatus.Sending)
+                while (Status == SimulatorStatus.Sending)
                 {
                     next += dt;
-                    this.EventsSent = this.eventsSentPerThread.Sum();
-                    this.EventsPerSecond = (this.EventsSent - prevEventsSent) / dt.TotalSeconds;
-                    prevEventsSent = this.EventsSent;
+                    EventsSent = _eventsSentPerThread.Sum();
+                    EventsPerSecond = (EventsSent - prevEventsSent) / dt.TotalSeconds;
+                    prevEventsSent = EventsSent;
                     var now = DateTime.Now;
                     if (next > now)
                     {
@@ -194,7 +194,7 @@
                     }
                 }
             });
-            this.eventsCountThread.Start();
+            _eventsCountThread.Start();
         }
 
         /// <summary>
@@ -202,15 +202,15 @@
         /// </summary>
         public void StopSending()
         {
-            this.Status = SimulatorStatus.Stopping;
-            this.creationThread.Join();
-            foreach (var t in this.senderThreads)
+            Status = SimulatorStatus.Stopping;
+            _creationThread.Join();
+            foreach (var t in _senderThreads)
             {
                 t.Join();
             }
 
-            this.eventsCountThread.Join();
-            this.Status = SimulatorStatus.Stopped;
+            _eventsCountThread.Join();
+            Status = SimulatorStatus.Stopped;
         }
 
         #endregion
@@ -223,18 +223,18 @@
         {
             if (sendMode == SendMode.ClickEvents)
             {
-                this.createList = this.CreateClickEvents;
-                this.updateList = this.UpdateClickEvents;
+                _createList = CreateClickEvents;
+                _updateList = UpdateClickEvents;
             }
             else if (sendMode == SendMode.PurchaseEvents)
             {
-                this.createList = this.CreatePurchaseEvents;
-                this.updateList = this.UpdatePurchaseEvents;
+                _createList = CreatePurchaseEvents;
+                _updateList = UpdatePurchaseEvents;
             }
             else if (sendMode == SendMode.SimulatedEvents)
             {
-                this.createList = this.CreateClickEvents;
-                this.updateList = this.UpdateSimulatedEvents;
+                _createList = CreateClickEvents;
+                _updateList = UpdateSimulatedEvents;
             }
         }
 
@@ -251,9 +251,9 @@
         /// <param name="batchQueue">The queue that batches are taken from before they are sent.</param>
         public void SendEvents(string publisher, ref int count, ConcurrentQueue<List<EventData>> batchQueue)
         {
-            var sender = this.eventHubClient.CreateSender(publisher);
+            var sender = _eventHubClient.CreateSender(publisher);
 
-            while (this.Status == SimulatorStatus.Sending)
+            while (Status == SimulatorStatus.Sending)
             {
                 List<EventData> eventList;
                 if (!batchQueue.TryDequeue(out eventList))
@@ -301,25 +301,25 @@
             TimeSpan dt;
             List<Event> eventList;
 
-            if (this.settings.EventsPerSecond < this.settings.BatchSize)
+            if (_settings.EventsPerSecond < _settings.BatchSize)
             {
-                eventList = this.createList(this.settings.EventsPerSecond);
+                eventList = _createList(_settings.EventsPerSecond);
                 dt = TimeSpan.FromSeconds(1.0);
             }
             else
             {
                 // Make batch at max size
-                eventList = this.createList(this.settings.BatchSize);
+                eventList = _createList(_settings.BatchSize);
 
                 // Calculate dt
-                dt = TimeSpan.FromSeconds(((double)this.settings.BatchSize) / this.settings.EventsPerSecond);
+                dt = TimeSpan.FromSeconds(((double)_settings.BatchSize) / _settings.EventsPerSecond);
             }
 
             var next = DateTime.Now;
-            while (this.Status == SimulatorStatus.Sending)
+            while (Status == SimulatorStatus.Sending)
             {
                 // If we cannot send fast enough, don't keep making more events.
-                if (batchQueue.Count >= 2 * this.settings.ThreadsCount)
+                if (batchQueue.Count >= 2 * _settings.ThreadsCount)
                 {
                     Thread.Sleep(50);
                     continue;
@@ -336,7 +336,7 @@
                 batchQueue.Enqueue(dataList);
 
                 // Update
-                this.updateList(eventList);
+                _updateList(eventList);
 
                 var now = DateTime.Now;
                 if (next > now)
@@ -353,7 +353,7 @@
             var eventList = new List<Event>();
             for (var i = 0; i < batchSize; i++)
             {
-                eventList.Add(this.eventCreator.CreateClickEvent());
+                eventList.Add(_eventCreator.CreateClickEvent());
             }
 
             return eventList;
@@ -364,7 +364,7 @@
             var eventList = new List<Event>();
             for (var i = 0; i < batchSize; i++)
             {
-                eventList.Add(this.eventCreator.CreatePurchaseEvent());
+                eventList.Add(_eventCreator.CreatePurchaseEvent());
             }
 
             return eventList;
@@ -379,15 +379,15 @@
             // Update list of events to show user action.
             var offset = 0;
             var len = eventList.Count;
-            var fastPurchaseCount = this.settings.BehaviorPercents[0] * len / 100;
-            var slowPurchaseCount = this.settings.BehaviorPercents[1] * len / 100;
+            var fastPurchaseCount = _settings.BehaviorPercents[0] * len / 100;
+            var slowPurchaseCount = _settings.BehaviorPercents[1] * len / 100;
             var browsingCount = len - fastPurchaseCount - slowPurchaseCount;
 
-            this.UpdateSimulatedEventsWithBehavior(offset, fastPurchaseCount, eventList, UserBehavior.FastPurchase);
+            UpdateSimulatedEventsWithBehavior(offset, fastPurchaseCount, eventList, UserBehavior.FastPurchase);
             offset += fastPurchaseCount;
-            this.UpdateSimulatedEventsWithBehavior(offset, slowPurchaseCount, eventList, UserBehavior.SlowPurchase);
+            UpdateSimulatedEventsWithBehavior(offset, slowPurchaseCount, eventList, UserBehavior.SlowPurchase);
             offset += slowPurchaseCount;
-            this.UpdateSimulatedEventsWithBehavior(offset, browsingCount, eventList, UserBehavior.Browsing);
+            UpdateSimulatedEventsWithBehavior(offset, browsingCount, eventList, UserBehavior.Browsing);
 
         }
 
@@ -395,7 +395,7 @@
         {
             for (var i = startIndex; count > 0; count--, i++)
             {
-                eventList[i] = this.eventCreator.CreateNextEvent(eventList[i], behavior);
+                eventList[i] = _eventCreator.CreateNextEvent(eventList[i], behavior);
             }
         }
 
@@ -403,7 +403,7 @@
         {
             for (var i = 0; i < eventList.Count; i++)
             {
-                eventList[i] = this.eventCreator.CreateClickEvent();
+                eventList[i] = _eventCreator.CreateClickEvent();
             }
 
         }
@@ -412,7 +412,7 @@
         {
             for (var i = 0; i < eventList.Count; i++)
             {
-                eventList[i] = this.eventCreator.CreatePurchaseEvent();
+                eventList[i] = _eventCreator.CreatePurchaseEvent();
             }
         }
 
@@ -426,7 +426,7 @@
 
         private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
 

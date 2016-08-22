@@ -42,10 +42,10 @@
         /// <param name="e">The event to be copied.</param>
         public ClickEvent(ClickEvent e) : base(e)
         {
-            this.CurrentUrl = e.CurrentUrl;
-            this.NextUrl = e.NextUrl;
-            this.EntryTime = e.EntryTime;
-            this.ExitTime = e.ExitTime;
+            CurrentUrl = e.CurrentUrl;
+            NextUrl = e.NextUrl;
+            EntryTime = e.EntryTime;
+            ExitTime = e.ExitTime;
         }
 
         /// <summary>

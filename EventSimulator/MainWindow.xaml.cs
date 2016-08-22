@@ -18,7 +18,7 @@ namespace EventSimulator
     {
         public MainWindow()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
         private void CloseTabCommandCanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -36,9 +36,9 @@ namespace EventSimulator
             // Stop sending the events.
             var tabItem = sender as EventHubControl;
             if (tabItem == null) return;
-            this.Tabs.Items.Remove(tabItem);
+            Tabs.Items.Remove(tabItem);
             var flyout = tabItem.SettingsFlyout;
-            this.Flyouts.Items.Remove(flyout);
+            Flyouts.Items.Remove(flyout);
         }
 
         /// <summary>
@@ -68,8 +68,8 @@ namespace EventSimulator
             newTab.Unloaded += eventHubControl.Shutdown;
 
             // Add tab
-            this.Flyouts.Items.Add(eventHubControl.SettingsFlyout);
-            this.Tabs.Items.Add(newTab);
+            Flyouts.Items.Add(eventHubControl.SettingsFlyout);
+            Tabs.Items.Add(newTab);
             newTab.Focus();
             eventHubControl.SettingsFlyout.IsOpen = true;
         }
